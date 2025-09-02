@@ -158,7 +158,7 @@
         #restart-button:hover {
             background-color: #00a884;
             transform: translateY(-2px);
-            box-shadow: 6px 15px rgba(0, 184, 148, 0.6);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
         }
 
         #exit-button {
@@ -198,6 +198,7 @@
             justify-content: center;
             align-items: center;
         }
+
     </style>
 </head>
 <body>
@@ -233,16 +234,16 @@
             'heart': ['❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤎']
         };
 
-        const faceEmojis = {
-            'happy': '😀',
-            'sad': '😩',
-            'laughing': '😂',
-            'angry': '😠',
-            'celebrating': '🥳',
-            'shocked': '🤯',
-            'winking': '😉',
-            'sleeping': '😴',
-            'cold': '🥶',
+        const uniqueEmojis = {
+            'happy face': '😀',
+            'sad face': '😩',
+            'laughing face': '😂',
+            'angry face': '😠',
+            'celebrating face': '🥳',
+            'shocked face': '🤯',
+            'winking face': '😉',
+            'sleeping face': '😴',
+            'cold face': '🥶',
             'light bulb': '💡',
             'bell': '🔔'
         };
@@ -354,23 +355,22 @@
         }
 
         function setupLevel1() {
-            const allShapes = shapes.concat(['light bulb', 'bell', 'face']);
+            const allShapes = Object.keys(coloredEmojis).concat(Object.keys(uniqueEmojis));
             const randomShape = allShapes[Math.floor(Math.random() * allShapes.length)];
             let clueText, correctAnswerEmoji, options;
-            
-            if (randomShape === 'face' || randomShape === 'light bulb' || randomShape === 'bell') {
-                const emotionKeys = Object.keys(faceEmojis);
-                const randomEmotion = emotionKeys[Math.floor(Math.random() * emotionKeys.length)];
-                correctAnswerEmoji = faceEmojis[randomEmotion];
-                clueText = `Find the ${randomEmotion}.`;
-                options = generateFaceOptions(correctAnswerEmoji, 9);
+
+            if (Object.keys(uniqueEmojis).includes(randomShape)) {
+                const randomUniqueKey = Object.keys(uniqueEmojis)[Math.floor(Math.random() * Object.keys(uniqueEmojis).length)];
+                correctAnswerEmoji = uniqueEmojis[randomUniqueKey];
+                clueText = `Find the ${randomUniqueKey}.`;
+                options = generateUniqueOptions(correctAnswerEmoji, 9);
             } else {
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
                 correctAnswerEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
                 clueText = `Find the ${randomColor} ${randomShape}.`;
                 options = generateColoredOptions(correctAnswerEmoji, 9);
             }
-
+            
             clueDisplay.textContent = clueText;
             speak(clueText);
             renderGrid(options, correctAnswerEmoji);
@@ -379,16 +379,18 @@
         function setupLevel2() {
             clueDisplay.textContent = '';
             
-            const allShapes = shapes.concat(['light bulb', 'bell', 'face']);
+            const allShapes = Object.keys(coloredEmojis).concat(Object.keys(uniqueEmojis));
             const randomShape = allShapes[Math.floor(Math.random() * allShapes.length)];
             let commonEmoji, differentEmoji, options;
 
-            if (randomShape === 'face' || randomShape === 'light bulb' || randomShape === 'bell') {
-                const faceValues = Object.values(faceEmojis);
-                commonEmoji = faceValues[Math.floor(Math.random() * faceValues.length)];
-                let otherFaces = faceValues.filter(e => e !== commonEmoji);
-                if (otherFaces.length > 0) {
-                    differentEmoji = otherFaces[Math.floor(Math.random() * otherFaces.length)];
+            if (Object.keys(uniqueEmojis).includes(randomShape)) {
+                const uniqueKeys = Object.keys(uniqueEmojis);
+                const commonKey = uniqueKeys[Math.floor(Math.random() * uniqueKeys.length)];
+                commonEmoji = uniqueEmojis[commonKey];
+                let otherUniqueKeys = uniqueKeys.filter(key => key !== commonKey);
+                if (otherUniqueKeys.length > 0) {
+                    const differentKey = otherUniqueKeys[Math.floor(Math.random() * otherUniqueKeys.length)];
+                    differentEmoji = uniqueEmojis[differentKey];
                 } else {
                     differentEmoji = commonEmoji;
                 }
@@ -457,8 +459,9 @@
             answerGrid.innerHTML = '';
             patternDisplay.innerHTML = '';
             dragDropContainer.style.display = 'flex';
-
-            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            const colorShapes = Object.keys(coloredEmojis);
+            const randomShape = colorShapes[Math.floor(Math.random() * colorShapes.length)];
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             const correctEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
             
@@ -466,15 +469,12 @@
             speak(`Drag the ${randomColor} ${randomShape} to the box.`);
             
             dragItem.textContent = correctEmoji;
-            dragItem.setAttribute('data-color', randomColor);
-            dragItem.setAttribute('data-shape', randomShape);
             
-            correctAnswer = `${randomColor}-${randomShape}`;
+            correctAnswer = correctEmoji;
         }
         
         dragItem.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('text/plain', e.target.textContent);
-            e.dataTransfer.setData('data-type', 'drag-emoji');
         });
 
         dropZone.addEventListener('dragover', (e) => {
@@ -484,12 +484,7 @@
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             const draggedEmoji = e.dataTransfer.getData('text/plain');
-            const dataType = e.dataTransfer.getData('data-type');
-            if (dataType === 'drag-emoji' && draggedEmoji === dragItem.textContent) {
-                checkAnswer(draggedEmoji, dragItem.textContent);
-            } else {
-                checkAnswer('wrong', 'correct');
-            }
+            checkAnswer(draggedEmoji, correctAnswer);
         });
 
         function checkAnswer(clickedEmoji, correctAnswerEmoji) {
@@ -543,12 +538,12 @@
             return Array.from(options);
         }
 
-        function generateFaceOptions(correctEmoji, count) {
+        function generateUniqueOptions(correctEmoji, count) {
             const options = new Set();
             options.add(correctEmoji);
             
-            const allFaceEmojis = Object.values(faceEmojis);
-            const wrongEmojis = allFaceEmojis.filter(e => e !== correctEmoji);
+            const allUniqueEmojis = Object.values(uniqueEmojis);
+            const wrongEmojis = allUniqueEmojis.filter(e => e !== correctEmoji);
             shuffleArray(wrongEmojis);
 
             while (options.size < count && wrongEmojis.length > 0) {
