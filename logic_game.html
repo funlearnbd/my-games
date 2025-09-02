@@ -355,25 +355,42 @@
         }
 
         function setupLevel1() {
-            const allShapes = Object.keys(coloredEmojis).concat(Object.keys(uniqueEmojis));
-            const randomShape = allShapes[Math.floor(Math.random() * allShapes.length)];
-            let clueText, correctAnswerEmoji, options;
-
-            if (Object.keys(uniqueEmojis).includes(randomShape)) {
-                const randomUniqueKey = Object.keys(uniqueEmojis)[Math.floor(Math.random() * Object.keys(uniqueEmojis).length)];
-                correctAnswerEmoji = uniqueEmojis[randomUniqueKey];
-                clueText = `Find the ${randomUniqueKey}.`;
-                options = generateUniqueOptions(correctAnswerEmoji, 9);
+            const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
+            
+            const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+            
+            let clueText;
+            if (Object.values(uniqueEmojis).includes(clueEmoji)) {
+                const clueKey = Object.keys(uniqueEmojis).find(key => uniqueEmojis[key] === clueEmoji);
+                clueText = `Find the ${clueKey}.`;
             } else {
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                correctAnswerEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
-                clueText = `Find the ${randomColor} ${randomShape}.`;
-                options = generateColoredOptions(correctAnswerEmoji, 9);
+                let foundShape = '';
+                let foundColor = '';
+                for (const shape in coloredEmojis) {
+                    const colorIndex = coloredEmojis[shape].indexOf(clueEmoji);
+                    if (colorIndex !== -1) {
+                        foundShape = shape;
+                        foundColor = colors[colorIndex];
+                        break;
+                    }
+                }
+                clueText = `Find the ${foundColor} ${foundShape}.`;
             }
             
             clueDisplay.textContent = clueText;
             speak(clueText);
-            renderGrid(options, correctAnswerEmoji);
+
+            const options = new Set();
+            options.add(clueEmoji);
+            
+            while (options.size < 9) {
+                const randomEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+                if (randomEmoji !== clueEmoji) {
+                    options.add(randomEmoji);
+                }
+            }
+
+            renderGrid(Array.from(options), clueEmoji);
         }
 
         function setupLevel2() {
