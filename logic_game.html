@@ -176,7 +176,8 @@
             color: var(--text-color-dark);
         }
 
-        .button-group {
+        #game-buttons {
+            display: none; /* Hidden by default, will be shown by JS */
             margin-top: 1.5rem;
             position: fixed; /* Keeps buttons fixed on the screen */
             bottom: 20px; /* Positions them at the bottom */
@@ -248,7 +249,7 @@
         <div id="score">Score: 0</div>
     </div>
     
-    <div class="button-group">
+    <div id="game-buttons">
         <button id="restart-button">New Game</button>
         <button id="exit-button">Exit Game</button>
     </div>
@@ -284,6 +285,7 @@
         const splashScreen = document.getElementById('splash-screen');
         const startButton = document.getElementById('start-btn');
         const gameContainer = document.getElementById('game-container');
+        const gameButtons = document.getElementById('game-buttons'); // Get the new button container
         const instructionsDisplay = document.getElementById('instructions');
         const clueDisplay = document.getElementById('clue-display');
         const patternDisplay = document.getElementById('pattern-display');
@@ -315,6 +317,7 @@
         function startGame() {
             splashScreen.style.display = 'none';
             gameContainer.style.display = 'flex';
+            gameButtons.style.display = 'block'; // Show the buttons
             currentLevel = 1;
             score = 0;
             playedLevelIntro = { 1: false, 2: false, 3: false };
