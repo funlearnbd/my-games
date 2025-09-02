@@ -240,7 +240,7 @@
         const scoreDisplay = document.getElementById('score');
         const restartButton = document.getElementById('restart');
         const exitButton = document.getElementById('exit');
-        const buzzSound = document.getElementById('buzz-sound'); // Get the audio element
+        const buzzSound = document.getElementById('buzz-sound');
 
         if (!synth) {
             voiceSupported = false;
@@ -294,9 +294,10 @@
                     setupRound();
                 }, 1500);
             } else {
-                buzzSound.play(); // Play the buzz sound on a wrong answer
+                buzzSound.play();
                 message.textContent = 'Try again!';
                 message.style.color = 'var(--error-color)';
+                speak('Try again!');
             }
         }
 
