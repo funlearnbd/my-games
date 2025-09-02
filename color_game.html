@@ -4,86 +4,166 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Color Matching Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #50e3c2; /* Mint Green */
+            --secondary-color: #4a90e2; /* Sky Blue */
+            --accent-color: #f5a623; /* Warm Orange */
+            --background-color: #f0f4f8; /* Light Grey-Blue */
+            --text-color-dark: #2a2a2a;
+            --box-shadow-light: rgba(0, 0, 0, 0.1);
+            --box-shadow-medium: rgba(0, 0, 0, 0.2);
+            --success-color: #4CAF50;
+            --error-color: #e74c3c;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
             text-align: center;
-            background-color: #f0f0f0;
+            background-color: var(--background-color);
             margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
+
+        .game-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--box-shadow-medium);
+            max-width: 600px;
+            width: 90%;
+            transition: transform 0.3s ease;
+        }
+        
+        .game-container:hover {
+            transform: scale(1.01);
+        }
+
         h1 {
-            font-size: 2em;
-            color: #333;
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
+
         #word-display {
-            font-size: 3em;
+            font-size: clamp(2.5rem, 6vw, 4rem);
             margin: 20px;
-            color: #333;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-color-dark);
+            text-shadow: 1px 1px 2px var(--box-shadow-light);
         }
+
         #color-boxes {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: clamp(10px, 2vw, 20px);
             flex-wrap: wrap;
         }
+
         .color-box {
-            width: 100px;
-            height: 100px;
-            border: 2px solid #333;
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(80px, 15vw, 120px);
+            border: 4px solid #fff;
             cursor: pointer;
-            border-radius: 10px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--box-shadow-light);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
+
+        .color-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px var(--box-shadow-medium);
+        }
+        
         #message {
-            font-size: 1.5em;
-            margin: 20px;
-            color: #333;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin: 20px 0;
+            font-weight: 600;
         }
+
         #score {
-            font-size: 1.2em;
-            margin: 10px;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            margin: 10px 0;
+            color: var(--text-color-dark);
         }
-        #start, #restart, #exit {
-            font-size: 1em;
-            padding: 10px 20px;
-            margin: 10px;
+
+        .button-group {
+            margin-top: 1.5rem;
+        }
+
+        button {
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            padding: 12px 24px;
+            margin: 0 8px;
             cursor: pointer;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
+
         #start, #restart {
-            background-color: #4CAF50;
+            background-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(80, 227, 194, 0.4);
         }
+
         #start:hover, #restart:hover {
-            background-color: #45a049;
+            background-color: #40c49e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(80, 227, 194, 0.6);
         }
+
         #exit {
-            background-color: #ff4444;
+            background-color: var(--error-color);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
         }
+
         #exit:hover {
-            background-color: #cc0000;
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
         }
     </style>
 </head>
 <body>
-    <h1>Color Matching Game</h1>
-    <div id="word-display" style="display: none;"></div>
-    <div id="color-boxes" style="display: none;"></div>
-    <div id="message">Click Start to play!</div>
-    <div id="score" style="display: none;">Score: 0</div>
-    <button id="start">Start Game</button>
-    <button id="restart" style="display: none;">New Game</button>
-    <button id="exit" style="display: none;">Exit Game</button>
+    <div class="game-container">
+        <h1>Color Match Mania! ✨</h1>
+        <div id="word-display" style="display: none;"></div>
+        <div id="color-boxes" style="display: none;"></div>
+        <div id="message">Click Start to play!</div>
+        <div id="score" style="display: none;">Score: 0</div>
+        
+        <div class="button-group">
+            <button id="start">Start Game</button>
+            <button id="restart" style="display: none;">New Game</button>
+            <button id="exit" style="display: none;">Exit Game</button>
+        </div>
+    </div>
 
     <script>
         const colors = [
-            { name: 'Red', value: '#ff0000' },
-            { name: 'Blue', value: '#0000ff' },
-            { name: 'Green', value: '#00ff00' },
-            { name: 'Yellow', value: '#ffff00' },
-            { name: 'Purple', value: '#800080' }
+            { name: 'Red', value: '#FF5733' },
+            { name: 'Blue', value: '#3385FF' },
+            { name: 'Green', value: '#33FF57' },
+            { name: 'Yellow', value: '#FFC733' },
+            { name: 'Purple', value: '#9933FF' },
+            { name: 'Orange', value: '#FF8A33' },
+            { name: 'Pink', value: '#FF33A1' },
+            { name: 'Teal', value: '#33FFF3' }
         ];
+
         let score = 0;
         let currentColor;
         const synth = window.speechSynthesis;
@@ -97,20 +177,19 @@
         const restartButton = document.getElementById('restart');
         const exitButton = document.getElementById('exit');
 
-        // Check if speech synthesis is supported
         if (!synth) {
             voiceSupported = false;
-            message.textContent = 'Voice not supported in this browser. Click Start to play with text!';
-            message.style.color = '#ff0000';
+            message.textContent = 'Voice not supported. Text-only mode.';
+            message.style.color = 'var(--error-color)';
         }
 
         function speak(text) {
             if (voiceSupported) {
-                synth.cancel(); // Clear any pending speech
+                synth.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
                 utterance.volume = 1;
-                utterance.rate = 0.9; // Slightly slower for clarity
+                utterance.rate = 0.9;
                 utterance.pitch = 1;
                 synth.speak(utterance);
             }
@@ -135,7 +214,6 @@
             wordDisplay.textContent = currentColor.name;
             speak(`Find the color ${currentColor.name}`);
 
-            // Shuffle colors for boxes
             const shuffledColors = [...colors].sort(() => Math.random() - 0.5);
             shuffledColors.forEach(color => {
                 const box = document.createElement('div');
@@ -150,7 +228,7 @@
             if (selectedColor.name === currentColor.name) {
                 score++;
                 message.textContent = 'Yay! Great job!';
-                message.style.color = '#4CAF50';
+                message.style.color = 'var(--success-color)';
                 scoreDisplay.textContent = `Score: ${score}`;
                 setTimeout(() => {
                     message.textContent = '';
@@ -158,23 +236,13 @@
                 }, 1500);
             } else {
                 message.textContent = 'Try again!';
-                message.style.color = '#ff0000';
+                message.style.color = 'var(--error-color)';
             }
         }
 
         function exitGame() {
-            synth.cancel(); // Stop any ongoing speech
-            wordDisplay.style.display = 'none';
-            colorBoxes.style.display = 'none';
-            scoreDisplay.style.display = 'none';
-            startButton.style.display = 'inline-block';
-            restartButton.style.display = 'none';
-            exitButton.style.display = 'none';
-            message.textContent = 'Thanks for playing! Goodbye!';
-            message.style.color = '#333';
-            if (voiceSupported) {
-                speak('Thanks for playing! Goodbye!');
-            }
+            synth.cancel();
+            window.location.href = 'index.html'; // Redirect to the homepage
         }
 
         startButton.addEventListener('click', startGame);
