@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌟 My Awesome Game Hub 🌟</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka+One&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #ff6f61; /* Coral Red */
@@ -30,7 +33,7 @@
             min-height: 100vh;
             justify-content: center;
             position: relative;
-            overflow-x: hidden; /* Prevent horizontal scroll from background animation */
+            overflow-x: hidden;
         }
 
         @keyframes gradientAnimation {
@@ -39,7 +42,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Overlay for subtle texture/pattern */
         body::before {
             content: '';
             position: absolute;
@@ -53,7 +55,7 @@
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white for content */
+            background-color: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 3rem 2rem;
             margin: 2rem;
@@ -67,11 +69,11 @@
         }
 
         h1 {
-            font-family: 'Fredoka One', cursive; /* Playful title font */
+            font-family: 'Fredoka One', cursive;
             color: var(--secondary-color);
             font-size: 3.5rem;
             margin-bottom: 2rem;
-            text-shadow: 4px 4px 0 var(--accent-color), 6px 6px 0 var(--primary-color); /* Retro text shadow */
+            text-shadow: 4px 4px 0 var(--accent-color), 6px 6px 0 var(--primary-color);
             letter-spacing: 2px;
             animation: bounceIn 1s ease-out;
         }
@@ -105,7 +107,7 @@
 
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Adjusted min-width for better fit */
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             padding: 0;
             list-style: none;
@@ -123,20 +125,20 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            min-height: 180px; /* Ensure cards have a consistent minimum height */
+            min-height: 180px;
             position: relative;
             overflow: hidden;
-            border: 3px solid var(--primary-color); /* Solid border */
+            border: 3px solid var(--primary-color);
         }
 
-        .game-card::before { /* Decorative element */
+        .game-card::before {
             content: '';
             position: absolute;
             top: -10px;
             left: -10px;
             right: -10px;
             bottom: -10px;
-            border-radius: 18px; /* Match card border-radius + padding */
+            border-radius: 18px;
             background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             z-index: -1;
             opacity: 0;
@@ -146,19 +148,39 @@
         .game-card:hover {
             transform: translateY(-8px) scale(1.03);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            border-color: var(--secondary-color); /* Highlight border on hover */
+            border-color: var(--secondary-color);
         }
 
         .game-card:hover::before {
-            opacity: 0.1; /* Show subtle gradient on hover */
+            opacity: 0.1;
+        }
+        
+        /* New styling for the link that wraps the entire card */
+        .game-card a {
+            text-decoration: none;
+            color: var(--secondary-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: 'Fredoka One', cursive;
+            display: flex; /* This is key to making content a column */
+            flex-direction: column; /* Stacks the icon and text vertically */
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transition: color 0.3s ease;
+        }
+
+        .game-card a:hover {
+            color: var(--primary-color);
         }
 
         .game-icon {
-            font-size: 4rem; /* Larger icons */
+            font-size: 4rem;
             line-height: 1;
             color: var(--primary-color);
             margin-bottom: 0.8rem;
-            animation: pulse 2s infinite; /* Subtle icon animation */
+            animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
@@ -167,25 +189,6 @@
             100% { transform: scale(1); }
         }
 
-        .game-card a {
-            text-decoration: none;
-            color: var(--secondary-color);
-            font-size: 1.4rem; /* Larger text for game names */
-            font-weight: 700;
-            font-family: 'Fredoka One', cursive; /* Game names also playful */
-            display: block;
-            width: 100%;
-            padding: 0.5rem 0;
-            border-radius: 8px;
-            transition: color 0.3s ease, background-color 0.3s ease;
-        }
-
-        .game-card a:hover {
-            color: var(--text-light);
-            background-color: var(--primary-color);
-        }
-
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5rem;
@@ -196,7 +199,7 @@
                 margin: 1rem;
             }
             .game-grid {
-                grid-template-columns: 1fr; /* Single column on small screens */
+                grid-template-columns: 1fr;
             }
             .game-card {
                 min-height: 150px;
@@ -239,36 +242,52 @@
         <h1>🌟 My Awesome Game Hub 🌟</h1>
         <ul class="game-grid">
             <li class="game-card">
-                <span class="game-icon">🎨</span>
-                <a href="color_game.html">Color Challenge</a>
+                <a href="color_game.html">
+                    <span class="game-icon">🎨</span>
+                    Color Challenge
+                </a>
             </li>
             <li class="game-card">
-                <span class="game-icon">🔠</span>
-                <a href="alphabet_game2.html">Alphabet Adventure</a>
+                <a href="alphabet_game2.html">
+                    <span class="game-icon">🔠</span>
+                    Alphabet Adventure
+                </a>
             </li>
             <li class="game-card">
-                <span class="game-icon">🧠</span>
-                <a href="logic_game.html">Logic Puzzle</a>
+                <a href="logic_game.html">
+                    <span class="game-icon">🧠</span>
+                    Logic Puzzle
+                </a>
             </li>
             <li class="game-card">
-                <span class="game-icon">➕</span>
-                <a href="math_fun (2).html">Math Fun</a>
+                <a href="math_fun (2).html">
+                    <span class="game-icon">➕</span>
+                    Math Fun
+                </a>
             </li>
             <li class="game-card">
-                <span class="game-icon">📊</span>
-                <a href="math_game.html">Math Mania</a>
+                <a href="math_game.html">
+                    <span class="game-icon">📊</span>
+                    Math Mania
+                </a>
             </li>
             <li class="game-card">
-                <span class="game-icon">➖</span>
-                <a href="simple_math.html">Simple Math</a>
+                <a href="simple_math.html">
+                    <span class="game-icon">➖</span>
+                    Simple Math
+                </a>
             </li>
             <li class="game-card">
-                <span class="game-icon">📈</span>
-                <a href="vertical_addition (1).html">Vertical Addition</a>
+                <a href="vertical_addition (1).html">
+                    <span class="game-icon">📈</span>
+                    Vertical Addition
+                </a>
             </li>
             <li class="game-card">
-                <span class="game-icon">📚</span>
-                <a href="vertical_addition_bangla.html">Bangla Addition</a>
+                <a href="vertical_addition_bangla.html">
+                    <span class="game-icon">📚</span>
+                    Bangla Addition
+                </a>
             </li>
         </ul>
     </div>
