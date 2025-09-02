@@ -31,7 +31,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
+            overflow: hidden; /* Prevents scrolling of the entire page */
         }
 
         .splash-screen {
@@ -88,6 +88,10 @@
             max-width: 600px;
             width: 90%;
             transition: transform 0.3s ease;
+            max-height: 85vh; /* Limits the height of the game area */
+            overflow-y: auto; /* Adds vertical scrolling */
+            display: flex;
+            flex-direction: column;
         }
         
         h1 {
@@ -174,6 +178,10 @@
 
         .button-group {
             margin-top: 1.5rem;
+            position: fixed; /* Keeps buttons fixed on the screen */
+            bottom: 20px; /* Positions them at the bottom */
+            width: 90%;
+            max-width: 600px;
         }
 
         button {
@@ -238,13 +246,13 @@
         <div id="answer-grid"></div>
         <div id="message"></div>
         <div id="score">Score: 0</div>
-        
-        <div class="button-group">
-            <button id="restart-button">New Game</button>
-            <button id="exit-button">Exit Game</button>
-        </div>
     </div>
     
+    <div class="button-group">
+        <button id="restart-button">New Game</button>
+        <button id="exit-button">Exit Game</button>
+    </div>
+
     <audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
     <audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
 
@@ -269,6 +277,7 @@
 
         let currentLevel = 1;
         let score = 0;
+        let playedLevelIntro = { 1: false, 2: false, 3: false };
         const synth = window.speechSynthesis;
         let voiceSupported = true;
 
@@ -305,9 +314,10 @@
 
         function startGame() {
             splashScreen.style.display = 'none';
-            gameContainer.style.display = 'block';
+            gameContainer.style.display = 'flex';
             currentLevel = 1;
             score = 0;
+            playedLevelIntro = { 1: false, 2: false, 3: false };
             scoreDisplay.textContent = `Score: ${score}`;
             newRound();
         }
@@ -336,7 +346,10 @@
 
         function setupLevel1() {
             instructionsDisplay.textContent = 'Level 1: Find the matching item.';
-            speak('Level 1: Find the matching item.');
+            if (!playedLevelIntro[1]) {
+                speak('Level 1: Find the matching item.');
+                playedLevelIntro[1] = true;
+            }
 
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
             let clueText, correctAnswerEmoji, options;
@@ -361,7 +374,10 @@
 
         function setupLevel2() {
             instructionsDisplay.textContent = 'Level 2: Find the one that is different.';
-            speak('Level 2: Find the one that is different.');
+            if (!playedLevelIntro[2]) {
+                speak('Level 2: Find the one that is different.');
+                playedLevelIntro[2] = true;
+            }
             clueDisplay.textContent = '';
 
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
@@ -398,86 +414,36 @@
 
         function setupLevel3() {
             instructionsDisplay.textContent = 'Level 3: Find the missing item in the pattern.';
-            speak('Level 3: Find the missing item in the pattern.');
+            if (!playedLevelIntro[3]) {
+                speak('Level 3: Find the missing item in the pattern.');
+                playedLevelIntro[3] = true;
+            }
             clueDisplay.textContent = '';
             
-            const patternType = Math.floor(Math.random() * 3);
+            const isColorPattern = Math.random() < 0.5;
             let emoji1, emoji2, correctAnswerEmoji, options;
-            let pattern = [];
 
-            if (patternType === 0) { // Sequential Progression
-                const isColorPattern = Math.random() < 0.5;
-                if (isColorPattern) {
-                    const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
-                    const startIndex = Math.floor(Math.random() * (colors.length - 2));
-                    const color1 = colors[startIndex];
-                    const color2 = colors[startIndex + 1];
-                    const color3 = colors[startIndex + 2];
-                    
-                    emoji1 = coloredEmojis[shape][colors.indexOf(color1)];
-                    emoji2 = coloredEmojis[shape][colors.indexOf(color2)];
-                    correctAnswerEmoji = coloredEmojis[shape][colors.indexOf(color3)];
-                    options = generateColoredOptions(correctAnswerEmoji, 3);
-                } else {
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    const shapeTypes = shapes.filter(s => s !== 'face');
-                    const startIndex = Math.floor(Math.random() * (shapeTypes.length - 2));
-                    const shape1 = shapeTypes[startIndex];
-                    const shape2 = shapeTypes[startIndex + 1];
-                    const shape3 = shapeTypes[startIndex + 2];
-                    
-                    emoji1 = coloredEmojis[shape1][colors.indexOf(color)];
-                    emoji2 = coloredEmojis[shape2][colors.indexOf(color)];
-                    correctAnswerEmoji = coloredEmojis[shape3][colors.indexOf(color)];
-                    options = generateColoredOptions(correctAnswerEmoji, 3);
-                }
-                pattern = [emoji1, emoji2];
+            if (isColorPattern) {
+                const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
+                const startIndex = Math.floor(Math.random() * (colors.length - 3));
+                
+                emoji1 = coloredEmojis[shape][startIndex];
+                emoji2 = coloredEmojis[shape][startIndex + 1];
+                correctAnswerEmoji = coloredEmojis[shape][startIndex + 2];
+                options = generateColoredOptions(correctAnswerEmoji, 3);
+            } else {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const shapeTypes = shapes.filter(s => s !== 'face');
+                const startIndex = Math.floor(Math.random() * (shapeTypes.length - 2));
 
-            } else if (patternType === 1) { // Alternating Pattern
-                const isColorPattern = Math.random() < 0.5;
-                if (isColorPattern) {
-                    const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
-                    const colorA = colors[Math.floor(Math.random() * colors.length)];
-                    let colorB = colors.filter(c => c !== colorA)[Math.floor(Math.random() * (colors.length - 1))];
-
-                    emoji1 = coloredEmojis[shape][colors.indexOf(colorA)];
-                    emoji2 = coloredEmojis[shape][colors.indexOf(colorB)];
-                    correctAnswerEmoji = emoji1; // The next emoji in the alternation
-                    options = generateColoredOptions(correctAnswerEmoji, 3);
-                } else {
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    const shapeTypes = shapes.filter(s => s !== 'face');
-                    const shapeA = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
-                    let shapeB = shapeTypes.filter(s => s !== shapeA)[Math.floor(Math.random() * (shapeTypes.length - 1))];
-                    
-                    emoji1 = coloredEmojis[shapeA][colors.indexOf(color)];
-                    emoji2 = coloredEmojis[shapeB][colors.indexOf(color)];
-                    correctAnswerEmoji = emoji1; // The next emoji in the alternation
-                    options = generateColoredOptions(correctAnswerEmoji, 3);
-                }
-                pattern = [emoji1, emoji2];
-
-            } else { // Repetitive Pattern (with an added distractor)
-                const isFacePattern = Math.random() < 0.5;
-                if (isFacePattern) {
-                    const correctEmotion = Object.keys(faceEmojis)[Math.floor(Math.random() * Object.keys(faceEmojis).length)];
-                    correctAnswerEmoji = faceEmojis[correctEmotion];
-                    emoji1 = correctAnswerEmoji;
-                    emoji2 = correctAnswerEmoji;
-                    options = generateFaceOptions(correctAnswerEmoji, 3);
-                } else {
-                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                    const randomShape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
-                    correctAnswerEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
-                    emoji1 = correctAnswerEmoji;
-                    emoji2 = correctAnswerEmoji;
-                    options = generateColoredOptions(correctAnswerEmoji, 3);
-                }
-                pattern = [emoji1, emoji2];
+                emoji1 = coloredEmojis[shapeTypes[startIndex]][colors.indexOf(color)];
+                emoji2 = coloredEmojis[shapeTypes[startIndex + 1]][colors.indexOf(color)];
+                correctAnswerEmoji = coloredEmojis[shapeTypes[startIndex + 2]][colors.indexOf(color)];
+                options = generateColoredOptions(correctAnswerEmoji, 3);
             }
 
             patternDisplay.innerHTML = '';
-            pattern.forEach(emoji => {
+            [emoji1, emoji2].forEach(emoji => {
                 const item = document.createElement('div');
                 item.className = 'item';
                 item.textContent = emoji;
@@ -575,6 +541,7 @@
             score = 0;
             scoreDisplay.textContent = `Score: ${score}`;
             currentLevel = 1;
+            playedLevelIntro = { 1: false, 2: false, 3: false };
             newRound();
         });
         exitButton.addEventListener('click', exitGame);
