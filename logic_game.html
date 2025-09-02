@@ -329,21 +329,17 @@
             
             if (gameType === 'find-different') {
                 setupFindDifferent();
-                currentInstructionText = 'Find the one that is different.';
             } else if (gameType === 'find-matching') {
                 setupFindMatching();
-                currentInstructionText = 'Find the matching item.';
             } else if (gameType === 'pattern') {
                 setupPattern();
-                currentInstructionText = 'Find the missing item in the pattern.';
             } else if (gameType === 'drag-drop') {
                 setupDragDrop();
-                currentInstructionText = 'Complete the puzzle.';
             }
 
-            instructionsDisplay.textContent = currentInstructionText;
+            instructionsDisplay.textContent = `Level ${currentLevel}: ${getGeneralInstruction(gameType)}`;
             jargonDisplay.textContent = jargonList[Math.floor(Math.random() * jargonList.length)];
-            speak(currentInstructionText);
+            // Note: The specific puzzle prompt is now handled within each setup function
         }
 
         function getGameTypeByLevel(level) {
@@ -351,10 +347,19 @@
             // This ensures a predictable cycle through all puzzle types with every level
             return gameTypes[(level - 1) % gameTypes.length];
         }
+        
+        function getGeneralInstruction(gameType) {
+            switch(gameType) {
+                case 'find-different': return 'Find the one that is different.';
+                case 'find-matching': return 'Find the matching item.';
+                case 'pattern': return 'Find the missing item in the pattern.';
+                case 'drag-drop': return 'Complete the puzzle.';
+                default: return '';
+            }
+        }
 
         function setupFindDifferent() {
             clueDisplay.textContent = '';
-            
             const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
             
             let commonEmoji, differentEmoji;
@@ -372,11 +377,11 @@
             
             const correctAnswerEmoji = differentEmoji;
             renderGrid(options, correctAnswerEmoji);
+            speak(`Level ${currentLevel}: Find the one that is different.`);
         }
 
         function setupFindMatching() {
             const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
-            
             const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
             
             let clueText;
@@ -398,19 +403,15 @@
             }
             
             clueDisplay.textContent = clueText;
-            speak(clueText);
+            const fullInstruction = `Level ${currentLevel}: Find the matching item. ${clueText}`;
+            speak(fullInstruction);
 
-            // Create a board with exactly one correct answer
             const options = [];
-            
-            // Add the single correct emoji
             options.push(clueEmoji);
             
-            // Get all other emojis
             const wrongEmojis = allEmojis.filter(e => e !== clueEmoji);
             shuffleArray(wrongEmojis);
             
-            // Add 8 other distinct emojis
             for (let i = 0; i < 8 && i < wrongEmojis.length; i++) {
                 options.push(wrongEmojis[i]);
             }
@@ -457,6 +458,7 @@
             patternDisplay.appendChild(questionMark);
             
             renderGrid(options, correctAnswerEmoji);
+            speak(`Level ${currentLevel}: Find the missing item in the pattern.`);
         }
 
         function setupDragDrop() {
@@ -470,7 +472,7 @@
             const correctEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
             
             clueDisplay.textContent = `Drag the ${randomColor} ${randomShape}.`;
-            speak(`Drag the ${randomColor} ${randomShape} to the box.`);
+            speak(`Level ${currentLevel}: Complete the puzzle. Drag the ${randomColor} ${randomShape} to the box.`);
             
             dragItem.textContent = correctEmoji;
             
@@ -502,7 +504,6 @@
                 
                 setTimeout(() => {
                     messageDisplay.textContent = '';
-                    // The bug was here. Now it's fixed to advance a level on every correct answer.
                     currentLevel++;
                     newRound();
                 }, 2500);
