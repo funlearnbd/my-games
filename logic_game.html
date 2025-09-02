@@ -348,29 +348,9 @@
         }
 
         function getGameTypeByLevel(level) {
-            if (level <= 5) {
-                return 'find-different';
-            } else if (level <= 10) {
-                const gameType = Math.random() < 0.6 ? 'find-different' : 'find-matching';
-                return gameType;
-            } else if (level <= 15) {
-                 const gameType = Math.floor(Math.random() * 3);
-                if (gameType === 0) return 'find-different';
-                if (gameType === 1) return 'find-matching';
-                return 'pattern';
-            } else if (level <= 20) {
-                 const gameType = Math.floor(Math.random() * 4);
-                if (gameType === 0) return 'find-different';
-                if (gameType === 1) return 'find-matching';
-                if (gameType === 2) return 'pattern';
-                return 'drag-drop';
-            } else {
-                 const gameType = Math.floor(Math.random() * 4);
-                if (gameType === 0) return 'find-different';
-                if (gameType === 1) return 'find-matching';
-                if (gameType === 2) return 'pattern';
-                return 'drag-drop';
-            }
+            const gameTypes = ['find-different', 'find-matching', 'pattern', 'drag-drop'];
+            // This ensures a predictable cycle through all puzzle types
+            return gameTypes[(level - 1) % gameTypes.length];
         }
 
         function setupFindDifferent() {
