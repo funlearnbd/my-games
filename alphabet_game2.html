@@ -4,35 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find the Letter!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
+        :root {
+            --primary-color: #00b894;
+            --secondary-color: #0984e3;
+            --accent-color: #ff7675;
+            --background-color: #dfe6e9;
+            --text-color-dark: #2d3436;
+            --box-shadow-light: rgba(0, 0, 0, 0.1);
+            --box-shadow-medium: rgba(0, 0, 0, 0.2);
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
         }
 
-        #game-container {
+        body {
+            font-family: 'Poppins', sans-serif;
             text-align: center;
+            background-color: var(--background-color);
+            margin: 0;
             padding: 20px;
-            border: 2px solid #333;
-            border-radius: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .splash-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--box-shadow-medium);
+            max-width: 500px;
+            width: 90%;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .splash-screen h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .splash-screen p {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--text-color-dark);
+            margin-bottom: 2rem;
+        }
+
+        .start-btn {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            padding: 15px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
+        }
+
+        .start-btn:hover {
+            background-color: #00a884;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
+        }
+
+        .game-container {
+            display: none; /* Hidden by default */
+            background-color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--box-shadow-medium);
+            max-width: 600px;
+            width: 90%;
+            transition: transform 0.3s ease;
         }
 
         h1 {
-            color: #333;
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
 
         #target-letter-display {
-            font-size: 2em;
-            font-weight: bold;
-            margin: 20px 0;
-            height: 50px;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            margin: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-color-dark);
+            text-shadow: 1px 1px 2px var(--box-shadow-light);
+            min-height: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -40,99 +113,183 @@
 
         #letter-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
             gap: 10px;
             margin-bottom: 20px;
         }
+        
+        @media (max-width: 480px) {
+            #letter-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
 
         .letter-box {
-            width: 50px;
-            height: 50px;
-            background-color: #eee;
-            border: 1px solid #ccc;
+            height: clamp(50px, 10vw, 70px);
+            background-color: #f0f4f8;
+            border: 2px solid #ccc;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5em;
+            font-size: clamp(1.5em, 4vw, 2em);
+            font-weight: 600;
             cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.2s;
+            border-radius: 10px;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-color-dark);
         }
 
         .letter-box:hover {
-            background-color: #ddd;
+            background-color: #e0e6ec;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         #message {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin: 20px 0;
+            font-weight: 600;
             min-height: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
+        }
+        
+        #score {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            margin: 10px 0;
+            color: var(--text-color-dark);
         }
 
-        #start-button, #exit-button {
-            padding: 10px 20px;
-            font-size: 1em;
+        .button-group {
+            margin-top: 1.5rem;
+        }
+
+        button {
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            padding: 12px 24px;
+            margin: 0 8px;
             cursor: pointer;
-            border: none;
-            border-radius: 5px;
             color: white;
-            margin: 5px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
-        #start-button {
-            background-color: #4CAF50; /* Green */
+        #restart-button {
+            background-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
+        }
+
+        #restart-button:hover {
+            background-color: #00a884;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
         }
 
         #exit-button {
-            background-color: #f44336; /* Red */
+            background-color: var(--error-color);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+        }
+
+        #exit-button:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
+
+    <div id="splash-screen" class="splash-screen">
+        <h1>Alphabet Adventure! 🔡</h1>
+        <p>Listen for the letter, then tap the right one!</p>
+        <button id="start-btn" class="start-btn">Start</button>
+    </div>
+
+    <div id="game-container" class="game-container">
         <h1>Find the Letter!</h1>
         <div id="target-letter-display"></div>
         <div id="letter-grid"></div>
         <div id="message"></div>
-        <button id="start-button">Start Game</button>
-        <button id="exit-button">Exit Game</button>
+        <div id="score">Score: 0</div>
+        
+        <div class="button-group">
+            <button id="restart-button">New Game</button>
+            <button id="exit-button">Exit Game</button>
+        </div>
     </div>
+
+    <audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
+    <audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
 
     <script>
         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         let targetLetter = '';
+        let score = 0;
+        const synth = window.speechSynthesis;
+        let voiceSupported = true;
 
-        const startButton = document.getElementById('start-button');
-        const exitButton = document.getElementById('exit-button');
+        const splashScreen = document.getElementById('splash-screen');
+        const startButton = document.getElementById('start-btn');
+        const gameContainer = document.getElementById('game-container');
         const targetLetterDisplay = document.getElementById('target-letter-display');
         const letterGrid = document.getElementById('letter-grid');
         const messageDisplay = document.getElementById('message');
+        const scoreDisplay = document.getElementById('score');
+        const restartButton = document.getElementById('restart-button');
+        const exitButton = document.getElementById('exit-button');
+        const successSound = document.getElementById('success-sound');
+        const buzzSound = document.getElementById('buzz-sound');
 
-        // Event listeners for buttons
-        startButton.addEventListener('click', startGame);
-        exitButton.addEventListener('click', exitGame);
+        if (!synth) {
+            voiceSupported = false;
+            document.querySelector('.splash-screen p').textContent = 'Voice not supported. Tap start to begin.';
+        }
 
-        // Function to start the game
+        function speak(text) {
+            if (voiceSupported) {
+                synth.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.volume = 1;
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                synth.speak(utterance);
+            }
+        }
+
         function startGame() {
-            messageDisplay.textContent = '';
+            splashScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
             newRound();
         }
 
-        // Function to end the game
-        function exitGame() {
-            targetLetterDisplay.textContent = '';
-            letterGrid.innerHTML = '';
-            messageDisplay.textContent = 'Game Over! Thanks for playing!';
-        }
-
-        // Function to start a new round
         function newRound() {
-            // Pick a random target letter
             targetLetter = letters[Math.floor(Math.random() * letters.length)];
             targetLetterDisplay.textContent = `Find the letter: ${targetLetter}`;
+            speak(targetLetter); // Speak the letter to find
 
-            // Shuffle the letters
-            const shuffledLetters = shuffleArray([...letters]);
+            // Get a random subset of letters, including the target
+            const lettersToDisplay = [targetLetter];
+            const otherLetters = letters.filter(l => l !== targetLetter);
+            for (let i = 0; i < 9; i++) { // Display 10 letters in total
+                const randomOther = otherLetters[Math.floor(Math.random() * otherLetters.length)];
+                lettersToDisplay.push(randomOther);
+                otherLetters.splice(otherLetters.indexOf(randomOther), 1); // Ensure no duplicates
+            }
+            const shuffledLetters = shuffleArray(lettersToDisplay);
 
             // Create the letter grid
             letterGrid.innerHTML = '';
@@ -143,20 +300,30 @@
                 letterBox.addEventListener('click', () => checkLetter(letter));
                 letterGrid.appendChild(letterBox);
             });
+            messageDisplay.textContent = ''; // Clear message for new round
         }
 
-        // Function to check the clicked letter
         function checkLetter(clickedLetter) {
             if (clickedLetter === targetLetter) {
+                successSound.play();
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
                 messageDisplay.textContent = 'Correct! Great job!';
-                // Wait a bit before starting the next round
-                setTimeout(newRound, 1000);
+                messageDisplay.style.color = 'var(--success-color)';
+                setTimeout(newRound, 1500);
             } else {
+                buzzSound.play();
                 messageDisplay.textContent = 'Try again!';
+                messageDisplay.style.color = 'var(--error-color)';
+                speak('Try again!');
             }
         }
 
-        // Helper function to shuffle an array (Fisher-Yates shuffle)
+        function exitGame() {
+            synth.cancel();
+            window.location.href = 'index.html';
+        }
+
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -164,6 +331,15 @@
             }
             return array;
         }
+        
+        // Event listeners
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', () => {
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            newRound();
+        });
+        exitButton.addEventListener('click', exitGame);
     </script>
 </body>
 </html>
