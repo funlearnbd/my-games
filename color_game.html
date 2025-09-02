@@ -9,10 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #00b894; /* Brighter Green */
-            --secondary-color: #0984e3; /* Brighter Blue */
-            --accent-color: #ff7675; /* Coral Red */
-            --background-color: #dfe6e9; /* Light Grey-Blue */
+            --primary-color: #00b894;
+            --secondary-color: #0984e3;
+            --accent-color: #ff7675;
+            --background-color: #dfe6e9;
             --text-color-dark: #2d3436;
             --box-shadow-light: rgba(0, 0, 0, 0.1);
             --box-shadow-medium: rgba(0, 0, 0, 0.2);
@@ -31,9 +31,56 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .splash-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--box-shadow-medium);
+            max-width: 500px;
+            width: 90%;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .splash-screen h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .splash-screen p {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--text-color-dark);
+            margin-bottom: 2rem;
+        }
+
+        .start-btn {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            padding: 15px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
+        }
+
+        .start-btn:hover {
+            background-color: #00a884;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
         }
 
         .game-container {
+            display: none; /* Hidden by default */
             background-color: white;
             padding: 2rem;
             border-radius: 20px;
@@ -41,10 +88,6 @@
             max-width: 600px;
             width: 90%;
             transition: transform 0.3s ease;
-        }
-        
-        .game-container:hover {
-            transform: scale(1.01);
         }
 
         h1 {
@@ -85,7 +128,7 @@
             transform: scale(1.05);
             box-shadow: 0 8px 20px var(--box-shadow-medium);
         }
-        
+
         #message {
             font-size: clamp(1.2rem, 3vw, 1.8rem);
             margin: 20px 0;
@@ -114,12 +157,12 @@
             transition: all 0.3s ease;
         }
 
-        #start, #restart {
+        #restart {
             background-color: var(--primary-color);
             box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
         }
 
-        #start:hover, #restart:hover {
+        #restart:hover {
             background-color: #00a884;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
@@ -135,20 +178,37 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
         }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="game-container">
+
+    <div id="splash-screen" class="splash-screen">
+        <h1>Are you ready to play?</h1>
+        <p>Listen for the color name, then tap the right box!</p>
+        <button id="start-btn" class="start-btn">Start</button>
+    </div>
+
+    <div id="game-container" class="game-container">
         <h1>Color Match Mania! ✨</h1>
-        <div id="word-display" style="display: none;"></div>
-        <div id="color-boxes" style="display: none;"></div>
-        <div id="message">Click Start to play!</div>
-        <div id="score" style="display: none;">Score: 0</div>
-        
+        <div id="word-display"></div>
+        <div id="color-boxes"></div>
+        <div id="message"></div>
+        <div id="score">Score: 0</div>
+
         <div class="button-group">
-            <button id="start">Start Game</button>
-            <button id="restart" style="display: none;">New Game</button>
-            <button id="exit" style="display: none;">Exit Game</button>
+            <button id="restart">New Game</button>
+            <button id="exit">Exit Game</button>
         </div>
     </div>
 
@@ -169,18 +229,19 @@
         const synth = window.speechSynthesis;
         let voiceSupported = true;
 
+        const splashScreen = document.getElementById('splash-screen');
+        const startButton = document.getElementById('start-btn');
+        const gameContainer = document.getElementById('game-container');
         const wordDisplay = document.getElementById('word-display');
         const colorBoxes = document.getElementById('color-boxes');
         const message = document.getElementById('message');
         const scoreDisplay = document.getElementById('score');
-        const startButton = document.getElementById('start');
         const restartButton = document.getElementById('restart');
         const exitButton = document.getElementById('exit');
 
         if (!synth) {
             voiceSupported = false;
-            message.textContent = 'Voice not supported. Text-only mode.';
-            message.style.color = 'var(--error-color)';
+            document.querySelector('.splash-screen p').textContent = 'Voice not supported. Tap start to begin.';
         }
 
         function speak(text) {
@@ -196,15 +257,10 @@
         }
 
         function startGame() {
+            splashScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
             score = 0;
             scoreDisplay.textContent = `Score: ${score}`;
-            message.textContent = '';
-            wordDisplay.style.display = 'block';
-            colorBoxes.style.display = 'flex';
-            scoreDisplay.style.display = 'block';
-            startButton.style.display = 'none';
-            restartButton.style.display = 'inline-block';
-            exitButton.style.display = 'inline-block';
             setupRound();
         }
 
