@@ -342,9 +342,9 @@
 
         function getInstructionsText(level) {
             if (level <= 10) {
-                return 'Find the matching item.';
-            } else if (level <= 20) {
                 return 'Find the one that is different.';
+            } else if (level <= 20) {
+                return 'Find the matching item.';
             } else if (level <= 25) {
                  return 'Find the missing item in the pattern.';
             } else {
@@ -354,6 +354,28 @@
         }
 
         function setupLevel1() {
+            clueDisplay.textContent = '';
+            
+            const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
+            
+            let commonEmoji, differentEmoji;
+            const commonEmojiIndex = Math.floor(Math.random() * allEmojis.length);
+            commonEmoji = allEmojis[commonEmojiIndex];
+            
+            const otherEmojis = allEmojis.filter(e => e !== commonEmoji);
+            const differentEmojiIndex = Math.floor(Math.random() * otherEmojis.length);
+            differentEmoji = otherEmojis[differentEmojiIndex];
+
+            const options = [differentEmoji];
+            for (let i = 0; i < 8; i++) {
+                options.push(commonEmoji);
+            }
+            
+            const correctAnswerEmoji = differentEmoji;
+            renderGrid(options, correctAnswerEmoji);
+        }
+
+        function setupLevel2() {
             const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
             
             const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
@@ -395,28 +417,6 @@
             }
             
             renderGrid(options, clueEmoji);
-        }
-
-        function setupLevel2() {
-            clueDisplay.textContent = '';
-            
-            const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
-            
-            let commonEmoji, differentEmoji;
-            const commonEmojiIndex = Math.floor(Math.random() * allEmojis.length);
-            commonEmoji = allEmojis[commonEmojiIndex];
-            
-            const otherEmojis = allEmojis.filter(e => e !== commonEmoji);
-            const differentEmojiIndex = Math.floor(Math.random() * otherEmojis.length);
-            differentEmoji = otherEmojis[differentEmojiIndex];
-
-            const options = [differentEmoji];
-            for (let i = 0; i < 8; i++) {
-                options.push(commonEmoji);
-            }
-            
-            const correctAnswerEmoji = differentEmoji;
-            renderGrid(options, correctAnswerEmoji);
         }
 
         function setupLevel3() {
