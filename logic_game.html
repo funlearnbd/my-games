@@ -54,16 +54,24 @@
             font-weight: 700;
             margin-bottom: 1rem;
         }
+
+        #jargon {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            font-style: italic;
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            min-height: 25px;
+        }
         
         #instructions {
-            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-size: clamp(1.4rem, 2.5vw, 1.8rem);
             font-weight: 600;
             color: var(--text-color-dark);
-            min-height: 30px;
+            min-height: 40px;
         }
 
         #clue-display {
-            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
             font-weight: 700;
             color: var(--text-color-dark);
             text-shadow: 1px 1px 2px var(--box-shadow-light);
@@ -204,6 +212,7 @@
 <body>
     <div id="game-container" class="game-container">
         <h1>Logic Quest</h1>
+        <div id="jargon"></div>
         <div id="instructions"></div>
         <div id="clue-display"></div>
         <div id="pattern-display"></div>
@@ -248,6 +257,19 @@
             'bell': '🔔'
         };
 
+        const jargonList = [
+            "Cogito, ergo sum.",
+            "Semper ad astra.",
+            "De omnibus dubitandum.",
+            "Scientia potentia est.",
+            "Audentes Fortuna iuvat.",
+            "In vino veritas.",
+            "Carpe diem.",
+            "Veritas vos liberabit.",
+            "Amor vincit omnia.",
+            "Ad astra per aspera."
+        ];
+
         let currentLevel = 1;
         let score = 0;
         let lastSpokenInstruction = '';
@@ -267,6 +289,7 @@
         const exitButton = document.getElementById('exit-button');
         const successSound = document.getElementById('success-sound');
         const buzzSound = document.getElementById('buzz-sound');
+        const jargonDisplay = document.getElementById('jargon');
 
         let correctAnswer = '';
         let currentInstructionText = '';
@@ -320,35 +343,32 @@
             }
 
             instructionsDisplay.textContent = currentInstructionText;
+            jargonDisplay.textContent = jargonList[Math.floor(Math.random() * jargonList.length)];
             speak(currentInstructionText);
         }
 
         function getGameTypeByLevel(level) {
             if (level <= 5) {
-                // Levels 1-5: Start with "find the different" for easy onboarding
                 return 'find-different';
             } else if (level <= 10) {
-                // Levels 6-10: Introduce "find the matching"
-                return 'find-matching';
+                const gameType = Math.random() < 0.6 ? 'find-different' : 'find-matching';
+                return gameType;
             } else if (level <= 15) {
-                // Levels 11-15: Introduce "pattern" and mix with previous types
-                 const gameType = Math.floor(Math.random() * 3) + 1;
-                if (gameType === 1) return 'find-different';
-                if (gameType === 2) return 'find-matching';
+                 const gameType = Math.floor(Math.random() * 3);
+                if (gameType === 0) return 'find-different';
+                if (gameType === 1) return 'find-matching';
                 return 'pattern';
             } else if (level <= 20) {
-                // Levels 16-20: Add "drag and drop"
-                 const gameType = Math.floor(Math.random() * 4) + 1;
-                if (gameType === 1) return 'find-different';
-                if (gameType === 2) return 'find-matching';
-                if (gameType === 3) return 'pattern';
+                 const gameType = Math.floor(Math.random() * 4);
+                if (gameType === 0) return 'find-different';
+                if (gameType === 1) return 'find-matching';
+                if (gameType === 2) return 'pattern';
                 return 'drag-drop';
             } else {
-                // Levels 21-30: A complete mix of all puzzle types
-                 const gameType = Math.floor(Math.random() * 4) + 1;
-                if (gameType === 1) return 'find-different';
-                if (gameType === 2) return 'find-matching';
-                if (gameType === 3) return 'pattern';
+                 const gameType = Math.floor(Math.random() * 4);
+                if (gameType === 0) return 'find-different';
+                if (gameType === 1) return 'find-matching';
+                if (gameType === 2) return 'pattern';
                 return 'drag-drop';
             }
         }
