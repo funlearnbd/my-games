@@ -373,7 +373,7 @@
                 let otherFaces = faceValues.filter(e => e !== commonEmoji);
                 if (otherFaces.length > 0) {
                     differentEmoji = otherFaces[Math.floor(Math.random() * otherFaces.length)];
-                } else { // Fallback if only one face emoji is available
+                } else {
                     differentEmoji = commonEmoji;
                 }
                 options = [differentEmoji];
@@ -401,52 +401,88 @@
             speak('Level 3: Find the missing item in the pattern.');
             clueDisplay.textContent = '';
             
-            const ruleType = Math.random() < 0.5 ? 'color' : 'shape';
+            const patternType = Math.floor(Math.random() * 3);
             let emoji1, emoji2, correctAnswerEmoji, options;
+            let pattern = [];
 
-            if (ruleType === 'color') {
-                const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
-                const color1 = colors[Math.floor(Math.random() * colors.length)];
-                let color2 = colors.filter(c => c !== color1)[Math.floor(Math.random() * (colors.length - 1))];
-                let color3 = colors.filter(c => c !== color1 && c !== color2)[Math.floor(Math.random() * (colors.length - 2))];
-                
-                emoji1 = coloredEmojis[shape][colors.indexOf(color1)];
-                emoji2 = coloredEmojis[shape][colors.indexOf(color2)];
-                correctAnswerEmoji = coloredEmojis[shape][colors.indexOf(color3)];
-                options = generateColoredOptions(correctAnswerEmoji, 3);
-            } else { // ruleType === 'shape'
-                const isFacePattern = Math.random() < 0.5;
-                if (isFacePattern) {
-                    const allFaceEmojis = Object.values(faceEmojis);
-                    const emojiSet = shuffleArray([...allFaceEmojis]);
-                    emoji1 = emojiSet[0];
-                    emoji2 = emojiSet[1];
-                    correctAnswerEmoji = emojiSet[2];
-                    options = generateFaceOptions(correctAnswerEmoji, 3);
+            if (patternType === 0) { // Sequential Progression
+                const isColorPattern = Math.random() < 0.5;
+                if (isColorPattern) {
+                    const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
+                    const startIndex = Math.floor(Math.random() * (colors.length - 2));
+                    const color1 = colors[startIndex];
+                    const color2 = colors[startIndex + 1];
+                    const color3 = colors[startIndex + 2];
+                    
+                    emoji1 = coloredEmojis[shape][colors.indexOf(color1)];
+                    emoji2 = coloredEmojis[shape][colors.indexOf(color2)];
+                    correctAnswerEmoji = coloredEmojis[shape][colors.indexOf(color3)];
+                    options = generateColoredOptions(correctAnswerEmoji, 3);
                 } else {
                     const color = colors[Math.floor(Math.random() * colors.length)];
                     const shapeTypes = shapes.filter(s => s !== 'face');
-                    const shape1 = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
-                    let shape2 = shapeTypes.filter(s => s !== shape1)[Math.floor(Math.random() * (shapeTypes.length - 1))];
-                    let shape3 = shapeTypes.filter(s => s !== shape1 && s !== shape2)[Math.floor(Math.random() * (shapeTypes.length - 2))];
+                    const startIndex = Math.floor(Math.random() * (shapeTypes.length - 2));
+                    const shape1 = shapeTypes[startIndex];
+                    const shape2 = shapeTypes[startIndex + 1];
+                    const shape3 = shapeTypes[startIndex + 2];
                     
                     emoji1 = coloredEmojis[shape1][colors.indexOf(color)];
                     emoji2 = coloredEmojis[shape2][colors.indexOf(color)];
                     correctAnswerEmoji = coloredEmojis[shape3][colors.indexOf(color)];
                     options = generateColoredOptions(correctAnswerEmoji, 3);
                 }
+                pattern = [emoji1, emoji2];
+
+            } else if (patternType === 1) { // Alternating Pattern
+                const isColorPattern = Math.random() < 0.5;
+                if (isColorPattern) {
+                    const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
+                    const colorA = colors[Math.floor(Math.random() * colors.length)];
+                    let colorB = colors.filter(c => c !== colorA)[Math.floor(Math.random() * (colors.length - 1))];
+
+                    emoji1 = coloredEmojis[shape][colors.indexOf(colorA)];
+                    emoji2 = coloredEmojis[shape][colors.indexOf(colorB)];
+                    correctAnswerEmoji = emoji1; // The next emoji in the alternation
+                    options = generateColoredOptions(correctAnswerEmoji, 3);
+                } else {
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const shapeTypes = shapes.filter(s => s !== 'face');
+                    const shapeA = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+                    let shapeB = shapeTypes.filter(s => s !== shapeA)[Math.floor(Math.random() * (shapeTypes.length - 1))];
+                    
+                    emoji1 = coloredEmojis[shapeA][colors.indexOf(color)];
+                    emoji2 = coloredEmojis[shapeB][colors.indexOf(color)];
+                    correctAnswerEmoji = emoji1; // The next emoji in the alternation
+                    options = generateColoredOptions(correctAnswerEmoji, 3);
+                }
+                pattern = [emoji1, emoji2];
+
+            } else { // Repetitive Pattern (with an added distractor)
+                const isFacePattern = Math.random() < 0.5;
+                if (isFacePattern) {
+                    const correctEmotion = Object.keys(faceEmojis)[Math.floor(Math.random() * Object.keys(faceEmojis).length)];
+                    correctAnswerEmoji = faceEmojis[correctEmotion];
+                    emoji1 = correctAnswerEmoji;
+                    emoji2 = correctAnswerEmoji;
+                    options = generateFaceOptions(correctAnswerEmoji, 3);
+                } else {
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    const randomShape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
+                    correctAnswerEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
+                    emoji1 = correctAnswerEmoji;
+                    emoji2 = correctAnswerEmoji;
+                    options = generateColoredOptions(correctAnswerEmoji, 3);
+                }
+                pattern = [emoji1, emoji2];
             }
 
             patternDisplay.innerHTML = '';
-            const item1 = document.createElement('div');
-            item1.className = 'item';
-            item1.textContent = emoji1;
-            patternDisplay.appendChild(item1);
-
-            const item2 = document.createElement('div');
-            item2.className = 'item';
-            item2.textContent = emoji2;
-            patternDisplay.appendChild(item2);
+            pattern.forEach(emoji => {
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.textContent = emoji;
+                patternDisplay.appendChild(item);
+            });
             
             const questionMark = document.createElement('div');
             questionMark.id = 'question-mark';
