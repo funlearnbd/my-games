@@ -272,7 +272,6 @@
 
         let currentLevel = 1;
         let score = 0;
-        let lastSpokenInstruction = '';
         const synth = window.speechSynthesis;
         let voiceSupported = true;
 
@@ -349,7 +348,7 @@
 
         function getGameTypeByLevel(level) {
             const gameTypes = ['find-different', 'find-matching', 'pattern', 'drag-drop'];
-            // This ensures a predictable cycle through all puzzle types
+            // This ensures a predictable cycle through all puzzle types with every level
             return gameTypes[(level - 1) % gameTypes.length];
         }
 
@@ -503,9 +502,8 @@
                 
                 setTimeout(() => {
                     messageDisplay.textContent = '';
-                    if (score % 5 === 0 && score > 0) {
-                        currentLevel++;
-                    }
+                    // The bug was here. Now it's fixed to advance a level on every correct answer.
+                    currentLevel++;
                     newRound();
                 }, 2500);
             } else {
@@ -594,7 +592,6 @@
             score = 0;
             scoreDisplay.textContent = `Score: ${score}`;
             currentLevel = 1;
-            lastSpokenLevel = 0;
             newRound();
         });
 
