@@ -1,87 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Logic Quest</title>
-<style>
-/* --- styles same as your version, omitted for brevity --- */
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logic Quest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#00b894; --secondary:#0984e3; --accent:#ff7675; --bg:#dfe6e9;
+      --text:#2d3436; --shadowL:rgba(0,0,0,.1); --shadowM:rgba(0,0,0,.2);
+      --success:#27ae60; --error:#e74c3c;
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:'Poppins',sans-serif; margin:0; padding:20px; background:var(--bg);
+      display:flex; min-height:100vh; align-items:center; justify-content:center;
+    }
+    .game-container{
+      background:#fff; width:min(600px,92vw); max-height:88vh; overflow:auto;
+      border-radius:20px; padding:2rem; box-shadow:0 10px 30px var(--shadowM);
+      display:flex; flex-direction:column; align-items:center;
+    }
+    .game-container h1{
+      margin:0 0 .5rem; color:var(--secondary); font-weight:700;
+      font-size:clamp(2rem,4vw,3rem);
+    }
+    /* Single question line under the heading */
+    #question{
+      margin:.25rem 0 1rem; color:var(--text); font-weight:700;
+      font-size:clamp(1.6rem,3.5vw,2.2rem); text-align:center; min-height:2.2rem;
+    }
+    #pattern-display{
+      display:flex; gap:14px; align-items:center; justify-content:center; margin:10px 0 6px;
+    }
+    #pattern-display .item{font-size:clamp(2.2rem,6vw,3.6rem)}
+    #question-mark{font-size:clamp(2.2rem,6vw,3.6rem); color:#888}
+    #answer-grid{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:12px 0 10px;
+      width:100%; place-items:center;
+    }
+    .answer-box{
+      width:clamp(82px,15vw,108px); height:clamp(82px,15vw,108px);
+      display:flex; align-items:center; justify-content:center;
+      background:#f0f4f8; border:2px solid #e0e0e0; border-radius:14px;
+      box-shadow:0 5px 15px var(--shadowL); cursor:pointer;
+      font-size:clamp(2.2rem,6vw,3.6rem); transition:.2s ease;
+    }
+    .answer-box:hover{transform:scale(1.05); box-shadow:0 8px 20px var(--shadowM)}
+    .drag-drop-container{
+      display:none; width:100%; gap:14px; align-items:center; justify-content:space-between;
+      border:2px dashed #ccc; border-radius:12px; padding:12px; margin:10px 0 8px;
+      flex-wrap:wrap;
+    }
+    .drag-item{font-size:clamp(2.2rem,6vw,3.6rem); cursor:grab; padding:8px 10px}
+    .drop-zone{
+      width:110px; height:110px; border:2px solid var(--secondary); border-radius:12px;
+      background:#f0f4f8; display:flex; align-items:center; justify-content:center;
+      margin-left:auto;
+    }
+    #message{font-weight:600; font-size:clamp(1.1rem,2.6vw,1.4rem); min-height:1.4rem; margin:6px 0}
+    #score{font-size:.95rem; color:var(--text); margin:2px 0 10px}
+    .button-group{display:flex; gap:10px; margin-top:.5rem}
+    button{
+      font-weight:600; color:#fff; border:0; border-radius:30px; cursor:pointer;
+      padding:12px 22px; transition:.25s ease; font-size:clamp(.95rem,2.2vw,1.05rem);
+    }
+    #restart-button{background:var(--primary); box-shadow:0 4px 10px rgba(0,184,148,.4)}
+    #restart-button:hover{transform:translateY(-2px); box-shadow:0 6px 15px rgba(0,184,148,.6)}
+    #exit-button{background:var(--error); box-shadow:0 4px 10px rgba(231,76,60,.4)}
+    #exit-button:hover{transform:translateY(-2px); box-shadow:0 6px 15px rgba(231,76,60,.6)}
+  </style>
 </head>
 <body>
-<div id="game-container" class="game-container">
+  <div class="game-container">
     <h1>Logic Quest</h1>
-    <div id="jargon"></div>
-    <div id="instructions"></div>
-    <div id="clue-display"></div>
+    <div id="question"></div> <!-- Single line prompt -->
     <div id="pattern-display"></div>
     <div id="answer-grid"></div>
-    <div id="drag-drop-container" class="drag-drop-container" style="display:none;"></div>
-    <div id="message"></div>
+    <div id="drag-drop" class="drag-drop-container"></div>
+    <div id="message" aria-live="polite"></div>
     <div id="score">Score: 0</div>
     <div class="button-group">
-        <button id="restart-button">New Game</button>
-        <button id="exit-button">Exit Game</button>
+      <button id="restart-button">New Game</button>
+      <button id="exit-button">Exit Game</button>
     </div>
-</div>
+  </div>
 
-<audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
-<audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
+  <audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
+  <audio id="buzz-sound"    src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
 
-<script>
-const colors = ['red','blue','green','yellow','purple','orange','black','brown'];
-const shapes = ['circle','square','heart'];
+  <script>
+    /* === Data === */
+    const colors = ['red','blue','green','yellow','purple','orange','black','brown'];
+    const shapes = ['circle','square','heart'];
 
-const coloredEmojis = {
-    'circle': ['🔴','🔵','🟢','🟡','🟣','🟠','⚫','🟤'],
-    'square': ['🟥','🟦','🟩','🟨','🟪','🟧','⬛','🟫'],
-    'heart': ['❤️','💙','💚','💛','💜','🧡','🖤','🤎']
-};
-const uniqueEmojis = {
-    'happy face':'😀','sad face':'😩','laughing face':'😂','angry face':'😠',
-    'celebrating face':'🥳','shocked face':'🤯','winking face':'😉','sleeping face':'😴',
-    'cold face':'🥶','light bulb':'💡','bell':'🔔'
-};
+    const coloredEmojis = {
+      circle:['🔴','🔵','🟢','🟡','🟣','🟠','⚫','🟤'],
+      square:['🟥','🟦','🟩','🟨','🟪','🟧','⬛','🟫'],
+      heart :['❤️','💙','💚','💛','💜','🧡','🖤','🤎']
+    };
+    const uniqueEmojis = {
+      'happy face':'😀','sad face':'😩','laughing face':'😂','angry face':'😠',
+      'celebrating face':'🥳','shocked face':'🤯','winking face':'😉','sleeping face':'😴',
+      'cold face':'🥶','light bulb':'💡','bell':'🔔'
+    };
 
-const jargonList=["Cogito, ergo sum.","Semper ad astra.","Scientia potentia est.","Carpe diem.","Veritas vos liberabit."];
+    /* === Elements === */
+    const questionEl = document.getElementById('question');
+    const patternEl  = document.getElementById('pattern-display');
+    const gridEl     = document.getElementById('answer-grid');
+    const dragDropEl = document.getElementById('drag-drop');
+    const msgEl      = document.getElementById('message');
+    const scoreEl    = document.getElementById('score');
+    const successSfx = document.getElementById('success-sound');
+    const errorSfx   = document.getElementById('buzz-sound');
+    const restartBtn = document.getElementById('restart-button');
+    const exitBtn    = document.getElementById('exit-button');
 
-let currentLevel=1, score=0, correctAnswer='';
+    /* === State === */
+    let round = 1;           // internal only, not shown
+    let score = 0;
+    let correctAnswer = '';
 
-const clueDisplay=document.getElementById('clue-display');
-const patternDisplay=document.getElementById('pattern-display');
-const answerGrid=document.getElementById('answer-grid');
-const dragDropContainer=document.getElementById('drag-drop-container');
-const messageDisplay=document.getElementById('message');
-const scoreDisplay=document.getElementById('score');
-const restartButton=document.getElementById('restart-button');
-const exitButton=document.getElementById('exit-button');
-const successSound=document.getElementById('success-sound');
-const buzzSound=document.getElementById('buzz-sound');
-const instructionsDisplay=document.getElementById('instructions');
-const jargonDisplay=document.getElementById('jargon');
+    /* === Helpers === */
+    const allColored = () => Object.values(coloredEmojis).flat();
+    const allUnique  = () => Object.values(uniqueEmojis);
+    const entirePool = () => [...allColored(), ...allUnique()];
 
-function newRound(){
-    messageDisplay.textContent='';
-    patternDisplay.innerHTML='';
-    answerGrid.innerHTML='';
-    dragDropContainer.style.display='none';
-    if(currentLevel>30){ messageDisplay.textContent="🎉 Completed all levels!"; return;}
-    const types=['find-different','find-matching','pattern','drag-drop'];
-    const type=types[(currentLevel-1)%types.length];
-    if(type==='find-different') setupFindDifferent();
-    if(type==='find-matching') setupFindMatching();
-    if(type==='pattern') setupPattern();
-    if(type==='drag-drop') setupDragDrop();
-    instructionsDisplay.textContent=`Level ${currentLevel}`;
-    jargonDisplay.textContent=jargonList[Math.floor(Math.random()*jargonList.length)];
-}
-function setupFindDifferent(){
-    const pool=[...Object.values(coloredEmojis).flat(),...Object.values(uniqueEmojis)];
-    const common=pool[Math.floor(Math.random()*pool.length)];
-    let diff; do{diff=pool[Math.floor(Math.random()*pool.length)];}while(diff===common);
-    const options=Array(8).fill(common); options.splice(Math.floor(Math.random()*9),0,diff);
-    correctAnswer=diff;
-    renderGrid(options);
-    clueDisplay.textContent="Find the one that is different.";
-}
-function setupFindMatching(){
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+    function sample(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function describeEmoji(e){
+      // unique?
+      for(const [name,emoji] of Object.entries(uniqueEmojis)) if(emoji===e) return name;
+      // colored shape?
+      for(const s in coloredEmojis){
+        const idx = coloredEmojis[s].indexOf(e);
+        if(idx>-1) return `${colors[idx]} ${s}`;
+      }
+      return 'item';
+    }
+
+    function setQuestion(text){ questionEl.textContent = text; }
+
+    function renderGrid(options){
+      gridEl.innerHTML = '';
+      options.forEach(emoji=>{
+        const box = document.createElement('div');
+        box.className='answer-box';
+        box.textContent=emoji;
+        box.addEventListener('click',()=>checkAnswer(emoji));
+        gridEl.appendChild(box);
+      });
+    }
+
+    function uniqueOptionsWithCorrect(correct, total, pool){
+      const set = new Set([correct]);
+      while(set.size < total){
+        set.add(pool[Math.floor(Math.random()*pool.length)]);
+      }
+      return shuffle([...set]);
+    }
+
+    /* === Game Types (no “matching item” text anywhere) === */
+
+    // 1) Find the one that is different (8 same + 1 odd)
+    function roundFindDifferent(){
+      patternEl.innerHTML=''; gridEl.innerHTML=''; dragDropEl.style.display='none';
+      const pool = entirePool();
+      const common = sample(pool);
+      let odd;
+      do{ odd = sample(pool);} while(odd===common);
+      const items = Array(8).fill(common);
+      const idx = Math.floor(Math.random()*9);
+      items.splice(idx,0,odd);
+      correctAnswer = odd;
+      setQuestion('Find the one that is different.');
+      renderGrid(items);
+    }
+
+    // 2) Find the [thing] (explicitly named)
+    function roundFindObject(){
+      patternEl.innerHTML=''; gridEl.innerHTML=''; dragDropEl.style.display='none';
+      const pool = entirePool();
+      const target = sample(pool);
+      correctAnswer = target;
+      const name = describeEmoji(target);
+      setQuestion(`Find the ${name}.`);
+      const options = uniqueOptionsWithCorrect(target, 9, pool);
+      renderGrid(options);
+    }
+
+    // 3) Pattern: show A, B, ?  (same shape, increasing color index)
+    function roundPattern(){
+      gridEl.innerHTML=''; dragDropEl.style.display='none';
+      const shape = sample(shapes);
+      const start = Math.floor(Math.random()*(colors.length-2)); // guarantees +1 and +2 exist
+      const a = coloredEmojis[shape][start];
+      const b = coloredEmojis[shape][start+1];
+      const c = coloredEmojis[shape][start+2];
+      patternEl.innerHTML = `
+        <div class="item">${a}</div>
+        <div class="item">${b}</div>
+        <div id="question-mark">?</div>`;
+      correctAnswer = c;
+      setQuestion('Pick the missing item.');
+      // make plausible distractors: same shape, different colors
+      const sameShape = coloredEmojis[shape].filter(e=>e!==c);
+      const options = uniqueOptionsWithCorrect(c, 6, sameShape); // 6 options, 2 rows
+      renderGrid(options);
+    }
+
+    // 4) Drag the [thing] into the box (multiple draggables)
+    function roundDragDrop(){
+      patternEl.innerHTML=''; gridEl.innerHTML=''; dragDropEl.innerHTML=''; dragDropEl.style.display='flex';
+      const shape = sample(shapes);
+      const color = sample(colors);
+      const target = coloredEmojis[shape][colors.indexOf(color)];
+      correctAnswer = target;
+      setQuestion(`Drag the ${color} ${shape} into the box.`);
+      // Build some choices (correct + 3 distractors)
+      const pool = allColored();
+      const options = uniqueOptionsWithCorrect(target, 4, pool);
+      // Draggables
+      options.forEach(e=>{
+        const d = document.createElement('div');
+        d.className='drag-item'; d.textContent=e; d.draggable=true;
+        d.addEventListener('dragstart',ev=>ev.dataTransfer.setData('text/plain',e));
+        dragDropEl.appendChild(d);
+      });
+      // Drop zone
+      const drop = document.createElement('div'); drop.className='drop-zone';
+      drop.addEventListener('dragover',e=>e.preventDefault());
+      drop.addEventListener('drop',e=>{
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text/plain');
+        checkAnswer(data);
+      });
+      dragDropEl.appendChild(drop);
+    }
+
+    /* === Round Router === */
+    function newRound(){
+      msgEl.textContent='';
+      const types = [roundFindDifferent, roundFindObject, roundPattern, roundDragDrop];
+      const next = types[(round-1) % types.length];
+      next();
+    }
+
+    /* === Answer checking === */
+    function checkAnswer(choice){
+      if(choice === correctAnswer){
+        successSfx.play();
+        score++; scoreEl.textContent = `Score: ${score}`;
+        msgEl.style.color = 'var(--success)'; msgEl.textContent = 'Correct!';
+        round++; setTimeout(newRound, 900);
+      }else{
+        errorSfx.play();
+        msgEl.style.color = 'var(--error)'; msgEl.textContent = 'Try again.';
+      }
+    }
+
+    /* === Controls === */
+    restartBtn.addEventListener('click', ()=>{
+      score = 0; round = 1; scoreEl.textContent = 'Score: 0'; newRound();
+    });
+    exitBtn.addEventListener('click', ()=>{ window.location.href='index.html'; });
+
+    /* === Start === */
+    window.addEventListener('load', newRound);
+  </script>
+</body>
+</html>
