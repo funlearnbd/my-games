@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find the Letter!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #game-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #target-letter-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #letter-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .letter-box {
+            width: 50px;
+            height: 50px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .letter-box:hover {
+            background-color: #ddd;
+        }
+
+        #message {
+            min-height: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        #start-button, #exit-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            margin: 5px;
+        }
+
+        #start-button {
+            background-color: #4CAF50; /* Green */
+        }
+
+        #exit-button {
+            background-color: #f44336; /* Red */
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Find the Letter!</h1>
+        <div id="target-letter-display"></div>
+        <div id="letter-grid"></div>
+        <div id="message"></div>
+        <button id="start-button">Start Game</button>
+        <button id="exit-button">Exit Game</button>
+    </div>
+
+    <script>
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        let targetLetter = '';
+
+        const startButton = document.getElementById('start-button');
+        const exitButton = document.getElementById('exit-button');
+        const targetLetterDisplay = document.getElementById('target-letter-display');
+        const letterGrid = document.getElementById('letter-grid');
+        const messageDisplay = document.getElementById('message');
+
+        // Event listeners for buttons
+        startButton.addEventListener('click', startGame);
+        exitButton.addEventListener('click', exitGame);
+
+        // Function to start the game
+        function startGame() {
+            messageDisplay.textContent = '';
+            newRound();
+        }
+
+        // Function to end the game
+        function exitGame() {
+            targetLetterDisplay.textContent = '';
+            letterGrid.innerHTML = '';
+            messageDisplay.textContent = 'Game Over! Thanks for playing!';
+        }
+
+        // Function to start a new round
+        function newRound() {
+            // Pick a random target letter
+            targetLetter = letters[Math.floor(Math.random() * letters.length)];
+            targetLetterDisplay.textContent = `Find the letter: ${targetLetter}`;
+
+            // Shuffle the letters
+            const shuffledLetters = shuffleArray([...letters]);
+
+            // Create the letter grid
+            letterGrid.innerHTML = '';
+            shuffledLetters.forEach(letter => {
+                const letterBox = document.createElement('div');
+                letterBox.classList.add('letter-box');
+                letterBox.textContent = letter;
+                letterBox.addEventListener('click', () => checkLetter(letter));
+                letterGrid.appendChild(letterBox);
+            });
+        }
+
+        // Function to check the clicked letter
+        function checkLetter(clickedLetter) {
+            if (clickedLetter === targetLetter) {
+                messageDisplay.textContent = 'Correct! Great job!';
+                // Wait a bit before starting the next round
+                setTimeout(newRound, 1000);
+            } else {
+                messageDisplay.textContent = 'Try again!';
+            }
+        }
+
+        // Helper function to shuffle an array (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>

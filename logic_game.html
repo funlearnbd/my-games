@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Quest</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #game-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+        }
+        
+        #instructions {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        #clue-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #pattern-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        #pattern-display .item {
+            font-size: 3em;
+        }
+        
+        #question-mark {
+            font-size: 3em;
+            color: #888;
+        }
+
+        #answer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .answer-box {
+            width: 80px;
+            height: 80px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+            font-size: 3em;
+        }
+
+        .answer-box:hover {
+            transform: scale(1.05);
+        }
+
+        #message {
+            min-height: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        #start-button, #exit-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            margin: 5px;
+        }
+
+        #start-button {
+            background-color: #4CAF50;
+        }
+
+        #exit-button {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Logic Quest</h1>
+        <div id="instructions"></div>
+        <div id="clue-display"></div>
+        <div id="pattern-display"></div>
+        <div id="answer-grid"></div>
+        <div id="message"></div>
+        <button id="start-button">Start Game</button>
+        <button id="exit-button">Exit Game</button>
+    </div>
+
+    <script>
+        const colors = ['red', 'blue', 'green', 'yellow'];
+        const shapes = ['circle', 'square', 'heart'];
+        const allEmojis = [
+            '🔴', '🔵', '🟢', '🟡',
+            '🟥', '🟦', '🟩', '🟨',
+            '❤️', '💙', '💚', '💛'
+        ];
+
+        let currentLevel = 1;
+        let correctAnswers = 0;
+        let correctAnswerEmoji = '';
+
+        const instructionsDisplay = document.getElementById('instructions');
+        const clueDisplay = document.getElementById('clue-display');
+        const patternDisplay = document.getElementById('pattern-display');
+        const answerGrid = document.getElementById('answer-grid');
+        const messageDisplay = document.getElementById('message');
+        const startButton = document.getElementById('start-button');
+        const exitButton = document.getElementById('exit-button');
+
+        startButton.addEventListener('click', startGame);
+        exitButton.addEventListener('click', exitGame);
+
+        function startGame() {
+            currentLevel = 1;
+            correctAnswers = 0;
+            messageDisplay.textContent = '';
+            newRound();
+        }
+
+        function exitGame() {
+            instructionsDisplay.textContent = '';
+            clueDisplay.textContent = '';
+            patternDisplay.innerHTML = '';
+            answerGrid.innerHTML = '';
+            messageDisplay.textContent = 'Game Over! Thanks for playing!';
+            speak('Game Over! Thanks for playing!');
+        }
+
+        function newRound() {
+            if (correctAnswers >= 5) {
+                correctAnswers = 0;
+                currentLevel++;
+                speak(`You're ready for level ${currentLevel}!`);
+            }
+
+            if (currentLevel > 3) {
+                messageDisplay.textContent = 'Congratulations! You have completed all levels!';
+                speak('Congratulations! You have completed all levels!');
+                exitGame();
+                return;
+            }
+
+            messageDisplay.textContent = '';
+            patternDisplay.innerHTML = '';
+            answerGrid.innerHTML = '';
+
+            if (currentLevel === 1) {
+                setupLevel1();
+            } else if (currentLevel === 2) {
+                setupLevel2();
+            } else if (currentLevel === 3) {
+                setupLevel3();
+            }
+        }
+
+        function setupLevel1() {
+            instructionsDisplay.textContent = 'Level 1: Find the matching item.';
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            correctAnswerEmoji = getEmoji(randomColor, randomShape);
+            
+            clueDisplay.textContent = `Find the ${randomColor} ${randomShape}.`;
+            speak(`Find the ${randomColor} ${randomShape}.`);
+
+            const options = generateOptions(correctAnswerEmoji, 9);
+            renderGrid(options);
+        }
+
+        function setupLevel2() {
+            instructionsDisplay.textContent = 'Level 2: Find the one that is different.';
+            clueDisplay.textContent = '';
+            speak('Find the one that is different.');
+
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            const commonEmoji = getEmoji(randomColor, randomShape);
+
+            let differentEmoji = commonEmoji;
+            while (differentEmoji === commonEmoji) {
+                const randColor = colors[Math.floor(Math.random() * colors.length)];
+                const randShape = shapes[Math.floor(Math.random() * shapes.length)];
+                differentEmoji = getEmoji(randColor, randShape);
+            }
+
+            correctAnswerEmoji = differentEmoji;
+
+            const options = [differentEmoji];
+            for (let i = 0; i < 8; i++) {
+                options.push(commonEmoji);
+            }
+            
+            renderGrid(options);
+        }
+
+        function setupLevel3() {
+            instructionsDisplay.textContent = 'Level 3: Find the missing item in the pattern.';
+            clueDisplay.textContent = '';
+            speak('Find the missing item in the pattern.');
+            
+            // Generate a simple, clear pattern rule
+            const ruleType = Math.random() < 0.5 ? 'color' : 'shape';
+            let emoji1, emoji2, emoji3;
+
+            if (ruleType === 'color') {
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                const color1 = colors[Math.floor(Math.random() * colors.length)];
+                let color2 = color1;
+                while (color2 === color1) {
+                    color2 = colors[Math.floor(Math.random() * colors.length)];
+                }
+                let color3 = color2;
+                while (color3 === color1 || color3 === color2) {
+                    color3 = colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                emoji1 = getEmoji(color1, shape);
+                emoji2 = getEmoji(color2, shape);
+                correctAnswerEmoji = getEmoji(color3, shape);
+            } else { // ruleType === 'shape'
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const shape1 = shapes[Math.floor(Math.random() * shapes.length)];
+                let shape2 = shape1;
+                while (shape2 === shape1) {
+                    shape2 = shapes[Math.floor(Math.random() * shapes.length)];
+                }
+                let shape3 = shape2;
+                while (shape3 === shape1 || shape3 === shape2) {
+                    shape3 = shapes[Math.floor(Math.random() * shapes.length)];
+                }
+                
+                emoji1 = getEmoji(color, shape1);
+                emoji2 = getEmoji(color, shape2);
+                correctAnswerEmoji = getEmoji(color, shape3);
+            }
+
+            patternDisplay.innerHTML = '';
+            const item1 = document.createElement('div');
+            item1.className = 'item';
+            item1.textContent = emoji1;
+            patternDisplay.appendChild(item1);
+
+            const item2 = document.createElement('div');
+            item2.className = 'item';
+            item2.textContent = emoji2;
+            patternDisplay.appendChild(item2);
+            
+            const questionMark = document.createElement('div');
+            questionMark.id = 'question-mark';
+            questionMark.textContent = '?';
+            patternDisplay.appendChild(questionMark);
+            
+            const options = generateOptions(correctAnswerEmoji, 3);
+            renderGrid(Array.from(options));
+        }
+
+        function checkAnswer(clickedEmoji) {
+            let isCorrect = false;
+
+            if (currentLevel === 1 || currentLevel === 3) {
+                isCorrect = (clickedEmoji === correctAnswerEmoji);
+            } else if (currentLevel === 2) {
+                const gridEmojis = Array.from(answerGrid.children).map(box => box.textContent);
+                const counts = {};
+                gridEmojis.forEach(emoji => {
+                    counts[emoji] = (counts[emoji] || 0) + 1;
+                });
+                
+                let commonEmoji = '';
+                for (const emoji in counts) {
+                    if (counts[emoji] > 1) {
+                        commonEmoji = emoji;
+                        break;
+                    }
+                }
+                isCorrect = (clickedEmoji !== commonEmoji);
+            }
+
+            if (isCorrect) {
+                messageDisplay.textContent = 'Correct! Great job!';
+                speak('Correct!');
+                correctAnswers++;
+                setTimeout(newRound, 1500);
+            } else {
+                messageDisplay.textContent = 'Try again!';
+                speak('Try again!');
+            }
+        }
+
+        function renderGrid(options) {
+            answerGrid.innerHTML = '';
+            shuffleArray(options);
+            options.forEach(emoji => {
+                const answerBox = document.createElement('div');
+                answerBox.className = 'answer-box';
+                answerBox.textContent = emoji;
+                answerBox.addEventListener('click', () => checkAnswer(emoji));
+                answerGrid.appendChild(answerBox);
+            });
+        }
+        
+        function getEmoji(color, shape) {
+            if (color === 'red' && shape === 'circle') return '🔴';
+            if (color === 'blue' && shape === 'circle') return '🔵';
+            if (color === 'green' && shape === 'circle') return '🟢';
+            if (color === 'yellow' && shape === 'circle') return '🟡';
+            if (color === 'red' && shape === 'square') return '🟥';
+            if (color === 'blue' && shape === 'square') return '🟦';
+            if (color === 'green' && shape === 'square') return '🟩';
+            if (color === 'yellow' && shape === 'square') return '🟨';
+            if (color === 'red' && shape === 'heart') return '❤️';
+            if (color === 'blue' && shape === 'heart') return '💙';
+            if (color === 'green' && shape === 'heart') return '💚';
+            if (color === 'yellow' && shape === 'heart') return '💛';
+            return '❓';
+        }
+
+        function generateOptions(correctEmoji, count) {
+            const options = new Set();
+            options.add(correctEmoji);
+            
+            const wrongEmojis = allEmojis.filter(e => e !== correctEmoji);
+            shuffleArray(wrongEmojis);
+
+            while (options.size < count) {
+                const randomEmoji = wrongEmojis.pop();
+                if (randomEmoji) {
+                    options.add(randomEmoji);
+                }
+            }
+            return Array.from(options);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>

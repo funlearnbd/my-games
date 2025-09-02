@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Matching Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2em;
+            color: #333;
+        }
+        #word-display {
+            font-size: 3em;
+            margin: 20px;
+            color: #333;
+        }
+        #color-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .color-box {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        #message {
+            font-size: 1.5em;
+            margin: 20px;
+            color: #333;
+        }
+        #score {
+            font-size: 1.2em;
+            margin: 10px;
+        }
+        #start, #restart, #exit {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #start, #restart {
+            background-color: #4CAF50;
+        }
+        #start:hover, #restart:hover {
+            background-color: #45a049;
+        }
+        #exit {
+            background-color: #ff4444;
+        }
+        #exit:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Color Matching Game</h1>
+    <div id="word-display" style="display: none;"></div>
+    <div id="color-boxes" style="display: none;"></div>
+    <div id="message">Click Start to play!</div>
+    <div id="score" style="display: none;">Score: 0</div>
+    <button id="start">Start Game</button>
+    <button id="restart" style="display: none;">New Game</button>
+    <button id="exit" style="display: none;">Exit Game</button>
+
+    <script>
+        const colors = [
+            { name: 'Red', value: '#ff0000' },
+            { name: 'Blue', value: '#0000ff' },
+            { name: 'Green', value: '#00ff00' },
+            { name: 'Yellow', value: '#ffff00' },
+            { name: 'Purple', value: '#800080' }
+        ];
+        let score = 0;
+        let currentColor;
+        const synth = window.speechSynthesis;
+        let voiceSupported = true;
+
+        const wordDisplay = document.getElementById('word-display');
+        const colorBoxes = document.getElementById('color-boxes');
+        const message = document.getElementById('message');
+        const scoreDisplay = document.getElementById('score');
+        const startButton = document.getElementById('start');
+        const restartButton = document.getElementById('restart');
+        const exitButton = document.getElementById('exit');
+
+        // Check if speech synthesis is supported
+        if (!synth) {
+            voiceSupported = false;
+            message.textContent = 'Voice not supported in this browser. Click Start to play with text!';
+            message.style.color = '#ff0000';
+        }
+
+        function speak(text) {
+            if (voiceSupported) {
+                synth.cancel(); // Clear any pending speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.volume = 1;
+                utterance.rate = 0.9; // Slightly slower for clarity
+                utterance.pitch = 1;
+                synth.speak(utterance);
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            message.textContent = '';
+            wordDisplay.style.display = 'block';
+            colorBoxes.style.display = 'flex';
+            scoreDisplay.style.display = 'block';
+            startButton.style.display = 'none';
+            restartButton.style.display = 'inline-block';
+            exitButton.style.display = 'inline-block';
+            setupRound();
+        }
+
+        function setupRound() {
+            colorBoxes.innerHTML = '';
+            currentColor = colors[Math.floor(Math.random() * colors.length)];
+            wordDisplay.textContent = currentColor.name;
+            speak(`Find the color ${currentColor.name}`);
+
+            // Shuffle colors for boxes
+            const shuffledColors = [...colors].sort(() => Math.random() - 0.5);
+            shuffledColors.forEach(color => {
+                const box = document.createElement('div');
+                box.className = 'color-box';
+                box.style.backgroundColor = color.value;
+                box.addEventListener('click', () => checkAnswer(color));
+                colorBoxes.appendChild(box);
+            });
+        }
+
+        function checkAnswer(selectedColor) {
+            if (selectedColor.name === currentColor.name) {
+                score++;
+                message.textContent = 'Yay! Great job!';
+                message.style.color = '#4CAF50';
+                scoreDisplay.textContent = `Score: ${score}`;
+                setTimeout(() => {
+                    message.textContent = '';
+                    setupRound();
+                }, 1500);
+            } else {
+                message.textContent = 'Try again!';
+                message.style.color = '#ff0000';
+            }
+        }
+
+        function exitGame() {
+            synth.cancel(); // Stop any ongoing speech
+            wordDisplay.style.display = 'none';
+            colorBoxes.style.display = 'none';
+            scoreDisplay.style.display = 'none';
+            startButton.style.display = 'inline-block';
+            restartButton.style.display = 'none';
+            exitButton.style.display = 'none';
+            message.textContent = 'Thanks for playing! Goodbye!';
+            message.style.color = '#333';
+            if (voiceSupported) {
+                speak('Thanks for playing! Goodbye!');
+            }
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+        exitButton.addEventListener('click', exitGame);
+    </script>
+</body>
+</html>

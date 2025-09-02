@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game for Kids</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #game-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #question-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 250px;
+        }
+
+        #answer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .answer-box {
+            width: 80px;
+            height: 80px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .answer-box:hover {
+            background-color: #ddd;
+        }
+
+        #message {
+            min-height: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        #start-button, #exit-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            margin: 5px;
+        }
+
+        #start-button {
+            background-color: #4CAF50;
+        }
+
+        #exit-button {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Math Game!</h1>
+        <div id="question-display"></div>
+        <div id="answer-grid"></div>
+        <div id="message"></div>
+        <button id="start-button">Start Game</button>
+        <button id="exit-button">Exit Game</button>
+    </div>
+
+    <script>
+        let correctAnswer = 0;
+
+        const startButton = document.getElementById('start-button');
+        const exitButton = document.getElementById('exit-button');
+        const questionDisplay = document.getElementById('question-display');
+        const answerGrid = document.getElementById('answer-grid');
+        const messageDisplay = document.getElementById('message');
+
+        startButton.addEventListener('click', startGame);
+        exitButton.addEventListener('click', exitGame);
+
+        function startGame() {
+            messageDisplay.textContent = '';
+            newRound();
+        }
+
+        function exitGame() {
+            questionDisplay.textContent = '';
+            answerGrid.innerHTML = '';
+            messageDisplay.textContent = 'Game Over! Thanks for playing!';
+            speak('Game Over! Thanks for playing!');
+        }
+
+        function newRound() {
+            messageDisplay.textContent = '';
+            
+            const num1 = Math.floor(Math.random() * 9) + 1; // Numbers from 1 to 9
+            const num2 = Math.floor(Math.random() * 9) + 1;
+            
+            const operators = ['+', '-', '*'];
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+
+            if (operator === '-' && num1 < num2) {
+                [num1, num2] = [num2, num1];
+            }
+            
+            let questionText = `${num1} ${operator} ${num2}`;
+            correctAnswer = eval(questionText);
+
+            questionDisplay.textContent = `${questionText} = ?`;
+
+            let spokenOperator = '';
+            if (operator === '+') spokenOperator = 'plus';
+            else if (operator === '-') spokenOperator = 'minus';
+            else if (operator === '*') spokenOperator = 'times';
+
+            speak(`What is ${num1} ${spokenOperator} ${num2}?`);
+
+            const answersForGrid = generateAnswerOptions(correctAnswer, 9);
+            
+            answerGrid.innerHTML = '';
+            answersForGrid.forEach(answer => {
+                const answerBox = document.createElement('div');
+                answerBox.classList.add('answer-box');
+                answerBox.textContent = answer;
+                answerBox.addEventListener('click', () => checkAnswer(answer));
+                answerGrid.appendChild(answerBox);
+            });
+        }
+
+        function checkAnswer(clickedAnswer) {
+            if (parseInt(clickedAnswer) === correctAnswer) {
+                messageDisplay.textContent = 'Correct! Great job!';
+                speak('Correct! Great job!');
+                setTimeout(newRound, 1500);
+            } else {
+                messageDisplay.textContent = 'Try again!';
+                speak('Try again!');
+            }
+        }
+
+        function generateAnswerOptions(correctAnswer, count) {
+            const options = new Set();
+            options.add(correctAnswer);
+            
+            while (options.size < count) {
+                let randomAnswer = Math.floor(Math.random() * 20);
+                if (correctAnswer < 10 && Math.random() < 0.5) {
+                    randomAnswer = Math.floor(Math.random() * 10);
+                }
+                if (!options.has(randomAnswer) && randomAnswer >= 0) {
+                    options.add(randomAnswer);
+                }
+            }
+            return shuffleArray(Array.from(options));
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Addition Adventure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            margin: 0;
+            color: #334e68;
+        }
+
+        #game-container {
+            text-align: center;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #0d47a1;
+            margin-top: 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        #game-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #instructions {
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        #status {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #424242;
+        }
+
+        #problem-display {
+            font-size: 3em;
+            font-weight: bold;
+            line-height: 1.2;
+            text-align: right;
+            margin-bottom: 20px;
+            min-width: 200px;
+            transition: transform 0.3s ease;
+        }
+
+        #problem-display.correct {
+            transform: scale(1.1);
+            color: #4CAF50;
+        }
+
+        #problem-display.wrong {
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .problem-line {
+            display: block;
+        }
+
+        .plus-sign {
+            float: left;
+            margin-right: 15px;
+        }
+
+        .line {
+            border-bottom: 4px solid #334e68;
+            height: 5px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        #answer-input {
+            width: 180px;
+            font-size: 1.8em;
+            padding: 12px;
+            text-align: right;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s;
+        }
+
+        #answer-input:focus {
+            border-color: #4CAF50;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.4em;
+            font-weight: bold;
+            min-height: 40px;
+        }
+
+        #timer {
+            font-size: 1.2em;
+            color: #ff5722;
+            margin-bottom: 10px;
+        }
+
+        #progress-bar-container {
+            width: 80%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        #start-btn, #submit-btn, #voice-btn {
+            padding: 12px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        #start-btn {
+            background-color: #ffb300;
+        }
+
+        #voice-btn.listening {
+            background-color: #ff5722;
+        }
+
+        #start-btn:hover, #submit-btn:hover, #voice-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        #reset-btn { background-color: #1a73e8; }
+        #exit-btn { background-color: #f44336; }
+        .btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Vertical Addition Adventure</h1>
+        <div id="game-content">
+            <div id="status"></div>
+            <div id="instructions">
+                <p>Welcome to the Vertical Addition Adventure!</p>
+                <p>How to play:</p>
+                <ul>
+                    <li>Add three numbers shown vertically.</li>
+                    <li>Type your answer and press <strong>Enter</strong> or <strong>Submit</strong>.</li>
+                    <li>Or use voice: say "What's the addition of [number] [number] [number]".</li>
+                    <li>Answer within the time limit to earn points!</li>
+                    <li>Complete 10 questions to level up. Higher levels, bigger numbers!</li>
+                    <li>Earn bonus points for speed and accuracy.</li>
+                </ul>
+            </div>
+            <div id="timer"></div>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="problem-display"></div>
+            <input type="number" id="answer-input" placeholder="Answer">
+            <div id="message"></div>
+        </div>
+        <button id="start-btn">Start Game</button>
+        <div id="controls" style="display: none;">
+            <button id="voice-btn">Voice Input</button>
+            <button id="reset-btn" class="btn">Reset</button>
+            <button id="exit-btn" class="btn">Exit</button>
+        </div>
+    </div>
+
+    <audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+    <audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-4.mp3"></audio>
+    <audio id="level-up-sound" src="https://www.soundjay.com/misc/sounds/magic-chime-01.mp3"></audio>
+
+    <script>
+        let currentLevel = 1;
+        let currentQuestion = 1;
+        let score = 0;
+        let correctAnswer;
+        let timerInterval;
+        let timeLeft;
+        let recognition;
+        const questionsPerLevel = 10;
+        const totalLevels = 300;
+        const baseTimeLimit = 15; // seconds per question
+
+        // DOM elements
+        let gameContent = document.getElementById('game-content');
+        const startBtn = document.getElementById('start-btn');
+        const controls = document.getElementById('controls');
+        let timerDisplay = document.getElementById('timer');
+        let progressBarContainer = document.getElementById('progress-bar-container');
+        let progressBar = document.getElementById('progress-bar');
+        let problemDisplay = document.getElementById('problem-display');
+        let messageDisplay = document.getElementById('message');
+        let answerInput = document.getElementById('answer-input');
+        const correctSound = document.getElementById('correct-sound');
+        const wrongSound = document.getElementById('wrong-sound');
+        const levelUpSound = document.getElementById('level-up-sound');
+
+        startBtn.addEventListener('click', startGame);
+        document.getElementById('reset-btn').addEventListener('click', resetGame);
+        document.getElementById('exit-btn').addEventListener('click', exitGame);
+
+        // Initialize Speech Recognition
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (window.SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            const voiceBtn = document.getElementById('voice-btn');
+            voiceBtn.addEventListener('click', toggleVoiceInput);
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                voiceBtn.classList.remove('listening');
+                voiceBtn.textContent = 'Voice Input';
+                processVoiceInput(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                voiceBtn.classList.remove('listening');
+                voiceBtn.textContent = 'Voice Input';
+                messageDisplay.textContent = 'Voice recognition error. Try again.';
+                messageDisplay.style.color = 'red';
+                speak('Voice recognition error. Please try again.');
+            };
+
+            recognition.onend = () => {
+                voiceBtn.classList.remove('listening');
+                voiceBtn.textContent = 'Voice Input';
+            };
+        } else {
+            document.getElementById('voice-btn').style.display = 'none';
+            console.log('Speech Recognition not supported in this browser.');
+        }
+
+        function toggleVoiceInput() {
+            const voiceBtn = document.getElementById('voice-btn');
+            if (!voiceBtn.classList.contains('listening')) {
+                voiceBtn.classList.add('listening');
+                voiceBtn.textContent = 'Listening...';
+                recognition.start();
+            } else {
+                voiceBtn.classList.remove('listening');
+                voiceBtn.textContent = 'Voice Input';
+                recognition.stop();
+            }
+        }
+
+        function processVoiceInput(transcript) {
+            const pattern = /what's the addition of (\d+)\s+(\d+)\s+(\d+)/i;
+            const match = transcript.match(pattern);
+            if (match) {
+                const num1 = parseInt(match[1], 10);
+                const num2 = parseInt(match[2], 10);
+                const num3 = parseInt(match[3], 10);
+                const playerAnswer = num1 + num2 + num3;
+                checkAnswer(playerAnswer);
+            } else {
+                messageDisplay.textContent = 'Please say "What\'s the addition of" followed by three numbers.';
+                messageDisplay.style.color = 'red';
+                speak('Please say "What\'s the addition of" followed by three numbers.');
+            }
+        }
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function startGame() {
+            currentLevel = 1;
+            currentQuestion = 1;
+            score = 0;
+            startBtn.style.display = 'none';
+            controls.style.display = 'flex';
+
+            // Update DOM references after modifying gameContent
+            gameContent = document.getElementById('game-content');
+            timerDisplay = document.getElementById('timer');
+            progressBarContainer = document.getElementById('progress-bar-container');
+            progressBar = document.getElementById('progress-bar');
+            problemDisplay = document.getElementById('problem-display');
+            messageDisplay = document.getElementById('message');
+            answerInput = document.getElementById('answer-input');
+
+            // Ensure all elements are visible
+            document.getElementById('status').style.display = 'block';
+            timerDisplay.style.display = 'block';
+            progressBarContainer.style.display = 'block';
+            problemDisplay.style.display = 'block';
+            answerInput.style.display = 'block';
+
+            // Add submit button and event listeners
+            const submitBtn = document.createElement('button');
+            submitBtn.id = 'submit-btn';
+            submitBtn.textContent = 'Submit';
+            gameContent.appendChild(submitBtn);
+            submitBtn.addEventListener('click', () => checkAnswer(parseInt(answerInput.value, 10)));
+            answerInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') checkAnswer(parseInt(answerInput.value, 10));
+            });
+
+            generateProblem();
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval);
+            if (recognition) recognition.stop();
+            gameContent.innerHTML = `
+                <div id="status"></div>
+                <div id="instructions">
+                    <p>Welcome to the Vertical Addition Adventure!</p>
+                    <p>How to play:</p>
+                    <ul>
+                        <li>Add three numbers shown vertically.</li>
+                        <li>Type your answer and press <strong>Enter</strong> or <strong>Submit</strong>.</li>
+                        <li>Or use voice: say "What's the addition of [number] [number] [number]".</li>
+                        <li>Answer within the time limit to earn points!</li>
+                        <li>Complete 10 questions to level up. Higher levels, bigger numbers!</li>
+                        <li>Earn bonus points for speed and accuracy.</li>
+                    </ul>
+                </div>
+                <div id="timer"></div>
+                <div id="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <div id="problem-display"></div>
+                <input type="number" id="answer-input" placeholder="Answer">
+                <div id="message"></div>
+            `;
+            startGame();
+        }
+
+        function exitGame() {
+            clearInterval(timerInterval);
+            if (recognition) recognition.stop();
+            gameContent.innerHTML = `<p>Game Over! Final Score: ${score}. Thanks for playing!</p>`;
+            startBtn.style.display = 'block';
+            startBtn.textContent = 'Play Again';
+            controls.style.display = 'none';
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = Math.max(5, baseTimeLimit - Math.floor(currentLevel / 50));
+            timerDisplay.textContent = `Time: ${timeLeft}s`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Time: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    messageDisplay.textContent = "Time's up! Try again.";
+                    messageDisplay.style.color = "red";
+                    wrongSound.play();
+                    speak("Time's up! Try again.");
+                    setTimeout(generateProblem, 1000);
+                }
+            }, 1000);
+        }
+
+        function generateProblem() {
+            let num1, num2, num3;
+            if (currentLevel <= 50) {
+                num1 = Math.floor(Math.random() * 10);
+                num2 = Math.floor(Math.random() * 10);
+                num3 = Math.floor(Math.random() * 10);
+            } else if (currentLevel <= 100) {
+                num1 = Math.floor(Math.random() * 50) + 10;
+                num2 = Math.floor(Math.random() * 20);
+                num3 = Math.floor(Math.random() * 20);
+            } else if (currentLevel <= 200) {
+                num1 = Math.floor(Math.random() * 90) + 10;
+                num2 = Math.floor(Math.random() * 50) + 10;
+                num3 = Math.floor(Math.random() * 50);
+            } else {
+                num1 = Math.floor(Math.random() * 900) + 100;
+                num2 = Math.floor(Math.random() * 900) + 100;
+                num3 = Math.floor(Math.random() * 900) + 100;
+            }
+
+            correctAnswer = num1 + num2 + num3;
+            problemDisplay.innerHTML = `
+                <span class="problem-line">${num1}</span>
+                <span class="problem-line">${num2}</span>
+                <span class="problem-line"><span class="plus-sign">+</span>${num3}</span>
+                <div class="line"></div>
+            `;
+            document.getElementById('status').textContent = `Level ${currentLevel} | Question ${currentQuestion}/${questionsPerLevel} | Score: ${score}`;
+            progressBar.style.width = `${(currentQuestion - 1) / questionsPerLevel * 100}%`;
+            messageDisplay.textContent = "";
+            problemDisplay.className = "";
+            answerInput.value = "";
+            answerInput.focus();
+            startTimer();
+        }
+
+        function checkAnswer(playerAnswer) {
+            if (playerAnswer === correctAnswer) {
+                clearInterval(timerInterval);
+                const timeBonus = Math.max(0, timeLeft * 10);
+                score += 100 + timeBonus;
+                messageDisplay.textContent = `Correct! +${100 + timeBonus} points`;
+                messageDisplay.style.color = "green";
+                problemDisplay.className = "correct";
+                correctSound.play();
+                speak("Good job!");
+                if (currentQuestion < questionsPerLevel) {
+                    currentQuestion++;
+                    setTimeout(generateProblem, 1000);
+                } else if (currentLevel < totalLevels) {
+                    messageDisplay.textContent = `Level ${currentLevel} Complete! Score: ${score}`;
+                    messageDisplay.style.color = "blue";
+                    levelUpSound.play();
+                    speak(`Level ${currentLevel} complete!`);
+                    currentLevel++;
+                    currentQuestion = 1;
+                    setTimeout(generateProblem, 1500);
+                } else {
+                    messageDisplay.textContent = `All Levels Complete! Final Score: ${score}`;
+                    messageDisplay.style.color = "purple";
+                    levelUpSound.play();
+                    speak("All levels complete! Great work!");
+                    clearInterval(timerInterval);
+                    answerInput.style.display = 'none';
+                    document.getElementById('submit-btn').style.display = 'none';
+                    timerDisplay.style.display = 'none';
+                    document.getElementById('voice-btn').style.display = 'none';
+                }
+            } else {
+                messageDisplay.textContent = "Try again!";
+                messageDisplay.style.color = "red";
+                problemDisplay.className = "wrong";
+                wrongSound.play();
+                speak("Try again!");
+            }
+        }
+    </script>
+</body>
+</html>

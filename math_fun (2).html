@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Math Adventure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e3f2fd; /* Light Blue */
+            margin: 0;
+            color: #1a237e; /* Dark Blue */
+        }
+
+        #game-container {
+            text-align: center;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #0d47a1; /* Darker Blue */
+            margin-top: 0;
+        }
+
+        #status {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #424242;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 15px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #progress {
+            height: 100%;
+            background-color: #4CAF50; /* Green */
+            transition: width 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        #question-display {
+            font-size: 2em;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        #question-display .emoji-group {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        #options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .option-btn {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid #1a73e8; /* Blue */
+            border-radius: 10px;
+            background-color: #e8f5e9; /* Light Green */
+            transition: all 0.2s;
+            color: #1a237e;
+        }
+
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        #start-btn {
+            padding: 15px 40px;
+            font-size: 1.8em;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #ffb300; /* Amber */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px #ff8f00;
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        #start-btn:active {
+            background-color: #ff8f00;
+            transform: translateY(2px);
+            box-shadow: 0 3px #ff6f00;
+        }
+
+        #instructions {
+            font-size: 1.1em;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        #instructions li {
+            margin-bottom: 5px;
+        }
+
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        #start-new-btn { background-color: #1a73e8; }
+        #exit-btn { background-color: #f44336; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div>
+            <h1>Math Adventure</h1>
+            <div id="game-content">
+                </div>
+            <div id="controls" style="display: none;">
+                <button id="start-new-btn" class="btn">Start New</button>
+                <button id="exit-btn" class="btn">Exit</button>
+            </div>
+        </div>
+        <button id="start-btn">Start Game</button>
+    </div>
+
+    <script>
+        const symbols = ['🔴', '🥢', '🍃', '🧩', '🎈', '🍎', '🥕', '✏️'];
+
+        let currentLap = 0;
+        let currentLevel = 1;
+        let correctAnswersInLevel = 0;
+        let correctAnswer;
+        const totalLaps = 100;
+        const correctAnswersToLevelUp = 10;
+        let gameActive = false;
+
+        const gameContainer = document.getElementById('game-container');
+        const startBtn = document.getElementById('start-btn');
+        const gameContent = document.getElementById('game-content');
+        const controls = document.getElementById('controls');
+
+        document.addEventListener('DOMContentLoaded', displayStartScreen);
+
+        startBtn.addEventListener('click', startGame);
+        document.getElementById('start-new-btn').addEventListener('click', startGame);
+        document.getElementById('exit-btn').addEventListener('click', exitGame);
+
+        function displayStartScreen() {
+            gameContent.innerHTML = `
+                <div id="instructions">
+                    <p>Welcome, little mathematician!</p>
+                    <p>How to play:</p>
+                    <ul>
+                        <li>The game will show a math problem with colorful symbols.</li>
+                        <li>Choose the correct answer from the buttons below.</li>
+                        <li>Each level gets a little harder.</li>
+                        <li>Can you complete all 100 laps?</li>
+                    </ul>
+                </div>
+            `;
+            startBtn.style.display = 'block';
+            controls.style.display = 'none';
+        }
+
+        function startGame() {
+            gameActive = true;
+            currentLap = 0;
+            currentLevel = 1;
+            correctAnswersInLevel = 0;
+            
+            startBtn.style.display = 'none';
+            controls.style.display = 'flex';
+            
+            gameContent.innerHTML = `
+                <div id="status"></div>
+                <div id="progress-bar"><div id="progress"></div></div>
+                <div id="question-display"></div>
+                <div id="options-grid"></div>
+                <div id="message"></div>
+            `;
+            
+            updateStatus();
+            nextRound();
+        }
+
+        function exitGame() {
+            gameActive = false;
+            gameContent.innerHTML = `<div id="message">Game Over! Thanks for playing!</div>`;
+            startBtn.textContent = 'Play Again';
+            startBtn.style.display = 'block';
+            controls.style.display = 'none';
+        }
+
+        function updateStatus() {
+            const statusDisplay = document.querySelector('#status');
+            const progressBar = document.querySelector('#progress');
+            if (statusDisplay && progressBar) {
+                const levelStatus = `Level ${currentLevel}`;
+                const lapStatus = `Lap ${currentLap}/${totalLaps}`;
+                statusDisplay.textContent = `${levelStatus} | ${lapStatus}`;
+                
+                const progressPercentage = (currentLap / totalLaps) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+            }
+        }
+
+        function nextRound() {
+            if (!gameActive) return;
+
+            if (currentLap >= totalLaps) {
+                endGameWin();
+                return;
+            }
+
+            if (correctAnswersInLevel >= correctAnswersToLevelUp) {
+                currentLevel++;
+                correctAnswersInLevel = 0;
+                document.querySelector('#message').textContent = `You leveled up! Welcome to Level ${currentLevel}!`;
+                setTimeout(() => {
+                    document.querySelector('#message').textContent = '';
+                    generateQuestion();
+                }, 1500);
+            } else {
+                generateQuestion();
+            }
+            updateStatus();
+        }
+
+        function generateQuestion() {
+            let num1, num2, operation, symbol;
+            symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            
+            const questionDisplay = document.querySelector('#question-display');
+
+            if (currentLevel === 1) { // Counting
+                num1 = Math.floor(Math.random() * 8) + 3;
+                questionDisplay.innerHTML = `<div class="emoji-group">${symbol.repeat(num1)}</div> = ?`;
+                correctAnswer = num1;
+            } else if (currentLevel === 2) { // Addition
+                num1 = Math.floor(Math.random() * 5) + 2;
+                num2 = Math.floor(Math.random() * 5) + 2;
+                questionDisplay.innerHTML = `<div class="emoji-group">${symbol.repeat(num1)}</div> + <div class="emoji-group">${symbol.repeat(num2)}</div> = ?`;
+                correctAnswer = num1 + num2;
+            } else if (currentLevel === 3) { // Subtraction
+                num1 = Math.floor(Math.random() * 8) + 5;
+                num2 = Math.floor(Math.random() * (num1 - 2)) + 2;
+                questionDisplay.innerHTML = `<div class="emoji-group">${symbol.repeat(num1)}</div> - <div class="emoji-group">${symbol.repeat(num2)}</div> = ?`;
+                correctAnswer = num1 - num2;
+            } else { // Mixed operations for higher levels
+                const operations = ['+', '-', '×', '÷'];
+                operation = operations[Math.floor(Math.random() * operations.length)];
+                
+                if (operation === '+') {
+                    num1 = Math.floor(Math.random() * 8) + 5;
+                    num2 = Math.floor(Math.random() * 8) + 5;
+                    questionDisplay.innerHTML = `<div class="emoji-group">${symbol.repeat(num1)}</div> + <div class="emoji-group">${symbol.repeat(num2)}</div> = ?`;
+                    correctAnswer = num1 + num2;
+                } else if (operation === '-') {
+                    num1 = Math.floor(Math.random() * 12) + 8;
+                    num2 = Math.floor(Math.random() * (num1 - 5)) + 5;
+                    questionDisplay.innerHTML = `<div class="emoji-group">${symbol.repeat(num1)}</div> - <div class="emoji-group">${symbol.repeat(num2)}</div> = ?`;
+                    correctAnswer = num1 - num2;
+                } else if (operation === '×') { // Simple multiplication
+                    num1 = Math.floor(Math.random() * 3) + 2;
+                    num2 = Math.floor(Math.random() * 4) + 2;
+                    questionDisplay.innerHTML = `${num1} × ${symbol.repeat(num2)} = ?`;
+                    correctAnswer = num1 * num2;
+                } else if (operation === '÷') { // Simple division
+                    num2 = Math.floor(Math.random() * 3) + 2;
+                    num1 = num2 * (Math.floor(Math.random() * 4) + 2);
+                    questionDisplay.innerHTML = `${num1} ${symbol}s ÷ ${num2} = ?`;
+                    correctAnswer = num1 / num2;
+                }
+            }
+            generateOptions();
+        }
+
+        function generateOptions() {
+            const options = new Set();
+            options.add(correctAnswer);
+            while (options.size < 4) {
+                let incorrectOption;
+                const offset = Math.floor(Math.random() * 5) - 2;
+                incorrectOption = correctAnswer + offset;
+                if (incorrectOption >= 0 && !options.has(incorrectOption)) {
+                    options.add(incorrectOption);
+                }
+            }
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+            renderOptions(shuffledOptions);
+        }
+
+        function renderOptions(options) {
+            const optionsGrid = document.querySelector('#options-grid');
+            optionsGrid.innerHTML = '';
+            options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.addEventListener('click', () => checkAnswer(option));
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedOption) {
+            if (!gameActive) return;
+            const messageDisplay = document.querySelector('#message');
+
+            if (selectedOption === correctAnswer) {
+                messageDisplay.textContent = 'Correct! Great job!';
+                correctAnswersInLevel++;
+                currentLap++;
+                setTimeout(nextRound, 1000);
+            } else {
+                messageDisplay.textContent = 'Try again!';
+            }
+        }
+
+        function endGameWin() {
+            gameActive = false;
+            gameContent.innerHTML = `<div id="message">You completed all ${totalLaps} laps! You are a math genius!</div>`;
+            startBtn.textContent = 'Play Again';
+            startBtn.style.display = 'block';
+            controls.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
