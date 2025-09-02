@@ -2,48 +2,121 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My HTML Game Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 My Game Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #6a0572;
+      --secondary-color: #92209d;
+      --background-color: #f0f0f5;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
     body {
-      font-family: sans-serif;
-      padding: 2rem;
-      background-color: #f4f4f4;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 2rem auto;
+      text-align: center;
     }
     h1 {
-      color: #333;
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 1.5rem;
     }
-    ul {
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      padding: 0;
       list-style: none;
-      padding-left: 0;
     }
-    li {
-      background: #fff;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    .game-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1.5rem;
     }
-    a {
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px var(--shadow);
+    }
+    .game-card a {
       text-decoration: none;
-      color: #007BFF;
-      font-size: 1.2rem;
+      color: var(--primary-color);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      display: block;
+      transition: color 0.3s ease;
     }
-    a:hover {
-      text-decoration: underline;
+    .game-card a:hover {
+      color: var(--secondary-color);
+    }
+    .icon {
+      font-size: 3rem;
+      line-height: 1;
+      color: var(--primary-color);
     }
   </style>
 </head>
 <body>
-  <h1>🎮 My Game Collection</h1>
-  <ul>
-    <li><a href="color_game.html">🎨 Color Game</a></li>
-    <li><a href="alphabet_game2.html">🔠 Alphabet Game 2</a></li>
-    <li><a href="logic_game.html">🧠 Logic Game</a></li>
-    <li><a href="math_fun (2).html">➕ Math Fun (2)</a></li>
-    <li><a href="math_game.html">📊 Math Game</a></li>
-    <li><a href="simple_math.html">➖ Simple Math</a></li>
-    <li><a href="vertical_addition (1).html">📈 Vertical Addition (1)</a></li>
-    <li><a href="vertical_addition_bangla.html">📚 Vertical Addition (Bangla)</a></li>
-  </ul>
+  <div class="container">
+    <h1>🎮 My Game Hub</h1>
+    <ul class="game-grid">
+      <li class="game-card">
+        <span class="icon">🎨</span>
+        <a href="color_game.html">Color Game</a>
+      </li>
+      <li class="game-card">
+        <span class="icon">🔠</span>
+        <a href="alphabet_game2.html">Alphabet Game 2</a>
+      </li>
+      <li class="game-card">
+        <span class="icon">🧠</span>
+        <a href="logic_game.html">Logic Game</a>
+      </li>
+      <li class="game-card">
+        <span class="icon">➕</span>
+        <a href="math_fun (2).html">Math Fun</a>
+      </li>
+      <li class="game-card">
+        <span class="icon">📊</span>
+        <a href="math_game.html">Math Game</a>
+      </li>
+      <li class="game-card">
+        <span class="icon">➖</span>
+        <a href="simple_math.html">Simple Math</a>
+      </li>
+      <li class="game-card">
+        <span class="icon">📈</span>
+        <a href="vertical_addition (1).html">Vertical Addition</a>
+      </li>
+      <li class="game-card">
+        <span class="icon">📚</span>
+        <a href="vertical_addition_bangla.html">Vertical Addition (Bangla)</a>
+      </li>
+    </ul>
+  </div>
 </body>
 </html>
