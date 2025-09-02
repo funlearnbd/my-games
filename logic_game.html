@@ -263,7 +263,7 @@
 
             if (currentLevel > lastSpokenLevel) {
                 speak(`Level ${currentLevel}: ${instructionsText}`);
-                lastSpkenLevel = currentLevel;
+                lastSpokenLevel = currentLevel;
             } else {
                 speak(instructionsText);
             }
@@ -466,7 +466,7 @@
         // This will start the game automatically when the page loads
         window.onload = newRound;
 
-        // Event listeners are still here for when you re-implement exit/restart
+        // Event listeners for New Game and Exit are still here
         restartButton.addEventListener('click', () => {
             score = 0;
             scoreDisplay.textContent = `Score: ${score}`;
@@ -475,7 +475,6 @@
             newRound();
         });
         exitButton.addEventListener('click', () => {
-             // You can add your exit logic here, for example, redirecting to another page
              alert('Exiting the game!');
         });
     </script>
