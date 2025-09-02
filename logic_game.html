@@ -4,42 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logic Quest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #00b894;
+            --secondary-color: #0984e3;
+            --accent-color: #ff7675;
+            --background-color: #dfe6e9;
+            --text-color-dark: #2d3436;
+            --box-shadow-light: rgba(0, 0, 0, 0.1);
+            --box-shadow-medium: rgba(0, 0, 0, 0.2);
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-        }
-
-        #game-container {
+            font-family: 'Poppins', sans-serif;
             text-align: center;
+            background-color: var(--background-color);
+            margin: 0;
             padding: 20px;
-            border: 2px solid #333;
-            border-radius: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
         }
 
+        .splash-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--box-shadow-medium);
+            max-width: 500px;
+            width: 90%;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .splash-screen h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .splash-screen p {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--text-color-dark);
+            margin-bottom: 2rem;
+        }
+
+        .start-btn {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            padding: 15px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
+        }
+
+        .start-btn:hover {
+            background-color: #00a884;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
+        }
+
+        .game-container {
+            display: none; /* Hidden by default */
+            background-color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--box-shadow-medium);
+            max-width: 600px;
+            width: 90%;
+            transition: transform 0.3s ease;
+        }
+        
         h1 {
-            color: #333;
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
         
         #instructions {
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-weight: 600;
+            color: var(--text-color-dark);
         }
 
         #clue-display {
-            font-size: 2em;
-            font-weight: bold;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: var(--text-color-dark);
+            text-shadow: 1px 1px 2px var(--box-shadow-light);
             margin: 20px 0;
-            height: 50px;
+            min-height: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -50,136 +120,210 @@
             justify-content: center;
             align-items: center;
             margin: 20px 0;
-            gap: 10px;
+            gap: 15px;
         }
 
         #pattern-display .item {
-            font-size: 3em;
+            font-size: clamp(2em, 6vw, 4em);
         }
         
         #question-mark {
-            font-size: 3em;
+            font-size: clamp(2em, 6vw, 4em);
             color: #888;
         }
 
         #answer-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 15px;
             margin-bottom: 20px;
         }
 
         .answer-box {
-            width: 80px;
-            height: 80px;
-            border: 1px solid #ccc;
+            width: clamp(80px, 15vw, 100px);
+            height: clamp(80px, 15vw, 100px);
+            background-color: #f0f4f8;
+            border: 2px solid #ccc;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px var(--box-shadow-light);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: transform 0.2s;
-            font-size: 3em;
+            font-size: clamp(2em, 6vw, 4em);
         }
 
         .answer-box:hover {
             transform: scale(1.05);
+            box-shadow: 0 8px 20px var(--box-shadow-medium);
         }
 
         #message {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 600;
             min-height: 20px;
-            font-weight: bold;
             margin-bottom: 15px;
         }
-
-        #start-button, #exit-button {
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            margin: 5px;
+        
+        #score {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            margin: 10px 0;
+            color: var(--text-color-dark);
         }
 
-        #start-button {
-            background-color: #4CAF50;
+        .button-group {
+            margin-top: 1.5rem;
+        }
+
+        button {
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            padding: 12px 24px;
+            margin: 0 8px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        #restart-button {
+            background-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
+        }
+
+        #restart-button:hover {
+            background-color: #00a884;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
         }
 
         #exit-button {
-            background-color: #f44336;
+            background-color: var(--error-color);
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+        }
+
+        #exit-button:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
+
+    <div id="splash-screen" class="splash-screen">
+        <h1>Logic Quest! 🧠</h1>
+        <p>Solve the puzzle to win!</p>
+        <button id="start-btn" class="start-btn">Start</button>
+    </div>
+
+    <div id="game-container" class="game-container">
         <h1>Logic Quest</h1>
         <div id="instructions"></div>
         <div id="clue-display"></div>
         <div id="pattern-display"></div>
         <div id="answer-grid"></div>
         <div id="message"></div>
-        <button id="start-button">Start Game</button>
-        <button id="exit-button">Exit Game</button>
+        <div id="score">Score: 0</div>
+        
+        <div class="button-group">
+            <button id="restart-button">New Game</button>
+            <button id="exit-button">Exit Game</button>
+        </div>
     </div>
+    
+    <audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
+    <audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
 
     <script>
-        const colors = ['red', 'blue', 'green', 'yellow'];
-        const shapes = ['circle', 'square', 'heart'];
-        const allEmojis = [
-            '🔴', '🔵', '🟢', '🟡',
-            '🟥', '🟦', '🟩', '🟨',
-            '❤️', '💙', '💚', '💛'
-        ];
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        const shapes = ['circle', 'square', 'heart', 'face'];
+        
+        const coloredEmojis = {
+            'circle': ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠'],
+            'square': ['🟥', '🟦', '🟩', '🟨', '🟪', '🟧'],
+            'heart': ['❤️', '💙', '💚', '💛', '💜', '🧡']
+        };
+
+        const faceEmojis = {
+            'happy': '😀',
+            'sad': '😩',
+            'laughing': '😂',
+            'angry': '😠',
+            'celebrating': '🥳',
+            'shocked': '🤯'
+        };
 
         let currentLevel = 1;
-        let correctAnswers = 0;
-        let correctAnswerEmoji = '';
+        let score = 0;
+        const synth = window.speechSynthesis;
+        let voiceSupported = true;
 
+        const splashScreen = document.getElementById('splash-screen');
+        const startButton = document.getElementById('start-btn');
+        const gameContainer = document.getElementById('game-container');
         const instructionsDisplay = document.getElementById('instructions');
         const clueDisplay = document.getElementById('clue-display');
         const patternDisplay = document.getElementById('pattern-display');
         const answerGrid = document.getElementById('answer-grid');
         const messageDisplay = document.getElementById('message');
-        const startButton = document.getElementById('start-button');
+        const scoreDisplay = document.getElementById('score');
+        const restartButton = document.getElementById('restart-button');
         const exitButton = document.getElementById('exit-button');
+        const successSound = document.getElementById('success-sound');
+        const buzzSound = document.getElementById('buzz-sound');
 
-        startButton.addEventListener('click', startGame);
-        exitButton.addEventListener('click', exitGame);
+        if (!synth) {
+            voiceSupported = false;
+            document.querySelector('.splash-screen p').textContent = 'Voice not supported. Tap start to begin.';
+        }
+
+        function speak(text) {
+            if (voiceSupported) {
+                synth.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.volume = 1;
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                synth.speak(utterance);
+            }
+        }
 
         function startGame() {
+            splashScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
             currentLevel = 1;
-            correctAnswers = 0;
-            messageDisplay.textContent = '';
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
             newRound();
         }
 
-        function exitGame() {
-            instructionsDisplay.textContent = '';
-            clueDisplay.textContent = '';
-            patternDisplay.innerHTML = '';
-            answerGrid.innerHTML = '';
-            messageDisplay.textContent = 'Game Over! Thanks for playing!';
-            speak('Game Over! Thanks for playing!');
-        }
-
         function newRound() {
-            if (correctAnswers >= 5) {
-                correctAnswers = 0;
-                currentLevel++;
-                speak(`You're ready for level ${currentLevel}!`);
-            }
-
-            if (currentLevel > 3) {
-                messageDisplay.textContent = 'Congratulations! You have completed all levels!';
-                speak('Congratulations! You have completed all levels!');
-                exitGame();
-                return;
-            }
-
             messageDisplay.textContent = '';
             patternDisplay.innerHTML = '';
             answerGrid.innerHTML = '';
+
+            if (currentLevel > 3) {
+                messageDisplay.textContent = 'Congratulations! You have completed all levels!';
+                messageDisplay.style.color = 'var(--success-color)';
+                speak('Congratulations! You have completed all levels!');
+                setTimeout(exitGame, 5000);
+                return;
+            }
 
             if (currentLevel === 1) {
                 setupLevel1();
@@ -192,83 +336,99 @@
 
         function setupLevel1() {
             instructionsDisplay.textContent = 'Level 1: Find the matching item.';
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-            
-            correctAnswerEmoji = getEmoji(randomColor, randomShape);
-            
-            clueDisplay.textContent = `Find the ${randomColor} ${randomShape}.`;
-            speak(`Find the ${randomColor} ${randomShape}.`);
+            speak('Level 1: Find the matching item.');
 
-            const options = generateOptions(correctAnswerEmoji, 9);
-            renderGrid(options);
+            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            let clueText, correctAnswerEmoji;
+
+            if (randomShape === 'face') {
+                const emotionKeys = Object.keys(faceEmojis);
+                const randomEmotion = emotionKeys[Math.floor(Math.random() * emotionKeys.length)];
+                correctAnswerEmoji = faceEmojis[randomEmotion];
+                clueText = `Find the ${randomEmotion} face.`;
+            } else {
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                correctAnswerEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
+                clueText = `Find the ${randomColor} ${randomShape}.`;
+            }
+
+            clueDisplay.textContent = clueText;
+            speak(clueText);
+
+            const options = generateOptions(correctAnswerEmoji, 9, randomShape);
+            renderGrid(options, correctAnswerEmoji);
         }
 
         function setupLevel2() {
             instructionsDisplay.textContent = 'Level 2: Find the one that is different.';
+            speak('Level 2: Find the one that is different.');
             clueDisplay.textContent = '';
-            speak('Find the one that is different.');
 
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-            const commonEmoji = getEmoji(randomColor, randomShape);
+            let commonEmojis, differentEmoji;
 
-            let differentEmoji = commonEmoji;
-            while (differentEmoji === commonEmoji) {
-                const randColor = colors[Math.floor(Math.random() * colors.length)];
-                const randShape = shapes[Math.floor(Math.random() * shapes.length)];
-                differentEmoji = getEmoji(randColor, randShape);
+            if (randomShape === 'face') {
+                commonEmojis = Object.values(faceEmojis);
+                const commonEmoji = commonEmojis[Math.floor(Math.random() * commonEmojis.length)];
+                differentEmoji = commonEmojis.filter(e => e !== commonEmoji)[Math.floor(Math.random() * (commonEmojis.length - 1))];
+                commonEmojis = [commonEmoji]; // To build the options array later
+            } else {
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                const commonEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
+                const otherColors = colors.filter(c => c !== randomColor);
+                const differentColor = otherColors[Math.floor(Math.random() * otherColors.length)];
+                differentEmoji = coloredEmojis[randomShape][colors.indexOf(differentColor)];
+                commonEmojis = [commonEmoji];
             }
 
-            correctAnswerEmoji = differentEmoji;
-
+            const correctAnswerEmoji = differentEmoji;
             const options = [differentEmoji];
             for (let i = 0; i < 8; i++) {
-                options.push(commonEmoji);
+                options.push(commonEmojis[0]); // Only one common emoji type for Level 2
             }
             
-            renderGrid(options);
+            renderGrid(options, correctAnswerEmoji);
         }
 
         function setupLevel3() {
             instructionsDisplay.textContent = 'Level 3: Find the missing item in the pattern.';
+            speak('Level 3: Find the missing item in the pattern.');
             clueDisplay.textContent = '';
-            speak('Find the missing item in the pattern.');
             
-            // Generate a simple, clear pattern rule
             const ruleType = Math.random() < 0.5 ? 'color' : 'shape';
-            let emoji1, emoji2, emoji3;
+            let emoji1, emoji2, correctAnswerEmoji;
 
             if (ruleType === 'color') {
-                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
                 const color1 = colors[Math.floor(Math.random() * colors.length)];
-                let color2 = color1;
-                while (color2 === color1) {
-                    color2 = colors[Math.floor(Math.random() * colors.length)];
-                }
-                let color3 = color2;
-                while (color3 === color1 || color3 === color2) {
-                    color3 = colors[Math.floor(Math.random() * colors.length)];
-                }
+                let color2 = colors.filter(c => c !== color1)[Math.floor(Math.random() * (colors.length - 1))];
+                let color3 = colors.filter(c => c !== color1 && c !== color2)[Math.floor(Math.random() * (colors.length - 2))];
                 
-                emoji1 = getEmoji(color1, shape);
-                emoji2 = getEmoji(color2, shape);
-                correctAnswerEmoji = getEmoji(color3, shape);
+                emoji1 = coloredEmojis[shape][colors.indexOf(color1)];
+                emoji2 = coloredEmojis[shape][colors.indexOf(color2)];
+                correctAnswerEmoji = coloredEmojis[shape][colors.indexOf(color3)];
             } else { // ruleType === 'shape'
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const shape1 = shapes[Math.floor(Math.random() * shapes.length)];
-                let shape2 = shape1;
-                while (shape2 === shape1) {
-                    shape2 = shapes[Math.floor(Math.random() * shapes.length)];
+                const isFacePattern = Math.random() < 0.5;
+                if (isFacePattern) {
+                    const allFaceEmojis = Object.values(faceEmojis);
+                    const shape1 = allFaceEmojis[Math.floor(Math.random() * allFaceEmojis.length)];
+                    let shape2 = allFaceEmojis.filter(e => e !== shape1)[Math.floor(Math.random() * (allFaceEmojis.length - 1))];
+                    let shape3 = allFaceEmojis.filter(e => e !== shape1 && e !== shape2)[Math.floor(Math.random() * (allFaceEmojis.length - 2))];
+
+                    emoji1 = shape1;
+                    emoji2 = shape2;
+                    correctAnswerEmoji = shape3;
+                } else {
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const shapeTypes = shapes.filter(s => s !== 'face');
+                    const shape1 = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+                    let shape2 = shapeTypes.filter(s => s !== shape1)[Math.floor(Math.random() * (shapeTypes.length - 1))];
+                    let shape3 = shapeTypes.filter(s => s !== shape1 && s !== shape2)[Math.floor(Math.random() * (shapeTypes.length - 2))];
+                    
+                    emoji1 = coloredEmojis[shape1][colors.indexOf(color)];
+                    emoji2 = coloredEmojis[shape2][colors.indexOf(color)];
+                    correctAnswerEmoji = coloredEmojis[shape3][colors.indexOf(color)];
                 }
-                let shape3 = shape2;
-                while (shape3 === shape1 || shape3 === shape2) {
-                    shape3 = shapes[Math.floor(Math.random() * shapes.length)];
-                }
-                
-                emoji1 = getEmoji(color, shape1);
-                emoji2 = getEmoji(color, shape2);
-                correctAnswerEmoji = getEmoji(color, shape3);
             }
 
             patternDisplay.innerHTML = '';
@@ -287,76 +447,70 @@
             questionMark.textContent = '?';
             patternDisplay.appendChild(questionMark);
             
-            const options = generateOptions(correctAnswerEmoji, 3);
-            renderGrid(Array.from(options));
+            const options = generateOptions(correctAnswerEmoji, 3, 'pattern');
+            renderGrid(options, correctAnswerEmoji);
         }
 
-        function checkAnswer(clickedEmoji) {
-            let isCorrect = false;
-
-            if (currentLevel === 1 || currentLevel === 3) {
-                isCorrect = (clickedEmoji === correctAnswerEmoji);
-            } else if (currentLevel === 2) {
-                const gridEmojis = Array.from(answerGrid.children).map(box => box.textContent);
-                const counts = {};
-                gridEmojis.forEach(emoji => {
-                    counts[emoji] = (counts[emoji] || 0) + 1;
-                });
-                
-                let commonEmoji = '';
-                for (const emoji in counts) {
-                    if (counts[emoji] > 1) {
-                        commonEmoji = emoji;
-                        break;
-                    }
-                }
-                isCorrect = (clickedEmoji !== commonEmoji);
-            }
-
-            if (isCorrect) {
+        function checkAnswer(clickedEmoji, correctAnswerEmoji) {
+            if (clickedEmoji === correctAnswerEmoji) {
+                successSound.play();
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
                 messageDisplay.textContent = 'Correct! Great job!';
+                messageDisplay.style.color = 'var(--success-color)';
                 speak('Correct!');
-                correctAnswers++;
-                setTimeout(newRound, 1500);
+                
+                setTimeout(() => {
+                    messageDisplay.textContent = '';
+                    if (score % 5 === 0 && score > 0) {
+                        currentLevel++;
+                        speak(`You're ready for level ${currentLevel}!`);
+                    }
+                    newRound();
+                }, 1500);
             } else {
+                buzzSound.play();
                 messageDisplay.textContent = 'Try again!';
+                messageDisplay.style.color = 'var(--error-color)';
                 speak('Try again!');
             }
         }
 
-        function renderGrid(options) {
+        function renderGrid(options, correctAnswerEmoji) {
             answerGrid.innerHTML = '';
             shuffleArray(options);
             options.forEach(emoji => {
                 const answerBox = document.createElement('div');
                 answerBox.className = 'answer-box';
                 answerBox.textContent = emoji;
-                answerBox.addEventListener('click', () => checkAnswer(emoji));
+                answerBox.addEventListener('click', () => checkAnswer(emoji, correctAnswerEmoji));
                 answerGrid.appendChild(answerBox);
             });
         }
         
         function getEmoji(color, shape) {
-            if (color === 'red' && shape === 'circle') return '🔴';
-            if (color === 'blue' && shape === 'circle') return '🔵';
-            if (color === 'green' && shape === 'circle') return '🟢';
-            if (color === 'yellow' && shape === 'circle') return '🟡';
-            if (color === 'red' && shape === 'square') return '🟥';
-            if (color === 'blue' && shape === 'square') return '🟦';
-            if (color === 'green' && shape === 'square') return '🟩';
-            if (color === 'yellow' && shape === 'square') return '🟨';
-            if (color === 'red' && shape === 'heart') return '❤️';
-            if (color === 'blue' && shape === 'heart') return '💙';
-            if (color === 'green' && shape === 'heart') return '💚';
-            if (color === 'yellow' && shape === 'heart') return '💛';
-            return '❓';
+            if (shape === 'face') {
+                const emotionKeys = Object.keys(faceEmojis);
+                return faceEmojis[emotionKeys[Math.floor(Math.random() * emotionKeys.length)]];
+            } else {
+                return coloredEmojis[shape][colors.indexOf(color)];
+            }
         }
 
-        function generateOptions(correctEmoji, count) {
+        function generateOptions(correctEmoji, count, shapeType) {
             const options = new Set();
             options.add(correctEmoji);
             
-            const wrongEmojis = allEmojis.filter(e => e !== correctEmoji);
+            let allAvailableEmojis = [];
+            if (shapeType === 'face' || correctEmoji in Object.values(faceEmojis)) {
+                allAvailableEmojis = Object.values(faceEmojis);
+            } else {
+                for (const shape in coloredEmojis) {
+                    allAvailableEmojis = allAvailableEmojis.concat(coloredEmojis[shape]);
+                }
+            }
+
+            const wrongEmojis = allAvailableEmojis.filter(e => e !== correctEmoji);
             shuffleArray(wrongEmojis);
 
             while (options.size < count) {
@@ -376,12 +530,19 @@
             return array;
         }
 
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                speechSynthesis.speak(utterance);
-            }
+        function exitGame() {
+            synth.cancel();
+            window.location.href = 'index.html';
         }
+        
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', () => {
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            currentLevel = 1;
+            newRound();
+        });
+        exitButton.addEventListener('click', exitGame);
     </script>
 </body>
 </html>
