@@ -158,7 +158,7 @@
         #restart-button:hover {
             background-color: #00a884;
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
+            box-shadow: 6px 15px rgba(0, 184, 148, 0.6);
         }
 
         #exit-button {
@@ -171,7 +171,33 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
         }
+        
+        .drag-drop-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+        }
 
+        .drag-item {
+            font-size: clamp(2em, 6vw, 4em);
+            cursor: grab;
+        }
+
+        .drop-zone {
+            width: 100px;
+            height: 100px;
+            background-color: #f0f4f8;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -181,6 +207,10 @@
         <div id="clue-display"></div>
         <div id="pattern-display"></div>
         <div id="answer-grid"></div>
+        <div id="drag-drop-container" class="drag-drop-container" style="display: none;">
+            <div id="drag-item" class="drag-item" draggable="true"></div>
+            <div id="drop-zone" class="drop-zone"></div>
+        </div>
         <div id="message"></div>
         <div id="score">Score: 0</div>
         
@@ -194,13 +224,13 @@
     <audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
 
     <script>
-        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
-        const shapes = ['circle', 'square', 'heart', 'face'];
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'black', 'brown'];
+        const shapes = ['circle', 'square', 'heart'];
         
         const coloredEmojis = {
-            'circle': ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠'],
-            'square': ['🟥', '🟦', '🟩', '🟨', '🟪', '🟧'],
-            'heart': ['❤️', '💙', '💚', '💛', '💜', '🧡']
+            'circle': ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠', '⚫', '🟤'],
+            'square': ['🟥', '🟦', '🟩', '🟨', '🟪', '🟧', '⬛', '🟫'],
+            'heart': ['❤️', '💙', '💚', '💛', '💜', '🧡', '🖤', '🤎']
         };
 
         const faceEmojis = {
@@ -209,7 +239,12 @@
             'laughing': '😂',
             'angry': '😠',
             'celebrating': '🥳',
-            'shocked': '🤯'
+            'shocked': '🤯',
+            'winking': '😉',
+            'sleeping': '😴',
+            'cold': '🥶',
+            'light bulb': '💡',
+            'bell': '🔔'
         };
 
         let currentLevel = 1;
@@ -222,12 +257,17 @@
         const clueDisplay = document.getElementById('clue-display');
         const patternDisplay = document.getElementById('pattern-display');
         const answerGrid = document.getElementById('answer-grid');
+        const dragDropContainer = document.getElementById('drag-drop-container');
+        const dragItem = document.getElementById('drag-item');
+        const dropZone = document.getElementById('drop-zone');
         const messageDisplay = document.getElementById('message');
         const scoreDisplay = document.getElementById('score');
         const restartButton = document.getElementById('restart-button');
         const exitButton = document.getElementById('exit-button');
         const successSound = document.getElementById('success-sound');
         const buzzSound = document.getElementById('buzz-sound');
+
+        let correctAnswer = '';
 
         if (!synth) {
             voiceSupported = false;
@@ -249,12 +289,13 @@
             messageDisplay.textContent = '';
             patternDisplay.innerHTML = '';
             answerGrid.innerHTML = '';
+            dragDropContainer.style.display = 'none';
 
-            if (currentLevel > 3) {
+            if (currentLevel > 30) {
                 messageDisplay.textContent = 'Congratulations! You have completed all levels!';
                 messageDisplay.style.color = 'var(--success-color)';
                 speak('Congratulations! You have completed all levels!');
-                setTimeout(exitGame, 5000);
+                setTimeout(() => window.location.href = 'index.html', 5000);
                 return;
             }
 
@@ -267,36 +308,61 @@
             } else {
                 speak(instructionsText);
             }
-
-            if (currentLevel === 1) {
-                setupLevel1();
-            } else if (currentLevel === 2) {
-                setupLevel2();
-            } else if (currentLevel === 3) {
-                setupLevel3();
+            
+            // Choose game type based on level
+            if (currentLevel <= 10) {
+                // Levels 1-10: Mix of Level 1 and Level 2
+                if (Math.random() < 0.6) {
+                    setupLevel1();
+                } else {
+                    setupLevel2();
+                }
+            } else if (currentLevel <= 20) {
+                // Levels 11-20: Mix of Level 2 and Level 3 (patterns)
+                if (Math.random() < 0.5) {
+                    setupLevel2();
+                } else {
+                    setupLevel3();
+                }
+            } else if (currentLevel <= 25) {
+                // Levels 21-25: Mix of Level 1, 2, 3
+                const gameType = Math.floor(Math.random() * 3) + 1;
+                if (gameType === 1) setupLevel1();
+                else if (gameType === 2) setupLevel2();
+                else setupLevel3();
+            } else {
+                // Levels 26-30: Mix of all plus drag and drop
+                 const gameType = Math.floor(Math.random() * 4) + 1;
+                if (gameType === 1) setupLevel1();
+                else if (gameType === 2) setupLevel2();
+                else if (gameType === 3) setupLevel3();
+                else setupDragDrop();
             }
         }
 
         function getInstructionsText(level) {
-            if (level === 1) {
+            if (level <= 10) {
                 return 'Find the matching item.';
-            } else if (level === 2) {
+            } else if (level <= 20) {
                 return 'Find the one that is different.';
-            } else if (level === 3) {
-                return 'Find the missing item in the pattern.';
+            } else if (level <= 25) {
+                 return 'Find the missing item in the pattern.';
+            } else {
+                return 'Complete the puzzle.';
             }
             return '';
         }
 
         function setupLevel1() {
-            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            const allShapes = shapes.concat(['light bulb', 'bell', 'face']);
+            const randomShape = allShapes[Math.floor(Math.random() * allShapes.length)];
             let clueText, correctAnswerEmoji, options;
-
-            if (randomShape === 'face') {
+            
+            if (randomShape === 'face' || randomShape === 'light bulb' || randomShape === 'bell') {
                 const emotionKeys = Object.keys(faceEmojis);
                 const randomEmotion = emotionKeys[Math.floor(Math.random() * emotionKeys.length)];
                 correctAnswerEmoji = faceEmojis[randomEmotion];
-                clueText = `Find the ${randomEmotion} face.`;
+                clueText = `Find the ${randomEmotion}.`;
                 options = generateFaceOptions(correctAnswerEmoji, 9);
             } else {
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -312,11 +378,12 @@
 
         function setupLevel2() {
             clueDisplay.textContent = '';
-
-            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            const allShapes = shapes.concat(['light bulb', 'bell', 'face']);
+            const randomShape = allShapes[Math.floor(Math.random() * allShapes.length)];
             let commonEmoji, differentEmoji, options;
 
-            if (randomShape === 'face') {
+            if (randomShape === 'face' || randomShape === 'light bulb' || randomShape === 'bell') {
                 const faceValues = Object.values(faceEmojis);
                 commonEmoji = faceValues[Math.floor(Math.random() * faceValues.length)];
                 let otherFaces = faceValues.filter(e => e !== commonEmoji);
@@ -352,7 +419,7 @@
             let emoji1, emoji2, correctAnswerEmoji, options;
 
             if (isColorPattern) {
-                const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
                 const startIndex = Math.floor(Math.random() * (colors.length - 3));
                 
                 emoji1 = coloredEmojis[shape][startIndex];
@@ -361,7 +428,7 @@
                 options = generateColoredOptions(correctAnswerEmoji, 3);
             } else {
                 const color = colors[Math.floor(Math.random() * colors.length)];
-                const shapeTypes = shapes.filter(s => s !== 'face');
+                const shapeTypes = shapes;
                 const startIndex = Math.floor(Math.random() * (shapeTypes.length - 2));
 
                 emoji1 = coloredEmojis[shapeTypes[startIndex]][colors.indexOf(color)];
@@ -386,6 +453,45 @@
             renderGrid(options, correctAnswerEmoji);
         }
 
+        function setupDragDrop() {
+            answerGrid.innerHTML = '';
+            patternDisplay.innerHTML = '';
+            dragDropContainer.style.display = 'flex';
+
+            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const correctEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
+            
+            clueDisplay.textContent = `Drag the ${randomColor} ${randomShape}.`;
+            speak(`Drag the ${randomColor} ${randomShape} to the box.`);
+            
+            dragItem.textContent = correctEmoji;
+            dragItem.setAttribute('data-color', randomColor);
+            dragItem.setAttribute('data-shape', randomShape);
+            
+            correctAnswer = `${randomColor}-${randomShape}`;
+        }
+        
+        dragItem.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+            e.dataTransfer.setData('data-type', 'drag-emoji');
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const draggedEmoji = e.dataTransfer.getData('text/plain');
+            const dataType = e.dataTransfer.getData('data-type');
+            if (dataType === 'drag-emoji' && draggedEmoji === dragItem.textContent) {
+                checkAnswer(draggedEmoji, dragItem.textContent);
+            } else {
+                checkAnswer('wrong', 'correct');
+            }
+        });
+
         function checkAnswer(clickedEmoji, correctAnswerEmoji) {
             if (clickedEmoji === correctAnswerEmoji) {
                 successSound.play();
@@ -402,7 +508,7 @@
                         speak(`You're ready for level ${currentLevel}!`);
                     }
                     newRound();
-                }, 2500); // Changed timeout to 2500ms
+                }, 2500);
             } else {
                 buzzSound.play();
                 messageDisplay.textContent = 'Try again!';
@@ -459,12 +565,10 @@
             return array;
         }
 
-        function exitGame() {
-            // This function is still here in case you want to navigate away
-        }
+        exitButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
         
-        window.onload = newRound;
-
         restartButton.addEventListener('click', () => {
             score = 0;
             scoreDisplay.textContent = `Score: ${score}`;
@@ -472,9 +576,9 @@
             lastSpokenLevel = 0;
             newRound();
         });
-        exitButton.addEventListener('click', () => {
-             alert('Exiting the game!');
-        });
+
+        window.onload = newRound;
+
     </script>
 </body>
 </html>
