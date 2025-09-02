@@ -59,6 +59,7 @@
             font-size: clamp(1rem, 2vw, 1.2rem);
             font-weight: 600;
             color: var(--text-color-dark);
+            min-height: 30px;
         }
 
         #clue-display {
@@ -169,7 +170,7 @@
         #exit-button:hover {
             background-color: #c0392b;
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
+            box-shadow: 6px 15px rgba(231, 76, 60, 0.6);
         }
         
         .drag-drop-container {
@@ -249,7 +250,7 @@
 
         let currentLevel = 1;
         let score = 0;
-        let lastSpokenLevel = 0;
+        let lastSpokenInstruction = '';
         const synth = window.speechSynthesis;
         let voiceSupported = true;
 
@@ -268,6 +269,7 @@
         const buzzSound = document.getElementById('buzz-sound');
 
         let correctAnswer = '';
+        let currentInstructionText = '';
 
         if (!synth) {
             voiceSupported = false;
@@ -292,6 +294,8 @@
             dragDropContainer.style.display = 'none';
 
             if (currentLevel > 30) {
+                instructionsDisplay.textContent = '';
+                clueDisplay.textContent = '';
                 messageDisplay.textContent = 'Congratulations! You have completed all levels!';
                 messageDisplay.style.color = 'var(--success-color)';
                 speak('Congratulations! You have completed all levels!');
@@ -299,57 +303,39 @@
                 return;
             }
 
-            const instructionsText = getInstructionsText(currentLevel);
-            instructionsDisplay.textContent = `Level ${currentLevel}: ${instructionsText}`;
-
-            if (currentLevel > lastSpokenLevel) {
-                speak(`Level ${currentLevel}: ${instructionsText}`);
-                lastSpokenLevel = currentLevel;
-            } else {
-                speak(instructionsText);
-            }
+            const gameType = getGameTypeByLevel(currentLevel);
             
-            // Choose game type based on level
-            if (currentLevel <= 10) {
-                // Levels 1-10: Only "Find the one that is different"
-                setupLevel1();
-            } else if (currentLevel <= 20) {
-                // Levels 11-20: Mix of Level 2 and Level 3 (patterns)
-                if (Math.random() < 0.5) {
-                    setupLevel2();
-                } else {
-                    setupLevel3();
-                }
-            } else if (currentLevel <= 25) {
-                // Levels 21-25: Mix of Level 1, 2, 3
-                const gameType = Math.floor(Math.random() * 3) + 1;
-                if (gameType === 1) setupLevel1();
-                else if (gameType === 2) setupLevel2();
-                else setupLevel3();
-            } else {
-                // Levels 26-30: Mix of all plus drag and drop
-                 const gameType = Math.floor(Math.random() * 4) + 1;
-                if (gameType === 1) setupLevel1();
-                else if (gameType === 2) setupLevel2();
-                else if (gameType === 3) setupLevel3();
-                else setupDragDrop();
+            if (gameType === 'find-different') {
+                setupFindDifferent();
+                currentInstructionText = 'Find the one that is different.';
+            } else if (gameType === 'find-matching') {
+                setupFindMatching();
+                currentInstructionText = 'Find the matching item.';
+            } else if (gameType === 'pattern') {
+                setupPattern();
+                currentInstructionText = 'Find the missing item in the pattern.';
+            } else if (gameType === 'drag-drop') {
+                setupDragDrop();
+                currentInstructionText = 'Complete the puzzle.';
             }
+
+            instructionsDisplay.textContent = currentInstructionText;
+            speak(currentInstructionText);
         }
 
-        function getInstructionsText(level) {
+        function getGameTypeByLevel(level) {
             if (level <= 10) {
-                return 'Find the one that is different.';
+                return 'find-different';
             } else if (level <= 20) {
-                return 'Find the matching item.';
+                return 'find-matching';
             } else if (level <= 25) {
-                 return 'Find the missing item in the pattern.';
+                 return 'pattern';
             } else {
-                return 'Complete the puzzle.';
+                return 'drag-drop';
             }
-            return '';
         }
 
-        function setupLevel1() {
+        function setupFindDifferent() {
             clueDisplay.textContent = '';
             
             const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
@@ -371,7 +357,7 @@
             renderGrid(options, correctAnswerEmoji);
         }
 
-        function setupLevel2() {
+        function setupFindMatching() {
             const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
             
             const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
@@ -415,7 +401,7 @@
             renderGrid(options, clueEmoji);
         }
 
-        function setupLevel3() {
+        function setupPattern() {
             clueDisplay.textContent = '';
             
             const isColorPattern = Math.random() < 0.5;
@@ -501,7 +487,6 @@
                     messageDisplay.textContent = '';
                     if (score % 5 === 0 && score > 0) {
                         currentLevel++;
-                        speak(`You're ready for level ${currentLevel}!`);
                     }
                     newRound();
                 }, 2500);
@@ -509,9 +494,31 @@
                 buzzSound.play();
                 messageDisplay.textContent = 'Try again!';
                 messageDisplay.style.color = 'var(--error-color)';
-                speak('Try again!');
+                
+                let shortInstruction = getShortInstructionText(correctAnswerEmoji);
+                if (shortInstruction) {
+                    clueDisplay.textContent = shortInstruction;
+                    speak(shortInstruction);
+                } else {
+                    speak('Try again!');
+                }
             }
         }
+        
+        function getShortInstructionText(emoji) {
+            if (Object.values(uniqueEmojis).includes(emoji)) {
+                return Object.keys(uniqueEmojis).find(key => uniqueEmojis[key] === emoji);
+            } else {
+                for (const shape in coloredEmojis) {
+                    const colorIndex = coloredEmojis[shape].indexOf(emoji);
+                    if (colorIndex !== -1) {
+                        return `${colors[colorIndex]} ${shape}`;
+                    }
+                }
+            }
+            return '';
+        }
+
 
         function renderGrid(options, correctAnswerEmoji) {
             answerGrid.innerHTML = '';
