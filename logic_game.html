@@ -31,7 +31,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden; /* Prevents scrolling of the entire page */
+            overflow: hidden;
         }
 
         .splash-screen {
@@ -80,7 +80,7 @@
         }
 
         .game-container {
-            display: none; /* Hidden by default */
+            display: none;
             background-color: white;
             padding: 2rem;
             border-radius: 20px;
@@ -88,8 +88,8 @@
             max-width: 600px;
             width: 90%;
             transition: transform 0.3s ease;
-            max-height: 85vh; /* Limits the height of the game area */
-            overflow-y: auto; /* Adds vertical scrolling */
+            max-height: 85vh;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
@@ -176,13 +176,12 @@
             color: var(--text-color-dark);
         }
 
-        #game-buttons {
-            display: none; /* Hidden by default, will be shown by JS */
+        .button-group {
             margin-top: 1.5rem;
-            position: fixed; /* Keeps buttons fixed on the screen */
-            bottom: 20px; /* Positions them at the bottom */
-            width: 90%;
-            max-width: 600px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         button {
@@ -247,11 +246,11 @@
         <div id="answer-grid"></div>
         <div id="message"></div>
         <div id="score">Score: 0</div>
-    </div>
-    
-    <div id="game-buttons">
-        <button id="restart-button">New Game</button>
-        <button id="exit-button">Exit Game</button>
+        
+        <div class="button-group">
+            <button id="restart-button">New Game</button>
+            <button id="exit-button">Exit Game</button>
+        </div>
     </div>
 
     <audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
@@ -278,14 +277,13 @@
 
         let currentLevel = 1;
         let score = 0;
-        let playedLevelIntro = { 1: false, 2: false, 3: false };
+        let lastSpokenLevel = 0; // New variable to track the last spoken level
         const synth = window.speechSynthesis;
         let voiceSupported = true;
 
         const splashScreen = document.getElementById('splash-screen');
         const startButton = document.getElementById('start-btn');
         const gameContainer = document.getElementById('game-container');
-        const gameButtons = document.getElementById('game-buttons'); // Get the new button container
         const instructionsDisplay = document.getElementById('instructions');
         const clueDisplay = document.getElementById('clue-display');
         const patternDisplay = document.getElementById('pattern-display');
@@ -317,10 +315,9 @@
         function startGame() {
             splashScreen.style.display = 'none';
             gameContainer.style.display = 'flex';
-            gameButtons.style.display = 'block'; // Show the buttons
             currentLevel = 1;
             score = 0;
-            playedLevelIntro = { 1: false, 2: false, 3: false };
+            lastSpokenLevel = 0;
             scoreDisplay.textContent = `Score: ${score}`;
             newRound();
         }
@@ -338,6 +335,16 @@
                 return;
             }
 
+            // Only speak the level intro if it's a new level
+            if (currentLevel > lastSpokenLevel) {
+                const instructionsText = `Level ${currentLevel}: ${getInstructionsText(currentLevel)}`;
+                instructionsDisplay.textContent = instructionsText;
+                speak(instructionsText);
+                lastSpokenLevel = currentLevel;
+            } else {
+                instructionsDisplay.textContent = `Level ${currentLevel}: ${getInstructionsText(currentLevel)}`;
+            }
+
             if (currentLevel === 1) {
                 setupLevel1();
             } else if (currentLevel === 2) {
@@ -347,13 +354,18 @@
             }
         }
 
-        function setupLevel1() {
-            instructionsDisplay.textContent = 'Level 1: Find the matching item.';
-            if (!playedLevelIntro[1]) {
-                speak('Level 1: Find the matching item.');
-                playedLevelIntro[1] = true;
+        function getInstructionsText(level) {
+            if (level === 1) {
+                return 'Find the matching item.';
+            } else if (level === 2) {
+                return 'Find the one that is different.';
+            } else if (level === 3) {
+                return 'Find the missing item in the pattern.';
             }
+            return '';
+        }
 
+        function setupLevel1() {
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
             let clueText, correctAnswerEmoji, options;
 
@@ -376,11 +388,6 @@
         }
 
         function setupLevel2() {
-            instructionsDisplay.textContent = 'Level 2: Find the one that is different.';
-            if (!playedLevelIntro[2]) {
-                speak('Level 2: Find the one that is different.');
-                playedLevelIntro[2] = true;
-            }
             clueDisplay.textContent = '';
 
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
@@ -416,11 +423,6 @@
         }
 
         function setupLevel3() {
-            instructionsDisplay.textContent = 'Level 3: Find the missing item in the pattern.';
-            if (!playedLevelIntro[3]) {
-                speak('Level 3: Find the missing item in the pattern.');
-                playedLevelIntro[3] = true;
-            }
             clueDisplay.textContent = '';
             
             const isColorPattern = Math.random() < 0.5;
@@ -544,7 +546,7 @@
             score = 0;
             scoreDisplay.textContent = `Score: ${score}`;
             currentLevel = 1;
-            playedLevelIntro = { 1: false, 2: false, 3: false };
+            lastSpokenLevel = 0;
             newRound();
         });
         exitButton.addEventListener('click', exitGame);
