@@ -402,7 +402,7 @@
                         speak(`You're ready for level ${currentLevel}!`);
                     }
                     newRound();
-                }, 1500);
+                }, 2500); // Changed timeout to 2500ms
             } else {
                 buzzSound.play();
                 messageDisplay.textContent = 'Try again!';
@@ -463,10 +463,8 @@
             // This function is still here in case you want to navigate away
         }
         
-        // This will start the game automatically when the page loads
         window.onload = newRound;
 
-        // Event listeners for New Game and Exit are still here
         restartButton.addEventListener('click', () => {
             score = 0;
             scoreDisplay.textContent = `Score: ${score}`;
