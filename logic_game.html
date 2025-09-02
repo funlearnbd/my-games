@@ -356,17 +356,17 @@
         function setupLevel1() {
             const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
             
-            const matchingEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+            const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
             
             let clueText;
-            if (Object.values(uniqueEmojis).includes(matchingEmoji)) {
-                const clueKey = Object.keys(uniqueEmojis).find(key => uniqueEmojis[key] === matchingEmoji);
+            if (Object.values(uniqueEmojis).includes(clueEmoji)) {
+                const clueKey = Object.keys(uniqueEmojis).find(key => uniqueEmojis[key] === clueEmoji);
                 clueText = `Find the ${clueKey}.`;
             } else {
                 let foundShape = '';
                 let foundColor = '';
                 for (const shape in coloredEmojis) {
-                    const colorIndex = coloredEmojis[shape].indexOf(matchingEmoji);
+                    const colorIndex = coloredEmojis[shape].indexOf(clueEmoji);
                     if (colorIndex !== -1) {
                         foundShape = shape;
                         foundColor = colors[colorIndex];
@@ -379,16 +379,29 @@
             clueDisplay.textContent = clueText;
             speak(clueText);
 
-            const options = [matchingEmoji];
+            // Generate options for "Find the matching item"
+            const options = [];
+            
+            // Add the correct emoji multiple times
+            const numCorrectEmojis = Math.floor(Math.random() * 3) + 2; // 2 to 4 correct matches
+            for (let i = 0; i < numCorrectEmojis; i++) {
+                options.push(clueEmoji);
+            }
+            
+            // Add a variety of incorrect emojis
+            const wrongEmojis = allEmojis.filter(e => e !== clueEmoji);
+            shuffleArray(wrongEmojis);
             
             while (options.length < 9) {
-                const randomEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-                if (randomEmoji !== matchingEmoji) {
-                    options.push(randomEmoji);
+                if (wrongEmojis.length > 0) {
+                    options.push(wrongEmojis.pop());
+                } else {
+                    // Fallback in case there aren't enough wrong emojis
+                    options.push(clueEmoji); 
                 }
             }
-
-            renderGrid(options, matchingEmoji);
+            
+            renderGrid(options, clueEmoji);
         }
 
         function setupLevel2() {
