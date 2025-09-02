@@ -50,8 +50,8 @@ h1 { color: #2c3e50; }
   <div id="score">Score: 0</div>
 </div>
 
-<audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
-<audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
+<audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+<audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
 <script>
 const colors = ['red','blue','green','yellow','purple','orange','black','brown'];
@@ -107,8 +107,12 @@ function setupFindEmoji(){
   const pool=[...Object.values(coloredEmojis).flat(),...Object.values(uniqueEmojis)];
   const target=pool[Math.floor(Math.random()*pool.length)];
   correctAnswer=target;
+
+  // Build clue
   let clue="";
-  for(const [k,v] of Object.entries(uniqueEmojis)) if(v===target) clue=`Find the ${k}.`;
+  for(const [k,v] of Object.entries(uniqueEmojis)){
+    if(v===target){ clue=`Find the ${k}.`; }
+  }
   if(!clue){
     for(const s in coloredEmojis){
       const idx=coloredEmojis[s].indexOf(target);
@@ -116,6 +120,8 @@ function setupFindEmoji(){
     }
   }
   questionEl.textContent=clue;
+
+  // Options
   const opts=[target];
   while(opts.length<9){
     let c=pool[Math.floor(Math.random()*pool.length)];
@@ -143,6 +149,7 @@ function setupDragDrop(){
   const target=coloredEmojis[shape][colors.indexOf(color)];
   correctAnswer=target;
   questionEl.textContent=`Drag the ${color} ${shape}.`;
+
   const distractors=generateOptions(target,3,[...Object.values(coloredEmojis).flat()]);
   shuffleArray(distractors);
   distractors.forEach(e=>{
