@@ -3,67 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Play & Learn Games</title>
+    <title>Brainiac Arcade</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4a90e2; /* Sky Blue */
-            --secondary-color: #50e3c2; /* Mint Green */
-            --background-color: #f7f9fc;
+            --primary-color: #50e3c2; /* Mint Green */
+            --secondary-color: #4a90e2; /* Sky Blue */
+            --accent-color: #f5a623; /* Warm Orange */
+            --background-color: #f0f4f8; /* Light Grey-Blue */
             --card-background: #ffffff;
-            --text-color-dark: #333;
-            --shadow: rgba(0, 0, 0, 0.1);
+            --text-color-dark: #2a2a2a;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.1);
         }
 
         body {
-            font-family: 'Quicksand', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--background-color);
             color: var(--text-color-dark);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 4rem 1rem;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 20px var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 5px var(--shadow-medium);
+        }
+        
+        .header p {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            margin-top: 0.5rem;
+            font-weight: 400;
+            opacity: 0.9;
         }
 
         .container {
             width: 90%;
-            max-width: 900px;
+            max-width: 1100px;
             margin: 2rem auto;
             text-align: center;
-            padding: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 2rem;
-            font-weight: 700;
         }
 
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
             list-style: none;
             padding: 0;
+            margin: 0;
         }
 
         .game-card {
             background-color: var(--card-background);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px var(--shadow);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            border: 2px solid var(--primary-color);
+            border-radius: 18px;
+            box-shadow: 0 8px 30px var(--shadow-light);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 1rem;
         }
 
         .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 40px var(--shadow-medium);
         }
 
         .game-card a {
@@ -73,95 +97,272 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
             height: 100%;
             width: 100%;
             box-sizing: border-box;
-        }
-
-        .game-card a:hover .game-icon {
-            transform: scale(1.1);
+            padding-bottom: 1.5rem; /* Space for the preview button */
         }
         
         .game-icon {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
-            color: var(--primary-color);
-            transition: transform 0.2s ease-in-out;
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+
+        .game-card:hover .game-icon {
+            transform: rotate(10deg) scale(1.2);
         }
 
         .game-name {
             font-size: 1.2rem;
-            font-weight: 700;
+            font-weight: 600;
             text-align: center;
+            color: var(--secondary-color);
+        }
+
+        .preview-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .preview-btn:hover {
+            background-color: var(--primary-color);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 8px 30px var(--shadow-medium);
+            position: relative;
+            text-align: center;
+            animation: fadeInScale 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .close-btn {
+            color: #aaa;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: var(--text-color-dark);
+            text-decoration: none;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-            .game-grid {
-                grid-template-columns: 1fr;
+            .header {
+                padding: 3rem 1rem;
             }
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>Brainiac Arcade 🚀</h1>
+        <p>Fun games to challenge your mind and learn new things!</p>
+    </div>
+    
     <div class="container">
-        <h1>Learn n Fun with Games! 😊</h1>
         <ul class="game-grid">
             <li class="game-card">
                 <a href="color_game.html">
                     <span class="game-icon">🎨</span>
                     <span class="game-name">Color Challenge</span>
                 </a>
+                <button class="preview-btn" data-game="color-challenge">Preview</button>
             </li>
             <li class="game-card">
                 <a href="alphabet_game2.html">
                     <span class="game-icon">🔠</span>
                     <span class="game-name">Alphabet Adventure</span>
                 </a>
+                <button class="preview-btn" data-game="alphabet-adventure">Preview</button>
             </li>
             <li class="game-card">
                 <a href="logic_game.html">
                     <span class="game-icon">🧠</span>
                     <span class="game-name">Logic Puzzle</span>
                 </a>
+                <button class="preview-btn" data-game="logic-puzzle">Preview</button>
             </li>
             <li class="game-card">
                 <a href="math_fun (2).html">
                     <span class="game-icon">➕</span>
                     <span class="game-name">Math Fun</span>
                 </a>
+                <button class="preview-btn" data-game="math-fun">Preview</button>
             </li>
             <li class="game-card">
                 <a href="math_game.html">
                     <span class="game-icon">📊</span>
                     <span class="game-name">Math Mania</span>
                 </a>
+                <button class="preview-btn" data-game="math-mania">Preview</button>
             </li>
             <li class="game-card">
                 <a href="simple_math.html">
                     <span class="game-icon">➖</span>
                     <span class="game-name">Simple Math</span>
                 </a>
+                <button class="preview-btn" data-game="simple-math">Preview</button>
             </li>
             <li class="game-card">
                 <a href="vertical_addition (1).html">
                     <span class="game-icon">📈</span>
                     <span class="game-name">Vertical Addition</span>
                 </a>
+                <button class="preview-btn" data-game="vertical-addition">Preview</button>
             </li>
             <li class="game-card">
                 <a href="vertical_addition_bangla.html">
                     <span class="game-icon">📚</span>
                     <span class="game-name">Bangla Addition</span>
                 </a>
+                <button class="preview-btn" data-game="bangla-addition">Preview</button>
             </li>
         </ul>
     </div>
+
+    <div id="game-preview-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="Game Preview">
+                <p id="modal-description"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('game-preview-modal');
+            const closeBtn = document.querySelector('.close-btn');
+
+            // Sample data for each game. Replace 'path/to/...' with your actual image paths.
+            const gameData = {
+                'color-challenge': {
+                    title: 'Color Challenge',
+                    description: 'Match the colors to test your speed and recognition!',
+                    image: 'https://via.placeholder.com/600x400.png?text=Color+Challenge+Preview'
+                },
+                'alphabet-adventure': {
+                    title: 'Alphabet Adventure',
+                    description: 'Learn your ABCs by finding the right letters!',
+                    image: 'https://via.placeholder.com/600x400.png?text=Alphabet+Adventure+Preview'
+                },
+                'logic-puzzle': {
+                    title: 'Logic Puzzle',
+                    description: 'Solve fun brain teasers and improve your problem-solving skills!',
+                    image: 'https://via.placeholder.com/600x400.png?text=Logic+Puzzle+Preview'
+                },
+                'math-fun': {
+                    title: 'Math Fun',
+                    description: 'Engaging math games to make learning numbers a blast!',
+                    image: 'https://via.placeholder.com/600x400.png?text=Math+Fun+Preview'
+                },
+                'math-mania': {
+                    title: 'Math Mania',
+                    description: 'A fast-paced challenge to sharpen your math skills.',
+                    image: 'https://via.placeholder.com/600x400.png?text=Math+Mania+Preview'
+                },
+                'simple-math': {
+                    title: 'Simple Math',
+                    description: 'Practice basic addition and subtraction with this simple game.',
+                    image: 'https://via.placeholder.com/600x400.png?text=Simple+Math+Preview'
+                },
+                'vertical-addition': {
+                    title: 'Vertical Addition',
+                    description: 'Learn to add numbers vertically in a clear and easy way.',
+                    image: 'https://via.placeholder.com/600x400.png?text=Vertical+Addition+Preview'
+                },
+                'bangla-addition': {
+                    title: 'Bangla Addition',
+                    description: 'A special game for learning vertical addition in Bangla.',
+                    image: 'https://via.placeholder.com/600x400.png?text=Bangla+Addition+Preview'
+                }
+            };
+
+            document.querySelectorAll('.preview-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent the link from navigating
+                    const gameId = button.getAttribute('data-game');
+                    const data = gameData[gameId];
+
+                    if (data) {
+                        document.getElementById('modal-title').innerText = data.title;
+                        document.getElementById('modal-image').src = data.image;
+                        document.getElementById('modal-description').innerText = data.description;
+                        modal.style.display = 'flex';
+                    }
+                });
+            });
+
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
