@@ -324,13 +324,31 @@
         }
 
         function getGameTypeByLevel(level) {
-            if (level <= 10) {
+            if (level <= 5) {
+                // Levels 1-5: Start with "find the different" for easy onboarding
                 return 'find-different';
-            } else if (level <= 20) {
+            } else if (level <= 10) {
+                // Levels 6-10: Introduce "find the matching"
                 return 'find-matching';
-            } else if (level <= 25) {
-                 return 'pattern';
+            } else if (level <= 15) {
+                // Levels 11-15: Introduce "pattern" and mix with previous types
+                 const gameType = Math.floor(Math.random() * 3) + 1;
+                if (gameType === 1) return 'find-different';
+                if (gameType === 2) return 'find-matching';
+                return 'pattern';
+            } else if (level <= 20) {
+                // Levels 16-20: Add "drag and drop"
+                 const gameType = Math.floor(Math.random() * 4) + 1;
+                if (gameType === 1) return 'find-different';
+                if (gameType === 2) return 'find-matching';
+                if (gameType === 3) return 'pattern';
+                return 'drag-drop';
             } else {
+                // Levels 21-30: A complete mix of all puzzle types
+                 const gameType = Math.floor(Math.random() * 4) + 1;
+                if (gameType === 1) return 'find-different';
+                if (gameType === 2) return 'find-matching';
+                if (gameType === 3) return 'pattern';
                 return 'drag-drop';
             }
         }
