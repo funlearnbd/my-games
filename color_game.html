@@ -9,14 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #50e3c2; /* Mint Green */
-            --secondary-color: #4a90e2; /* Sky Blue */
-            --accent-color: #f5a623; /* Warm Orange */
-            --background-color: #f0f4f8; /* Light Grey-Blue */
-            --text-color-dark: #2a2a2a;
+            --primary-color: #00b894; /* Brighter Green */
+            --secondary-color: #0984e3; /* Brighter Blue */
+            --accent-color: #ff7675; /* Coral Red */
+            --background-color: #dfe6e9; /* Light Grey-Blue */
+            --text-color-dark: #2d3436;
             --box-shadow-light: rgba(0, 0, 0, 0.1);
             --box-shadow-medium: rgba(0, 0, 0, 0.2);
-            --success-color: #4CAF50;
+            --success-color: #27ae60;
             --error-color: #e74c3c;
         }
 
@@ -114,15 +114,15 @@
             transition: all 0.3s ease;
         }
 
-        #start, #restart {
+        #restart {
             background-color: var(--primary-color);
-            box-shadow: 0 4px 10px rgba(80, 227, 194, 0.4);
+            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
         }
 
-        #start:hover, #restart:hover {
-            background-color: #40c49e;
+        #restart:hover {
+            background-color: #00a884;
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(80, 227, 194, 0.6);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
         }
 
         #exit {
@@ -153,14 +153,14 @@
 
     <script>
         const colors = [
-            { name: 'Red', value: '#FF5733' },
-            { name: 'Blue', value: '#3385FF' },
-            { name: 'Green', value: '#33FF57' },
-            { name: 'Yellow', value: '#FFC733' },
-            { name: 'Purple', value: '#9933FF' },
-            { name: 'Orange', value: '#FF8A33' },
-            { name: 'Pink', value: '#FF33A1' },
-            { name: 'Teal', value: '#33FFF3' }
+            { name: 'Red', value: '#eb4d4b' },
+            { name: 'Blue', value: '#2e86de' },
+            { name: 'Green', value: '#6ab04c' },
+            { name: 'Yellow', value: '#f9ca24' },
+            { name: 'Purple', value: '#8e44ad' },
+            { name: 'Orange', value: '#e67e22' },
+            { name: 'Pink', value: '#fd79a8' },
+            { name: 'Teal', value: '#1abc9c' }
         ];
 
         let score = 0;
@@ -227,10 +227,9 @@
 
         function exitGame() {
             synth.cancel();
-            window.location.href = 'index.html'; // Redirect to the homepage
+            window.location.href = 'index.html';
         }
 
-        // The game now starts automatically when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             setupRound();
         });
