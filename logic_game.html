@@ -379,26 +379,19 @@
             clueDisplay.textContent = clueText;
             speak(clueText);
 
-            // Generate options for "Find the matching item"
+            // Create a board with exactly one correct answer
             const options = [];
             
-            // Add the correct emoji multiple times
-            const numCorrectEmojis = Math.floor(Math.random() * 3) + 2; // 2 to 4 correct matches
-            for (let i = 0; i < numCorrectEmojis; i++) {
-                options.push(clueEmoji);
-            }
+            // Add the single correct emoji
+            options.push(clueEmoji);
             
-            // Add a variety of incorrect emojis
+            // Get all other emojis
             const wrongEmojis = allEmojis.filter(e => e !== clueEmoji);
             shuffleArray(wrongEmojis);
             
-            while (options.length < 9) {
-                if (wrongEmojis.length > 0) {
-                    options.push(wrongEmojis.pop());
-                } else {
-                    // Fallback in case there aren't enough wrong emojis
-                    options.push(clueEmoji); 
-                }
+            // Add 8 other distinct emojis
+            for (let i = 0; i < 8 && i < wrongEmojis.length; i++) {
+                options.push(wrongEmojis[i]);
             }
             
             renderGrid(options, clueEmoji);
