@@ -140,15 +140,14 @@
 <body>
     <div class="game-container">
         <h1>Color Match Mania! ✨</h1>
-        <div id="word-display" style="display: none;"></div>
-        <div id="color-boxes" style="display: none;"></div>
-        <div id="message">Click Start to play!</div>
-        <div id="score" style="display: none;">Score: 0</div>
+        <div id="word-display"></div>
+        <div id="color-boxes"></div>
+        <div id="message"></div>
+        <div id="score">Score: 0</div>
         
         <div class="button-group">
-            <button id="start">Start Game</button>
-            <button id="restart" style="display: none;">New Game</button>
-            <button id="exit" style="display: none;">Exit Game</button>
+            <button id="restart">New Game</button>
+            <button id="exit">Exit Game</button>
         </div>
     </div>
 
@@ -173,7 +172,6 @@
         const colorBoxes = document.getElementById('color-boxes');
         const message = document.getElementById('message');
         const scoreDisplay = document.getElementById('score');
-        const startButton = document.getElementById('start');
         const restartButton = document.getElementById('restart');
         const exitButton = document.getElementById('exit');
 
@@ -193,19 +191,6 @@
                 utterance.pitch = 1;
                 synth.speak(utterance);
             }
-        }
-
-        function startGame() {
-            score = 0;
-            scoreDisplay.textContent = `Score: ${score}`;
-            message.textContent = '';
-            wordDisplay.style.display = 'block';
-            colorBoxes.style.display = 'flex';
-            scoreDisplay.style.display = 'block';
-            startButton.style.display = 'none';
-            restartButton.style.display = 'inline-block';
-            exitButton.style.display = 'inline-block';
-            setupRound();
         }
 
         function setupRound() {
@@ -245,8 +230,17 @@
             window.location.href = 'index.html'; // Redirect to the homepage
         }
 
-        startButton.addEventListener('click', startGame);
-        restartButton.addEventListener('click', startGame);
+        // The game now starts automatically when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setupRound();
+        });
+        
+        restartButton.addEventListener('click', () => {
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            setupRound();
+        });
+
         exitButton.addEventListener('click', exitGame);
     </script>
 </body>
