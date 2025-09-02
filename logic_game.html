@@ -94,7 +94,7 @@
             flex-direction: column;
         }
         
-        h1 {
+        .game-container h1 {
             font-size: clamp(2rem, 4vw, 3rem);
             color: var(--secondary-color);
             font-weight: 700;
@@ -277,7 +277,7 @@
 
         let currentLevel = 1;
         let score = 0;
-        let lastSpokenLevel = 0; // New variable to track the last spoken level
+        let lastSpokenLevel = 0;
         const synth = window.speechSynthesis;
         let voiceSupported = true;
 
@@ -335,14 +335,16 @@
                 return;
             }
 
-            // Only speak the level intro if it's a new level
+            const instructionsText = getInstructionsText(currentLevel);
+            instructionsDisplay.textContent = `Level ${currentLevel}: ${instructionsText}`;
+
+            // Only speak the level number if it's a new level
             if (currentLevel > lastSpokenLevel) {
-                const instructionsText = `Level ${currentLevel}: ${getInstructionsText(currentLevel)}`;
-                instructionsDisplay.textContent = instructionsText;
-                speak(instructionsText);
+                speak(`Level ${currentLevel}: ${instructionsText}`);
                 lastSpokenLevel = currentLevel;
             } else {
-                instructionsDisplay.textContent = `Level ${currentLevel}: ${getInstructionsText(currentLevel)}`;
+                // For subsequent rounds in the same level, just speak the instructions
+                speak(instructionsText);
             }
 
             if (currentLevel === 1) {
@@ -422,134 +424,4 @@
             renderGrid(options, correctAnswerEmoji);
         }
 
-        function setupLevel3() {
-            clueDisplay.textContent = '';
-            
-            const isColorPattern = Math.random() < 0.5;
-            let emoji1, emoji2, correctAnswerEmoji, options;
-
-            if (isColorPattern) {
-                const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
-                const startIndex = Math.floor(Math.random() * (colors.length - 3));
-                
-                emoji1 = coloredEmojis[shape][startIndex];
-                emoji2 = coloredEmojis[shape][startIndex + 1];
-                correctAnswerEmoji = coloredEmojis[shape][startIndex + 2];
-                options = generateColoredOptions(correctAnswerEmoji, 3);
-            } else {
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const shapeTypes = shapes.filter(s => s !== 'face');
-                const startIndex = Math.floor(Math.random() * (shapeTypes.length - 2));
-
-                emoji1 = coloredEmojis[shapeTypes[startIndex]][colors.indexOf(color)];
-                emoji2 = coloredEmojis[shapeTypes[startIndex + 1]][colors.indexOf(color)];
-                correctAnswerEmoji = coloredEmojis[shapeTypes[startIndex + 2]][colors.indexOf(color)];
-                options = generateColoredOptions(correctAnswerEmoji, 3);
-            }
-
-            patternDisplay.innerHTML = '';
-            [emoji1, emoji2].forEach(emoji => {
-                const item = document.createElement('div');
-                item.className = 'item';
-                item.textContent = emoji;
-                patternDisplay.appendChild(item);
-            });
-            
-            const questionMark = document.createElement('div');
-            questionMark.id = 'question-mark';
-            questionMark.textContent = '?';
-            patternDisplay.appendChild(questionMark);
-            
-            renderGrid(options, correctAnswerEmoji);
-        }
-
-        function checkAnswer(clickedEmoji, correctAnswerEmoji) {
-            if (clickedEmoji === correctAnswerEmoji) {
-                successSound.play();
-                score++;
-                scoreDisplay.textContent = `Score: ${score}`;
-                messageDisplay.textContent = 'Correct! Great job!';
-                messageDisplay.style.color = 'var(--success-color)';
-                speak('Correct!');
-                
-                setTimeout(() => {
-                    messageDisplay.textContent = '';
-                    if (score % 5 === 0 && score > 0) {
-                        currentLevel++;
-                        speak(`You're ready for level ${currentLevel}!`);
-                    }
-                    newRound();
-                }, 1500);
-            } else {
-                buzzSound.play();
-                messageDisplay.textContent = 'Try again!';
-                messageDisplay.style.color = 'var(--error-color)';
-                speak('Try again!');
-            }
-        }
-
-        function renderGrid(options, correctAnswerEmoji) {
-            answerGrid.innerHTML = '';
-            shuffleArray(options);
-            options.forEach(emoji => {
-                const answerBox = document.createElement('div');
-                answerBox.className = 'answer-box';
-                answerBox.textContent = emoji;
-                answerBox.addEventListener('click', () => checkAnswer(emoji, correctAnswerEmoji));
-                answerGrid.appendChild(answerBox);
-            });
-        }
-
-        function generateColoredOptions(correctEmoji, count) {
-            const options = new Set();
-            options.add(correctEmoji);
-            
-            const allColoredEmojis = Object.values(coloredEmojis).flat();
-            const wrongEmojis = allColoredEmojis.filter(e => e !== correctEmoji);
-            shuffleArray(wrongEmojis);
-
-            while (options.size < count && wrongEmojis.length > 0) {
-                options.add(wrongEmojis.pop());
-            }
-            return Array.from(options);
-        }
-
-        function generateFaceOptions(correctEmoji, count) {
-            const options = new Set();
-            options.add(correctEmoji);
-            
-            const allFaceEmojis = Object.values(faceEmojis);
-            const wrongEmojis = allFaceEmojis.filter(e => e !== correctEmoji);
-            shuffleArray(wrongEmojis);
-
-            while (options.size < count && wrongEmojis.length > 0) {
-                options.add(wrongEmojis.pop());
-            }
-            return Array.from(options);
-        }
-
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        function exitGame() {
-            synth.cancel();
-            window.location.href = 'index.html';
-        }
-        
-        startButton.addEventListener('click', startGame);
-        restartButton.addEventListener('click', () => {
-            score = 0;
-            scoreDisplay.textContent = `Score: ${score}`;
-            currentLevel = 1;
-            lastSpokenLevel = 0;
-            newRound();
-        });
-        exitButton.addEventListener('click', exitGame);
-    </script>
-</body>
-</html>
+        function
