@@ -311,12 +311,8 @@
             
             // Choose game type based on level
             if (currentLevel <= 10) {
-                // Levels 1-10: Mix of Level 1 and Level 2
-                if (Math.random() < 0.6) {
-                    setupLevel1();
-                } else {
-                    setupLevel2();
-                }
+                // Levels 1-10: Only "Find the one that is different"
+                setupLevel1();
             } else if (currentLevel <= 20) {
                 // Levels 11-20: Mix of Level 2 and Level 3 (patterns)
                 if (Math.random() < 0.5) {
