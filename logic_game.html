@@ -198,7 +198,6 @@
             justify-content: center;
             align-items: center;
         }
-
     </style>
 </head>
 <body>
@@ -357,17 +356,17 @@
         function setupLevel1() {
             const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
             
-            const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+            const matchingEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
             
             let clueText;
-            if (Object.values(uniqueEmojis).includes(clueEmoji)) {
-                const clueKey = Object.keys(uniqueEmojis).find(key => uniqueEmojis[key] === clueEmoji);
+            if (Object.values(uniqueEmojis).includes(matchingEmoji)) {
+                const clueKey = Object.keys(uniqueEmojis).find(key => uniqueEmojis[key] === matchingEmoji);
                 clueText = `Find the ${clueKey}.`;
             } else {
                 let foundShape = '';
                 let foundColor = '';
                 for (const shape in coloredEmojis) {
-                    const colorIndex = coloredEmojis[shape].indexOf(clueEmoji);
+                    const colorIndex = coloredEmojis[shape].indexOf(matchingEmoji);
                     if (colorIndex !== -1) {
                         foundShape = shape;
                         foundColor = colors[colorIndex];
@@ -380,51 +379,34 @@
             clueDisplay.textContent = clueText;
             speak(clueText);
 
-            const options = new Set();
-            options.add(clueEmoji);
+            const options = [matchingEmoji];
             
-            while (options.size < 9) {
+            while (options.length < 9) {
                 const randomEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-                if (randomEmoji !== clueEmoji) {
-                    options.add(randomEmoji);
+                if (randomEmoji !== matchingEmoji) {
+                    options.push(randomEmoji);
                 }
             }
 
-            renderGrid(Array.from(options), clueEmoji);
+            renderGrid(options, matchingEmoji);
         }
 
         function setupLevel2() {
             clueDisplay.textContent = '';
             
-            const allShapes = Object.keys(coloredEmojis).concat(Object.keys(uniqueEmojis));
-            const randomShape = allShapes[Math.floor(Math.random() * allShapes.length)];
-            let commonEmoji, differentEmoji, options;
+            const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
+            
+            let commonEmoji, differentEmoji;
+            const commonEmojiIndex = Math.floor(Math.random() * allEmojis.length);
+            commonEmoji = allEmojis[commonEmojiIndex];
+            
+            const otherEmojis = allEmojis.filter(e => e !== commonEmoji);
+            const differentEmojiIndex = Math.floor(Math.random() * otherEmojis.length);
+            differentEmoji = otherEmojis[differentEmojiIndex];
 
-            if (Object.keys(uniqueEmojis).includes(randomShape)) {
-                const uniqueKeys = Object.keys(uniqueEmojis);
-                const commonKey = uniqueKeys[Math.floor(Math.random() * uniqueKeys.length)];
-                commonEmoji = uniqueEmojis[commonKey];
-                let otherUniqueKeys = uniqueKeys.filter(key => key !== commonKey);
-                if (otherUniqueKeys.length > 0) {
-                    const differentKey = otherUniqueKeys[Math.floor(Math.random() * otherUniqueKeys.length)];
-                    differentEmoji = uniqueEmojis[differentKey];
-                } else {
-                    differentEmoji = commonEmoji;
-                }
-                options = [differentEmoji];
-                for (let i = 0; i < 8; i++) {
-                    options.push(commonEmoji);
-                }
-            } else {
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                commonEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
-                let otherColors = colors.filter(c => c !== randomColor);
-                let differentColor = otherColors[Math.floor(Math.random() * otherColors.length)];
-                differentEmoji = coloredEmojis[randomShape][colors.indexOf(differentColor)];
-                options = [differentEmoji];
-                for (let i = 0; i < 8; i++) {
-                    options.push(commonEmoji);
-                }
+            const options = [differentEmoji];
+            for (let i = 0; i < 8; i++) {
+                options.push(commonEmoji);
             }
             
             const correctAnswerEmoji = differentEmoji;
