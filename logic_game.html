@@ -339,23 +339,23 @@
             speak('Level 1: Find the matching item.');
 
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-            let clueText, correctAnswerEmoji;
+            let clueText, correctAnswerEmoji, options;
 
             if (randomShape === 'face') {
                 const emotionKeys = Object.keys(faceEmojis);
                 const randomEmotion = emotionKeys[Math.floor(Math.random() * emotionKeys.length)];
                 correctAnswerEmoji = faceEmojis[randomEmotion];
                 clueText = `Find the ${randomEmotion} face.`;
+                options = generateFaceOptions(correctAnswerEmoji, 9);
             } else {
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
                 correctAnswerEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
                 clueText = `Find the ${randomColor} ${randomShape}.`;
+                options = generateColoredOptions(correctAnswerEmoji, 9);
             }
 
             clueDisplay.textContent = clueText;
             speak(clueText);
-
-            const options = generateOptions(correctAnswerEmoji, 9, randomShape);
             renderGrid(options, correctAnswerEmoji);
         }
 
@@ -365,28 +365,34 @@
             clueDisplay.textContent = '';
 
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-            let commonEmojis, differentEmoji;
+            let commonEmoji, differentEmoji, options;
 
             if (randomShape === 'face') {
-                commonEmojis = Object.values(faceEmojis);
-                const commonEmoji = commonEmojis[Math.floor(Math.random() * commonEmojis.length)];
-                differentEmoji = commonEmojis.filter(e => e !== commonEmoji)[Math.floor(Math.random() * (commonEmojis.length - 1))];
-                commonEmojis = [commonEmoji]; // To build the options array later
+                const faceValues = Object.values(faceEmojis);
+                commonEmoji = faceValues[Math.floor(Math.random() * faceValues.length)];
+                let otherFaces = faceValues.filter(e => e !== commonEmoji);
+                if (otherFaces.length > 0) {
+                    differentEmoji = otherFaces[Math.floor(Math.random() * otherFaces.length)];
+                } else { // Fallback if only one face emoji is available
+                    differentEmoji = commonEmoji;
+                }
+                options = [differentEmoji];
+                for (let i = 0; i < 8; i++) {
+                    options.push(commonEmoji);
+                }
             } else {
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                const commonEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
-                const otherColors = colors.filter(c => c !== randomColor);
-                const differentColor = otherColors[Math.floor(Math.random() * otherColors.length)];
+                commonEmoji = coloredEmojis[randomShape][colors.indexOf(randomColor)];
+                let otherColors = colors.filter(c => c !== randomColor);
+                let differentColor = otherColors[Math.floor(Math.random() * otherColors.length)];
                 differentEmoji = coloredEmojis[randomShape][colors.indexOf(differentColor)];
-                commonEmojis = [commonEmoji];
-            }
-
-            const correctAnswerEmoji = differentEmoji;
-            const options = [differentEmoji];
-            for (let i = 0; i < 8; i++) {
-                options.push(commonEmojis[0]); // Only one common emoji type for Level 2
+                options = [differentEmoji];
+                for (let i = 0; i < 8; i++) {
+                    options.push(commonEmoji);
+                }
             }
             
+            const correctAnswerEmoji = differentEmoji;
             renderGrid(options, correctAnswerEmoji);
         }
 
@@ -396,7 +402,7 @@
             clueDisplay.textContent = '';
             
             const ruleType = Math.random() < 0.5 ? 'color' : 'shape';
-            let emoji1, emoji2, correctAnswerEmoji;
+            let emoji1, emoji2, correctAnswerEmoji, options;
 
             if (ruleType === 'color') {
                 const shape = shapes.filter(s => s !== 'face')[Math.floor(Math.random() * (shapes.length - 1))];
@@ -407,17 +413,16 @@
                 emoji1 = coloredEmojis[shape][colors.indexOf(color1)];
                 emoji2 = coloredEmojis[shape][colors.indexOf(color2)];
                 correctAnswerEmoji = coloredEmojis[shape][colors.indexOf(color3)];
+                options = generateColoredOptions(correctAnswerEmoji, 3);
             } else { // ruleType === 'shape'
                 const isFacePattern = Math.random() < 0.5;
                 if (isFacePattern) {
                     const allFaceEmojis = Object.values(faceEmojis);
-                    const shape1 = allFaceEmojis[Math.floor(Math.random() * allFaceEmojis.length)];
-                    let shape2 = allFaceEmojis.filter(e => e !== shape1)[Math.floor(Math.random() * (allFaceEmojis.length - 1))];
-                    let shape3 = allFaceEmojis.filter(e => e !== shape1 && e !== shape2)[Math.floor(Math.random() * (allFaceEmojis.length - 2))];
-
-                    emoji1 = shape1;
-                    emoji2 = shape2;
-                    correctAnswerEmoji = shape3;
+                    const emojiSet = shuffleArray([...allFaceEmojis]);
+                    emoji1 = emojiSet[0];
+                    emoji2 = emojiSet[1];
+                    correctAnswerEmoji = emojiSet[2];
+                    options = generateFaceOptions(correctAnswerEmoji, 3);
                 } else {
                     const color = colors[Math.floor(Math.random() * colors.length)];
                     const shapeTypes = shapes.filter(s => s !== 'face');
@@ -428,6 +433,7 @@
                     emoji1 = coloredEmojis[shape1][colors.indexOf(color)];
                     emoji2 = coloredEmojis[shape2][colors.indexOf(color)];
                     correctAnswerEmoji = coloredEmojis[shape3][colors.indexOf(color)];
+                    options = generateColoredOptions(correctAnswerEmoji, 3);
                 }
             }
 
@@ -447,7 +453,6 @@
             questionMark.textContent = '?';
             patternDisplay.appendChild(questionMark);
             
-            const options = generateOptions(correctAnswerEmoji, 3, 'pattern');
             renderGrid(options, correctAnswerEmoji);
         }
 
@@ -487,37 +492,31 @@
                 answerGrid.appendChild(answerBox);
             });
         }
-        
-        function getEmoji(color, shape) {
-            if (shape === 'face') {
-                const emotionKeys = Object.keys(faceEmojis);
-                return faceEmojis[emotionKeys[Math.floor(Math.random() * emotionKeys.length)]];
-            } else {
-                return coloredEmojis[shape][colors.indexOf(color)];
-            }
-        }
 
-        function generateOptions(correctEmoji, count, shapeType) {
+        function generateColoredOptions(correctEmoji, count) {
             const options = new Set();
             options.add(correctEmoji);
             
-            let allAvailableEmojis = [];
-            if (shapeType === 'face' || correctEmoji in Object.values(faceEmojis)) {
-                allAvailableEmojis = Object.values(faceEmojis);
-            } else {
-                for (const shape in coloredEmojis) {
-                    allAvailableEmojis = allAvailableEmojis.concat(coloredEmojis[shape]);
-                }
-            }
-
-            const wrongEmojis = allAvailableEmojis.filter(e => e !== correctEmoji);
+            const allColoredEmojis = Object.values(coloredEmojis).flat();
+            const wrongEmojis = allColoredEmojis.filter(e => e !== correctEmoji);
             shuffleArray(wrongEmojis);
 
-            while (options.size < count) {
-                const randomEmoji = wrongEmojis.pop();
-                if (randomEmoji) {
-                    options.add(randomEmoji);
-                }
+            while (options.size < count && wrongEmojis.length > 0) {
+                options.add(wrongEmojis.pop());
+            }
+            return Array.from(options);
+        }
+
+        function generateFaceOptions(correctEmoji, count) {
+            const options = new Set();
+            options.add(correctEmoji);
+            
+            const allFaceEmojis = Object.values(faceEmojis);
+            const wrongEmojis = allFaceEmojis.filter(e => e !== correctEmoji);
+            shuffleArray(wrongEmojis);
+
+            while (options.size < count && wrongEmojis.length > 0) {
+                options.add(wrongEmojis.pop());
             }
             return Array.from(options);
         }
