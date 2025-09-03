@@ -173,7 +173,6 @@ function newRound(){
   hintOverlay.style.display="none";
   totalRounds++;
 
-  // Mode selection logic for progressive learning
   if(selectRounds<10) currentMode="select";
   else if(dragRounds<10) currentMode="drag";
   else if(missingRounds<10) currentMode="missing";
@@ -210,7 +209,6 @@ function newRound(){
       grid.appendChild(box);
     });
 
-    // Hint for first 2 rounds
     if((selectRounds<2 && currentMode==="select") || (dragRounds<2 && currentMode==="drag")){
       showHint();
     }
@@ -222,11 +220,11 @@ function newRound(){
     const base = items[Math.floor(Math.random()*items.length)];
     const different = items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)];
     correctAnswer = different.src;
-    questionDisplay.textContent="Find the different one!";
+    questionDisplay.textContent = "Find the different item!";
     speak(questionDisplay.textContent);
-    const arr = Array(5).fill(base).concat(different);
-    shuffleArray(arr);
-    arr.forEach(opt=>{
+    const options = Array(5).fill(base).concat([different]);
+    shuffleArray(options);
+    options.forEach(opt=>{
       const box=document.createElement("div");
       box.className="answer-box";
       const img=document.createElement("img");
@@ -235,13 +233,12 @@ function newRound(){
       box.onclick = ()=>checkAnswer(opt.src,opt.sound);
       grid.appendChild(box);
     });
-    if(diffRounds<=2) showHint();
   }
   else if(currentMode==="missing"){
     missingRounds++;
-    let availableItems = items.slice();
-    shuffleArray(availableItems);
-    const sequence = availableItems.slice(0,4);
+    let sequence = items.slice(0);
+    shuffleArray(sequence);
+    sequence=sequence.slice(0,4);
     const missingIndex = Math.floor(Math.random()*sequence.length);
     correctAnswer = sequence[missingIndex].src;
     questionDisplay.textContent="Find the missing piece!";
@@ -249,7 +246,7 @@ function newRound(){
 
     sequence.forEach((it,i)=>{
       if(i!==missingIndex){
-        const div = document.createElement("div");
+        const div=document.createElement("div");
         div.className="answer-box";
         const img=document.createElement("img");
         img.src=it.src;
@@ -303,8 +300,8 @@ function showHint(){
   boxes.forEach(box=>{
     if(box.querySelector("img") && box.querySelector("img").src===correctAnswer){
       const rect = box.getBoundingClientRect();
-      hintOverlay.style.top = rect.top+"px";
-      hintOverlay.style.left = rect.left+"px";
+      hintOverlay.style.top = rect.top + "px";
+      hintOverlay.style.left = rect.left + "px";
       hintOverlay.style.display="block";
       setTimeout(()=>hintOverlay.style.display="none",1500);
     }
