@@ -282,17 +282,6 @@
         if (!synth) {
             voiceSupported = false;
         }
-        
-        // This function will now be called after the rest of the game is loaded
-        function speakInstructions(gameType, clueText = '') {
-            if (!voiceSupported) return;
-            const generalInstruction = getGeneralInstruction(gameType);
-            let fullInstruction = `Level ${currentLevel}: ${generalInstruction}`;
-            if (clueText) {
-                fullInstruction += `. ${clueText}`;
-            }
-            speak(fullInstruction);
-        }
 
         function speak(text) {
             if (voiceSupported) {
@@ -370,9 +359,11 @@
                 options.push(commonEmoji);
             }
             
+            const generalInstruction = getGeneralInstruction('find-different');
+            speak(`Level ${currentLevel}: ${generalInstruction}`);
+            
             const correctAnswerEmoji = differentEmoji;
             renderGrid(options, correctAnswerEmoji);
-            speakInstructions('find-different');
         }
 
         function setupFindMatching() {
@@ -398,7 +389,8 @@
             }
             
             clueDisplay.textContent = clueText;
-            speakInstructions('find-matching', clueText);
+            const generalInstruction = getGeneralInstruction('find-matching');
+            speak(`Level ${currentLevel}: ${generalInstruction}. ${clueText}`);
 
             const options = [clueEmoji];
             
@@ -450,7 +442,8 @@
             questionMark.textContent = '?';
             patternDisplay.appendChild(questionMark);
             
-            speakInstructions('pattern');
+            const generalInstruction = getGeneralInstruction('pattern');
+            speak(`Level ${currentLevel}: ${generalInstruction}`);
             
             renderGrid(options, correctAnswerEmoji);
         }
@@ -472,7 +465,8 @@
             const q = `Drag the ${randomColor} ${randomShape}.`;
             clueDisplay.textContent = q;
             
-            speakInstructions('drag-drop', q);
+            const generalInstruction = getGeneralInstruction('drag-drop');
+            speak(`Level ${currentLevel}: ${generalInstruction}. ${q}`);
             
             const distractors = generateOptions(target, 3, Object.values(coloredEmojis).flat());
             shuffleArray(distractors);
