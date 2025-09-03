@@ -5,95 +5,26 @@
 <title>Kids Logic Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
-  font-family: 'Comic Sans MS', cursive, sans-serif;
-  margin: 0; padding: 0;
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-h1 { 
-  margin-top: 15px;
-  font-size: 40px;
-  color: #e74c3c;
-  text-shadow: 2px 2px #fff;
-}
-#question { 
-  font-size: 26px; 
-  margin: 10px 0; 
-  color: #2c3e50;
-  min-height: 50px;
-  text-align:center;
-}
-#grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
-  gap: 12px; 
-  justify-items: center;
-  width: 90%;
-  max-width: 700px;
-}
-.answer-box { 
-  width: 100px; 
-  height: 100px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 50px; 
-  border: 3px solid #3498db; 
-  border-radius: 16px; 
-  background: #fff; 
-  cursor: pointer; 
-  user-select: none; 
-  transition: transform 0.3s, background 0.3s, border-color 0.3s;
-  box-shadow: 2px 4px 12px rgba(0,0,0,0.2);
-  position: relative;
-}
-.answer-box img { width: 90px; height: 90px; object-fit: contain; }
-.answer-box.correct { animation: bounce 0.5s; border-color:#27ae60; background:#d4f7dc; }
-.answer-box.wrong { animation: shake 0.5s; border-color:#e74c3c; background:#f7d4d4; }
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-20px); }
-  60% { transform: translateY(-10px); }
-}
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  50% { transform: translateX(8px); }
-  75% { transform: translateX(-8px); }
-  100% { transform: translateX(0); }
-}
-#drop-zone { 
-  margin: 10px auto; 
-  width: 250px; 
-  height: 100px; 
-  border: 3px dashed #27ae60; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  font-size: 18px; 
-  border-radius: 16px; 
-  color: #27ae60; 
-  display: none; 
-  transition: background 0.3s, border-color 0.3s;
-  background: #d4f7dc;
-  position: relative;
-}
-#drop-zone.drag-over { background: #a4e0b0; border-color: #2ecc71; color:#2c3e50; }
-#message { font-size: 22px; margin-top: 8px; height: 28px; font-weight: bold; color:#2c3e50; min-height:28px;}
-#score { font-size: 22px; margin-top: 5px; color: #34495e; font-weight: bold; }
-#puzzle-display { display: grid; grid-template-columns: repeat(2, 100px); justify-content: center; gap: 8px; margin-bottom: 10px; font-size: 50px; }
-#drag-tutorial { display:none; position:absolute; width:60px; height:60px; pointer-events:none; font-size:48px; z-index:1000; }
-#hint-overlay { display:none; position:absolute; width:100px; height:100px; border: 4px solid #f1c40f; border-radius: 16px; box-shadow: 0 0 20px #f1c40f; z-index:999; pointer-events:none; }
+body { font-family: 'Comic Sans MS', cursive, sans-serif; margin:0; padding:0; background: linear-gradient(135deg, #ffecd2, #fcb69f); display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:100vh; }
+h1 { margin-top:15px; font-size:40px; color:#e74c3c; text-shadow:2px 2px #fff; }
+#question { font-size:26px; margin:10px 0; color:#2c3e50; min-height:50px; text-align:center; }
+#grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap:12px; justify-items:center; width:90%; max-width:700px; }
+.answer-box { width:100px; height:100px; display:flex; align-items:center; justify-content:center; font-size:50px; border:3px solid #3498db; border-radius:16px; background:#fff; cursor:pointer; user-select:none; transition:transform 0.3s, background 0.3s, border-color 0.3s; box-shadow:2px 4px 12px rgba(0,0,0,0.2); position:relative; }
+.answer-box img { width:90px; height:90px; object-fit:contain; }
+.answer-box.correct { animation:bounce 0.5s; border-color:#27ae60; background:#d4f7dc; }
+.answer-box.wrong { animation:shake 0.5s; border-color:#e74c3c; background:#f7d4d4; }
+@keyframes bounce {0%,20%,50%,80%,100%{transform:translateY(0);}40%{transform:translateY(-20px);}60%{transform:translateY(-10px);}}
+@keyframes shake {0%{transform:translateX(0);}25%{transform:translateX(-8px);}50%{transform:translateX(8px);}75%{transform:translateX(-8px);}100%{transform:translateX(0);}}
+#drop-zone { margin:10px auto; width:250px; height:100px; border:3px dashed #27ae60; display:flex; align-items:center; justify-content:center; font-size:18px; border-radius:16px; color:#27ae60; display:none; transition:background 0.3s, border-color 0.3s; background:#d4f7dc; position:relative; }
+#drop-zone.drag-over { background:#a4e0b0; border-color:#2ecc71; color:#2c3e50; }
+#message { font-size:22px; margin-top:8px; height:28px; font-weight:bold; color:#2c3e50; min-height:28px;}
+#score { font-size:22px; margin-top:5px; color:#34495e; font-weight:bold; }
+#puzzle-display { display:grid; grid-template-columns: repeat(2, 100px); justify-content:center; gap:8px; margin-bottom:10px; font-size:50px; }
+#drag-copy { position:absolute; width:90px; height:90px; pointer-events:none; display:none; z-index:1000; }
+#tutorial-arrow { position:absolute; width:50px; height:50px; background:url('https://i.imgur.com/h3iXzS9.png') no-repeat center center/contain; pointer-events:none; display:none; z-index:2000; }
 </style>
 </head>
 <body>
-
 <h1>Kids Logic Game</h1>
 <div id="question">Loading...</div>
 <div id="puzzle-display"></div>
@@ -101,47 +32,42 @@ h1 {
 <div id="drop-zone">Drag & Drop Answer Here</div>
 <div id="message"></div>
 <div id="score">Score: 0</div>
-<div id="drag-tutorial">➡️</div>
-<div id="hint-overlay"></div>
-
+<img id="drag-copy">
+<img id="tutorial-arrow">
 <audio id="bg-music" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
 <audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
 <script>
-// === Game Data ===
-const items = [
-  {name:"apple", src:"https://i.imgur.com/6v0zK4F.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-  {name:"banana", src:"https://i.imgur.com/7jZrK3l.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-  {name:"dog", src:"https://i.imgur.com/EnYvQ2n.png", sound:"https://actions.google.com/sounds/v1/animals/dog_bark.ogg"},
-  {name:"cat", src:"https://i.imgur.com/G6xE9wH.png", sound:"https://actions.google.com/sounds/v1/animals/cat_purr.ogg"},
-  {name:"flower", src:"https://i.imgur.com/5zr0X8U.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-  {name:"smile", src:"https://i.imgur.com/NZrFtXM.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"}
-];
+// === Data ===
+const items=[
+{name:"apple", src:"https://i.imgur.com/6v0zK4F.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"banana", src:"https://i.imgur.com/7jZrK3l.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"dog", src:"https://i.imgur.com/EnYvQ2n.png", sound:"https://actions.google.com/sounds/v1/animals/dog_bark.ogg"},
+{name:"cat", src:"https://i.imgur.com/G6xE9wH.png", sound:"https://actions.google.com/sounds/v1/animals/cat_purr.ogg"},
+{name:"flower", src:"https://i.imgur.com/5zr0X8U.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"smile", src:"https://i.imgur.com/NZrFtXM.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"car", src:"https://i.imgur.com/V2M9j6H.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"ball", src:"https://i.imgur.com/B6pHymL.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"star", src:"https://i.imgur.com/5C4qk6B.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"tree", src:"https://i.imgur.com/x0EXZxT.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"}];
 
-let score=0, correctAnswer="", currentMode="select", selectRounds=0, dragRounds=0, missingRounds=0, diffRounds=0;
-const questionDisplay=document.getElementById("question");
-const grid=document.getElementById("grid");
-const puzzleDisplay=document.getElementById("puzzle-display");
-const dropZone=document.getElementById("drop-zone");
-const messageDisplay=document.getElementById("message");
-const scoreDisplay=document.getElementById("score");
-const dragTutorial=document.getElementById("drag-tutorial");
-const hintOverlay=document.getElementById("hint-overlay");
-const bgMusic=document.getElementById("bg-music");
-bgMusic.volume=0.2;
-bgMusic.play();
+let score=0, correctAnswer="", currentMode="select", dragTutorialCount=0;
+const questionDisplay=document.getElementById("question"), grid=document.getElementById("grid"),
+puzzleDisplay=document.getElementById("puzzle-display"), dropZone=document.getElementById("drop-zone"),
+messageDisplay=document.getElementById("message"), scoreDisplay=document.getElementById("score"),
+dragCopy=document.getElementById("drag-copy"), bgMusic=document.getElementById("bg-music"),
+tutorialArrow=document.getElementById("tutorial-arrow");
 
-// === Helpers ===
+bgMusic.volume=0.2; bgMusic.play();
+
 function shuffleArray(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr;}
-function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text);window.speechSynthesis.speak(u);}}
+function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text); window.speechSynthesis.speak(u);}}
 
-// === Game Logic ===
+// === Game ===
 function newRound(){
-  grid.innerHTML=""; puzzleDisplay.innerHTML=""; dropZone.style.display="none"; dragTutorial.style.display="none"; messageDisplay.textContent="";
-  const modes=["select","select","drag","drag","missing","missing","different","different"];
-  shuffleArray(modes); currentMode=modes[0];
-  
+  grid.innerHTML=""; puzzleDisplay.innerHTML=""; dropZone.style.display="none"; messageDisplay.textContent="";
+  const modes=["select","drag","missing","different"]; shuffleArray(modes); currentMode=modes[0];
   if(currentMode==="select") generateSelect();
   else if(currentMode==="drag") generateDrag();
   else if(currentMode==="missing") generateMissing();
@@ -150,121 +76,99 @@ function newRound(){
 
 // === Select Mode ===
 function generateSelect(){
-  selectRounds++; dropZone.style.display="none";
+  dropZone.style.display="none";
   const correct=items[Math.floor(Math.random()*items.length)]; correctAnswer=correct.src;
-  questionDisplay.textContent="Find the "+correct.name+"!";
-  speak(questionDisplay.textContent);
-
+  questionDisplay.textContent="Find the "+correct.name+"!"; speak(questionDisplay.textContent);
   let options=[correct];
-  while(options.length<4){
-    const it=items[Math.floor(Math.random()*items.length)];
-    if(!options.includes(it)) options.push(it);
-  }
+  while(options.length<6){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
   shuffleArray(options);
-  options.forEach(opt=>{
-    const box=document.createElement("div"); box.className="answer-box";
-    const img=document.createElement("img"); img.src=opt.src; box.appendChild(img);
-    box.onclick=()=>checkAnswer(opt.src,opt.sound);
-    grid.appendChild(box);
+  options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img);
+    box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box);
   });
 }
 
-// === Drag Mode ===
+// === Drag Mode with Tutorial ===
 function generateDrag(){
-  dragRounds++; dropZone.style.display="flex";
-  const correct=items[Math.floor(Math.random()*items.length)]; correctAnswer=correct.src;
-  questionDisplay.textContent="Drag the "+correct.name+" to the box!";
-  speak(questionDisplay.textContent);
-
-  let options=[correct];
-  while(options.length<4){
-    const it=items[Math.floor(Math.random()*items.length)];
-    if(!options.includes(it)) options.push(it);
-  }
+  dropZone.style.display="flex"; const correct=items[Math.floor(Math.random()*items.length)]; correctAnswer=correct.src;
+  questionDisplay.textContent="Drag the "+correct.name+" to the box!"; speak(questionDisplay.textContent);
+  let options=[correct]; while(options.length<6){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
   shuffleArray(options);
-
   options.forEach(opt=>{
-    const box=document.createElement("div"); box.className="answer-box";
-    const img=document.createElement("img"); img.src=opt.src; img.draggable=true; box.appendChild(img);
-    img.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",opt.src));
-    grid.appendChild(box);
+    const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img);
+    enableTouchDrag(img,opt.sound); grid.appendChild(box);
   });
 
-  if(dragRounds<=2) showDragTutorial();
+  if(dragTutorialCount<2){
+    dragTutorialCount++;
+    showDragTutorial(correct);
+  }
 }
 
-// === Drag Tutorial ===
-function showDragTutorial(){
-  const box=document.querySelector(".answer-box img"); if(!box) return;
-  const rect=box.getBoundingClientRect(); dragTutorial.style.display="block"; dragTutorial.style.top=rect.top+"px"; dragTutorial.style.left=rect.left+"px";
-  const dz=dropZone.getBoundingClientRect(); let step=0; if(window.dragTutorialInterval) clearInterval(window.dragTutorialInterval);
-  window.dragTutorialInterval=setInterval(()=>{
-    let t=step%40; let prog=t/20; if(prog>1) prog=2-prog;
-    let x=rect.left+(dz.left-rect.left)*prog; let y=rect.top+(dz.top-rect.top)*prog;
-    dragTutorial.style.left=x+"px"; dragTutorial.style.top=y+"px"; step++;
-  },50);
+function showDragTutorial(correct){
+  tutorialArrow.style.display="block";
+  let posX=50, posY=grid.getBoundingClientRect().top+50; let dir=1;
+  const interval=setInterval(()=>{
+    posX+=dir*2;
+    if(posX>grid.getBoundingClientRect().left+200 || posX<grid.getBoundingClientRect().left+50) dir*=-1;
+    tutorialArrow.style.left=posX+"px"; tutorialArrow.style.top=posY+"px";
+  },20);
+  setTimeout(()=>{clearInterval(interval); tutorialArrow.style.display="none";},5000);
+}
+
+// === Touch Drag ===
+function enableTouchDrag(img,sound){
+  img.addEventListener("pointerdown", e=>{
+    e.preventDefault();
+    dragCopy.src=img.src; dragCopy.style.display="block"; dragCopy.style.left=e.pageX-45+"px"; dragCopy.style.top=e.pageY-45+"px";
+    const moveHandler = ev=>{ dragCopy.style.left=ev.pageX-45+"px"; dragCopy.style.top=ev.pageY-45+"px"; };
+    const upHandler = ev=>{
+      dragCopy.style.display="none";
+      document.removeEventListener("pointermove", moveHandler);
+      document.removeEventListener("pointerup", upHandler);
+      const dz=document.getElementById("drop-zone").getBoundingClientRect();
+      if(ev.clientX>dz.left && ev.clientX<dz.right && ev.clientY>dz.top && ev.clientY<dz.bottom){
+        checkAnswer(img.src,sound);
+      }
+    };
+    document.addEventListener("pointermove", moveHandler);
+    document.addEventListener("pointerup", upHandler);
+  });
 }
 
 // === Missing Mode ===
 function generateMissing(){
-  missingRounds++;
-  const sequence=shuffleArray(items.slice(0)).slice(0,4);
-  const missingIndex=Math.floor(Math.random()*sequence.length);
-  correctAnswer=sequence[missingIndex].src;
-  questionDisplay.textContent="Find the missing piece!";
-  speak(questionDisplay.textContent);
-
-  sequence.forEach((it,i)=>{ if(i!==missingIndex){const div=document.createElement("div"); div.className="answer-box"; const img=document.createElement("img"); img.src=it.src; div.appendChild(img); puzzleDisplay.appendChild(div); } });
-
-  const options=[sequence[missingIndex]];
-  while(options.length<3){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it); }
+  const sequence=shuffleArray(items.slice(0)).slice(0,6); const missingIndex=Math.floor(Math.random()*sequence.length);
+  correctAnswer=sequence[missingIndex].src; questionDisplay.textContent="Find the missing piece!"; speak(questionDisplay.textContent);
+  sequence.forEach((it,i)=>{ if(i!==missingIndex){ const div=document.createElement("div"); div.className="answer-box"; const img=document.createElement("img"); img.src=it.src; div.appendChild(img); puzzleDisplay.appendChild(div); }});
+  const options=[sequence[missingIndex]]; while(options.length<3){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
   shuffleArray(options);
   options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
-  if(missingRounds<=2) showHint();
 }
 
 // === Find Different ===
 function generateDifferent(){
-  diffRounds++;
   const base=items[Math.floor(Math.random()*items.length)];
-  let different=items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)];
-  correctAnswer=different.src;
-  questionDisplay.textContent="Find the different item!";
-  speak(questionDisplay.textContent);
-  const options=Array(3).fill(base).concat([different]); shuffleArray(options);
+  let different=items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)]; correctAnswer=different.src;
+  questionDisplay.textContent="Find the different item!"; speak(questionDisplay.textContent);
+  const options=[base,base,base,different]; shuffleArray(options);
   options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
 }
 
 // === Check Answer ===
 function checkAnswer(selected,sound){
-  const boxes=document.querySelectorAll(".answer-box");
-  boxes.forEach(b=>b.classList.remove("correct","wrong"));
+  const boxes=document.querySelectorAll(".answer-box"); boxes.forEach(b=>b.classList.remove("correct","wrong"));
   if(selected===correctAnswer){
     document.getElementById("success-sound").play();
     if(sound) new Audio(sound).play();
-    messageDisplay.textContent="✅ Correct!";
-    speak("Correct!");
-    score++; scoreDisplay.textContent="Score: "+score;
+    messageDisplay.textContent="✅ Correct!"; speak("Correct!"); score++; scoreDisplay.textContent="Score: "+score;
     boxes.forEach(b=>{ if(b.querySelector("img").src===selected) b.classList.add("correct"); });
     setTimeout(newRound,1200);
-  } else {
-    document.getElementById("buzz-sound").play();
-    messageDisplay.textContent="❌ Try again!";
-    speak("Try again!");
+  } else { document.getElementById("buzz-sound").play(); messageDisplay.textContent="❌ Try again!"; speak("Try again!");
     boxes.forEach(b=>{ if(b.querySelector("img").src===selected) b.classList.add("wrong"); });
   }
 }
 
-// === Hints ===
-function showHint(){ const box=document.querySelector(".answer-box img[src='"+correctAnswer+"']"); if(box){ const rect=box.getBoundingClientRect(); hintOverlay.style.top=rect.top+"px"; hintOverlay.style.left=rect.left+"px"; hintOverlay.style.display="block"; setTimeout(()=>hintOverlay.style.display="none",1500); } }
-
-// === Drag & Drop Listeners ===
-dropZone.addEventListener("dragover", e=>e.preventDefault());
-dropZone.addEventListener("drop", e=>{ e.preventDefault(); const src=e.dataTransfer.getData("text/plain"); checkAnswer(src); dropZone.classList.remove("drag-over"); });
-dropZone.addEventListener("dragenter", e=>dropZone.classList.add("drag-over"));
-dropZone.addEventListener("dragleave", e=>dropZone.classList.remove("drag-over"));
-
-// Start Game
+// === Start Game ===
 newRound();
 </script>
 </body>
