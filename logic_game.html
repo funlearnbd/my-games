@@ -12,6 +12,9 @@ body {
   padding: 20px;
   min-height: 100vh;
   position: relative;
+  overflow: hidden;
+  -webkit-user-select: none; 
+  user-select: none;
 }
 h1 { 
   margin-top: 10px; 
@@ -135,6 +138,7 @@ let missingRounds = 0;
 let diffRounds = 0;
 let correctAnswer = "";
 let currentMode = "select";
+let dragTutorialInterval;
 
 const items = [
   {src:"https://twemoji.maxcdn.com/v/latest/72x72/1f34e.png", name:"apple", sound:"https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"},
@@ -162,6 +166,10 @@ function shuffleArray(arr){
     [arr[i],arr[j]]=[arr[j],arr[i]];
   }
 }
+
+document.addEventListener("touchmove", function(e){
+  if(currentMode==="drag") e.preventDefault();
+}, { passive:false });
 
 function newRound(){
   messageDisplay.textContent = "";
@@ -192,7 +200,7 @@ function newRound(){
     if(currentMode==="drag") dropZone.style.display="flex";
 
     const options = availableItems.slice(0,6);
-    if(!options.map(it=>it.src).includes(correctAnswer)) options[0]=correctItem;
+    if(!options.includes(correctItem)) options[0]=correctItem;
     shuffleArray(options);
 
     options.forEach(opt=>{
@@ -201,47 +209,25 @@ function newRound(){
       const img=document.createElement("img");
       img.src=opt.src;
       box.appendChild(img);
-      box.draggable = currentMode==="drag";
-      if(currentMode==="select") box.onclick = ()=>checkAnswer(opt.src,opt.sound);
-      box.addEventListener("dragstart", e=>{
-        if(currentMode==="drag") e.dataTransfer.setData("text/plain", opt.src);
-      });
+      if(currentMode==="drag"){
+        img.draggable=true;
+        img.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",opt.src); });
+      } else {
+        box.onclick = ()=>checkAnswer(opt.src,opt.sound);
+      }
       grid.appendChild(box);
     });
-
-    if((selectRounds<2 && currentMode==="select") || (dragRounds<2 && currentMode==="drag")){
-      showHint();
-    }
 
     if(currentMode==="drag" && dragRounds<2) showDragTutorial();
-  }
-  else if(currentMode==="different"){
-    diffRounds++;
-    const base = items[Math.floor(Math.random()*items.length)];
-    const different = items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)];
-    correctAnswer = different.src;
-    questionDisplay.textContent = "Find the different item!";
-    speak(questionDisplay.textContent);
-    const options = Array(5).fill(base).concat([different]);
-    shuffleArray(options);
-    options.forEach(opt=>{
-      const box=document.createElement("div");
-      box.className="answer-box";
-      const img=document.createElement("img");
-      img.src=opt.src;
-      box.appendChild(img);
-      box.onclick = ()=>checkAnswer(opt.src,opt.sound);
-      grid.appendChild(box);
-    });
-  }
-  else if(currentMode==="missing"){
+
+  } else if(currentMode==="missing"){
     missingRounds++;
     let sequence = items.slice(0);
     shuffleArray(sequence);
-    sequence=sequence.slice(0,4);
+    sequence = sequence.slice(0,4);
     const missingIndex = Math.floor(Math.random()*sequence.length);
     correctAnswer = sequence[missingIndex].src;
-    questionDisplay.textContent="Find the missing piece!";
+    questionDisplay.textContent = "Find the missing piece!";
     speak(questionDisplay.textContent);
 
     sequence.forEach((it,i)=>{
@@ -261,7 +247,6 @@ function newRound(){
       if(!options.includes(item)) options.push(item);
     }
     shuffleArray(options);
-
     options.forEach(opt=>{
       const box=document.createElement("div");
       box.className="answer-box";
@@ -273,6 +258,25 @@ function newRound(){
     });
 
     if(missingRounds<=2) showHint();
+  } else if(currentMode==="different"){
+    diffRounds++;
+    let base = items[Math.floor(Math.random()*items.length)];
+    let different = items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)];
+    correctAnswer = different.src;
+    questionDisplay.textContent = "Find the different item!";
+    speak(questionDisplay.textContent);
+
+    const options = Array(5).fill(base).concat([different]);
+    shuffleArray(options);
+    options.forEach(opt=>{
+      const box=document.createElement("div");
+      box.className="answer-box";
+      const img=document.createElement("img");
+      img.src=opt.src;
+      box.appendChild(img);
+      box.onclick = ()=>checkAnswer(opt.src,opt.sound);
+      grid.appendChild(box);
+    });
   }
 
   if(currentMode==="select") selectRounds++;
@@ -315,16 +319,20 @@ function showDragTutorial(){
   dragTutorial.style.top=rect.top+"px";
   dragTutorial.style.left=rect.left+"px";
   dragTutorial.style.display="block";
+
   const dzRect = dropZone.getBoundingClientRect();
   let step=0;
-  const interval = setInterval(()=>{
-    if(step>20){ dragTutorial.style.display="none"; clearInterval(interval); return;}
-    const x = rect.left + (dzRect.left-rect.left)*(step/20);
-    const y = rect.top + (dzRect.top-rect.top)*(step/20);
-    dragTutorial.style.left=x+"px";
-    dragTutorial.style.top=y+"px";
+  if(dragTutorialInterval) clearInterval(dragTutorialInterval);
+  dragTutorialInterval = setInterval(()=>{
+    const t = step % 40;
+    let progress = t/20;
+    if(progress>1) progress = 2-progress;
+    const x = rect.left + (dzRect.left-rect.left)*progress;
+    const y = rect.top + (dzRect.top-rect.top)*progress;
+    dragTutorial.style.left = x + "px";
+    dragTutorial.style.top = y + "px";
     step++;
-  },30);
+  },50);
 }
 
 dropZone.addEventListener("dragover", e=>e.preventDefault());
@@ -339,6 +347,5 @@ dropZone.addEventListener("dragleave", e=>{ dropZone.classList.remove("drag-over
 
 newRound();
 </script>
-
 </body>
 </html>
