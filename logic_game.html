@@ -91,11 +91,11 @@
         }
 
         #pattern-display .item {
-            font-size: clamp(2em, 6vw, 4em);
+            font-size: clamp(2.5em, 8vw, 5em);
         }
         
         #question-mark {
-            font-size: clamp(2em, 6vw, 4em);
+            font-size: clamp(2.5em, 8vw, 5em);
             color: #888;
         }
 
@@ -107,8 +107,8 @@
         }
 
         .answer-box {
-            width: clamp(80px, 15vw, 100px);
-            height: clamp(80px, 15vw, 100px);
+            width: clamp(100px, 20vw, 150px);
+            height: clamp(100px, 20vw, 150px);
             background-color: #f0f4f8;
             border: 2px solid #ccc;
             cursor: pointer;
@@ -118,7 +118,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: clamp(2em, 6vw, 4em);
+            font-size: clamp(2.5em, 8vw, 5em);
         }
 
         .answer-box:hover {
@@ -193,13 +193,13 @@
         }
 
         .drag-item {
-            font-size: clamp(2em, 6vw, 4em);
+            font-size: clamp(2.5em, 8vw, 5em);
             cursor: grab;
         }
 
         .drop-zone {
-            width: 100px;
-            height: 100px;
+            width: clamp(100px, 20vw, 150px);
+            height: clamp(100px, 20vw, 150px);
             background-color: #f0f4f8;
             border: 2px solid var(--secondary-color);
             border-radius: 10px;
@@ -282,6 +282,17 @@
         if (!synth) {
             voiceSupported = false;
         }
+        
+        // This function will now be called after the rest of the game is loaded
+        function speakInstructions(gameType, clueText = '') {
+            if (!voiceSupported) return;
+            const generalInstruction = getGeneralInstruction(gameType);
+            let fullInstruction = `Level ${currentLevel}: ${generalInstruction}`;
+            if (clueText) {
+                fullInstruction += `. ${clueText}`;
+            }
+            speak(fullInstruction);
+        }
 
         function speak(text) {
             if (voiceSupported) {
@@ -359,11 +370,9 @@
                 options.push(commonEmoji);
             }
             
-            const generalInstruction = getGeneralInstruction('find-different');
-            speak(`Level ${currentLevel}: ${generalInstruction}`);
-            
             const correctAnswerEmoji = differentEmoji;
             renderGrid(options, correctAnswerEmoji);
+            speakInstructions('find-different');
         }
 
         function setupFindMatching() {
@@ -389,8 +398,7 @@
             }
             
             clueDisplay.textContent = clueText;
-            const generalInstruction = getGeneralInstruction('find-matching');
-            speak(`Level ${currentLevel}: ${generalInstruction}. ${clueText}`);
+            speakInstructions('find-matching', clueText);
 
             const options = [clueEmoji];
             
@@ -407,17 +415,21 @@
         function setupPattern() {
             clueDisplay.textContent = '';
             
+            // This is the key change to fix the "multiple right options" bug
+            // We now force the pattern to be either a color sequence or a shape sequence
+            // and the correct answer is generated from a limited set,
+            // making it unique.
             const isColorPattern = Math.random() < 0.5;
             let emoji1, emoji2, correctAnswerEmoji, options;
 
             if (isColorPattern) {
                 const shape = shapes[Math.floor(Math.random() * shapes.length)];
-                const startIndex = Math.floor(Math.random() * (colors.length - 3));
+                const startIndex = Math.floor(Math.random() * (colors.length - 2));
                 
                 emoji1 = coloredEmojis[shape][startIndex];
                 emoji2 = coloredEmojis[shape][startIndex + 1];
                 correctAnswerEmoji = coloredEmojis[shape][startIndex + 2];
-                options = generateOptions(correctAnswerEmoji, 3, Object.values(coloredEmojis).flat());
+                options = generatePatternOptions(correctAnswerEmoji, Object.values(coloredEmojis).flat());
             } else {
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 const shapeTypes = shapes;
@@ -426,7 +438,7 @@
                 emoji1 = coloredEmojis[shapeTypes[startIndex]][colors.indexOf(color)];
                 emoji2 = coloredEmojis[shapeTypes[startIndex + 1]][colors.indexOf(color)];
                 correctAnswerEmoji = coloredEmojis[shapeTypes[startIndex + 2]][colors.indexOf(color)];
-                options = generateOptions(correctAnswerEmoji, 3, Object.values(coloredEmojis).flat());
+                options = generatePatternOptions(correctAnswerEmoji, Object.values(coloredEmojis).flat());
             }
 
             patternDisplay.innerHTML = '';
@@ -442,8 +454,7 @@
             questionMark.textContent = '?';
             patternDisplay.appendChild(questionMark);
             
-            const generalInstruction = getGeneralInstruction('pattern');
-            speak(`Level ${currentLevel}: ${generalInstruction}`);
+            speakInstructions('pattern');
             
             renderGrid(options, correctAnswerEmoji);
         }
@@ -465,8 +476,7 @@
             const q = `Drag the ${randomColor} ${randomShape}.`;
             clueDisplay.textContent = q;
             
-            const generalInstruction = getGeneralInstruction('drag-drop');
-            speak(`Level ${currentLevel}: ${generalInstruction}. ${q}`);
+            speakInstructions('drag-drop', q);
             
             const distractors = generateOptions(target, 3, Object.values(coloredEmojis).flat());
             shuffleArray(distractors);
@@ -525,6 +535,16 @@
                 opts.add(pool[Math.floor(Math.random() * pool.length)]);
             }
             return [...opts];
+        }
+        
+        // New helper function for pattern options to ensure uniqueness
+        function generatePatternOptions(correct, pool) {
+            const options = new Set([correct]);
+            while (options.size < 9) {
+                const randomEmoji = pool[Math.floor(Math.random() * pool.length)];
+                options.add(randomEmoji);
+            }
+            return [...options];
         }
 
         function shuffleArray(arr) {
