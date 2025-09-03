@@ -39,130 +39,143 @@ h1 { margin-top:15px; font-size:40px; color:#e74c3c; text-shadow:2px 2px #fff; }
 <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
 <script>
-// === Data ===
+// === Data (Optimized small images) ===
 const items=[
-{name:"apple", src:"https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"banana", src:"https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"dog", src:"https://upload.wikimedia.org/wikipedia/commons/5/5f/Golden_Retriever_Carlos_(10581910556).jpg", sound:"https://actions.google.com/sounds/v1/animals/dog_bark.ogg"},
-{name:"cat", src:"https://upload.wikimedia.org/wikipedia/commons/3/3a/Cat03.jpg", sound:"https://actions.google.com/sounds/v1/animals/cat_purr.ogg"},
-{name:"flower", src:"https://upload.wikimedia.org/wikipedia/commons/e/e4/Flower_PNG_Clipart.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"smile", src:"https://upload.wikimedia.org/wikipedia/commons/1/13/Emojione_1F604.svg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"car", src:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Toy_car.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"ball", src:"https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"star", src:"https://upload.wikimedia.org/wikipedia/commons/4/44/Plain_Yellow_Star.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"tree", src:"https://upload.wikimedia.org/wikipedia/commons/e/ec/Tree_icon.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"}
+{name:"apple", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/120px-Red_Apple.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"banana", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Banana-Single.jpg/120px-Banana-Single.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"dog", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Golden_Retriever_Carlos_%2810581910556%29.jpg/120px-Golden_Retriever_Carlos_%2810581910556%29.jpg", sound:"https://actions.google.com/sounds/v1/animals/dog_bark.ogg"},
+{name:"cat", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/120px-Cat03.jpg", sound:"https://actions.google.com/sounds/v1/animals/cat_purr.ogg"},
+{name:"flower", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Flower_PNG_Clipart.png/120px-Flower_PNG_Clipart.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"car", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Toy_car.jpg/120px-Toy_car.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"ball", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Basketball.png/120px-Basketball.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"star", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Plain_Yellow_Star.png/120px-Plain_Yellow_Star.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"tree", src:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Tree_icon.png/120px-Tree_icon.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"}
 ];
 
-let score=0, correctAnswer="", currentMode="select", dragTutorialCount=0;
-const questionDisplay=document.getElementById("question"), grid=document.getElementById("grid"),
-puzzleDisplay=document.getElementById("puzzle-display"), dropZone=document.getElementById("drop-zone"),
-messageDisplay=document.getElementById("message"), scoreDisplay=document.getElementById("score"),
-dragCopy=document.getElementById("drag-copy"), bgMusic=document.getElementById("bg-music"),
-tutorialArrow=document.getElementById("tutorial-arrow");
+// === Preload Images ===
+let loadedCount=0;
+items.forEach(it=>{
+  const img=new Image();
+  img.src=it.src;
+  img.onload=()=>{ loadedCount++; if(loadedCount===items.length) initGame(); };
+});
 
-bgMusic.volume=0.2; bgMusic.play();
+// === Init Game ===
+function initGame(){
+  const questionDisplay=document.getElementById("question"),
+        grid=document.getElementById("grid"),
+        puzzleDisplay=document.getElementById("puzzle-display"),
+        dropZone=document.getElementById("drop-zone"),
+        messageDisplay=document.getElementById("message"),
+        scoreDisplay=document.getElementById("score"),
+        dragCopy=document.getElementById("drag-copy"),
+        tutorialArrow=document.getElementById("tutorial-arrow"),
+        bgMusic=document.getElementById("bg-music");
+  bgMusic.volume=0.2; bgMusic.play();
 
-function shuffleArray(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr;}
-function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text); window.speechSynthesis.speak(u);}}
+  let score=0, correctAnswer="", currentMode="select", dragTutorialCount=0;
 
-// === Game ===
-function newRound(){
-  grid.innerHTML=""; puzzleDisplay.innerHTML=""; dropZone.style.display="none"; messageDisplay.textContent="";
-  const modes=["select","drag","missing","different"]; shuffleArray(modes); currentMode=modes[0];
-  if(currentMode==="select") generateSelect();
-  else if(currentMode==="drag") generateDrag();
-  else if(currentMode==="missing") generateMissing();
-  else if(currentMode==="different") generateDifferent();
-}
+  function shuffleArray(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr;}
+  function speak(text){if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(text); window.speechSynthesis.speak(u);}
 
-// === Select Mode ===
-function generateSelect(){
-  dropZone.style.display="none";
-  const correct=items[Math.floor(Math.random()*items.length)]; correctAnswer=correct.src;
-  questionDisplay.textContent="Find the "+correct.name+"!"; speak(questionDisplay.textContent);
-  let options=[correct];
-  while(options.length<6){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
-  shuffleArray(options);
-  options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img);
-    box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box);
-  });
-}
-
-// === Drag Mode with Tutorial ===
-function generateDrag(){
-  dropZone.style.display="flex"; const correct=items[Math.floor(Math.random()*items.length)]; correctAnswer=correct.src;
-  questionDisplay.textContent="Drag the "+correct.name+" to the box!"; speak(questionDisplay.textContent);
-  let options=[correct]; while(options.length<6){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
-  shuffleArray(options);
-  options.forEach(opt=>{
-    const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img);
-    enableTouchDrag(img,opt.sound); grid.appendChild(box);
-  });
-
-  if(dragTutorialCount<2){
-    dragTutorialCount++;
-    showDragTutorial(correct);
+  function newRound(){
+    grid.innerHTML=""; puzzleDisplay.innerHTML=""; dropZone.style.display="none"; messageDisplay.textContent="";
+    const modes=["select","drag","missing","different"]; shuffleArray(modes); currentMode=modes[0];
+    if(currentMode==="select") generateSelect();
+    else if(currentMode==="drag") generateDrag();
+    else if(currentMode==="missing") generateMissing();
+    else if(currentMode==="different") generateDifferent();
   }
-}
 
-function showDragTutorial(correct){
-  tutorialArrow.style.display="block";
-  let posX=50, posY=grid.getBoundingClientRect().top+50; let dir=1;
-  const interval=setInterval(()=>{
-    posX+=dir*2;
-    if(posX>grid.getBoundingClientRect().left+200 || posX<grid.getBoundingClientRect().left+50) dir*=-1;
-    tutorialArrow.style.left=posX+"px"; tutorialArrow.style.top=posY+"px";
-  },20);
-  setTimeout(()=>{clearInterval(interval); tutorialArrow.style.display="none";},5000);
-}
+  // --- Select Mode ---
+  function generateSelect(){
+    dropZone.style.display="none";
+    const correct=items[Math.floor(Math.random()*items.length)]; correctAnswer=correct.src;
+    questionDisplay.textContent="Find the "+correct.name+"!"; speak(questionDisplay.textContent);
+    let options=[correct];
+    while(options.length<6){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
+    shuffleArray(options);
+    options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img);
+      box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box);
+    });
+  }
 
-// === Touch Drag ===
-function enableTouchDrag(img,sound){
-  img.addEventListener("pointerdown", e=>{
-    e.preventDefault();
-    dragCopy.src=img.src; dragCopy.style.display="block"; dragCopy.style.left=e.pageX-45+"px"; dragCopy.style.top=e.pageY-45+"px";
-    const moveHandler = ev=>{ dragCopy.style.left=ev.pageX-45+"px"; dragCopy.style.top=ev.pageY-45+"px"; };
-    const upHandler = ev=>{
-      dragCopy.style.display="none";
-      document.removeEventListener("pointermove", moveHandler);
-      document.removeEventListener("pointerup", upHandler);
-      const dz=document.getElementById("drop-zone").getBoundingClientRect();
-      if(ev.clientX>dz.left && ev.clientX<dz.right && ev.clientY>dz.top && ev.clientY<dz.bottom){
-        checkAnswer(img.src,sound);
-      }
-    };
-    document.addEventListener("pointermove", moveHandler);
-    document.addEventListener("pointerup", upHandler);
-  });
-}
+  // --- Drag Mode ---
+  function generateDrag(){
+    dropZone.style.display="flex"; const correct=items[Math.floor(Math.random()*items.length)]; correctAnswer=correct.src;
+    questionDisplay.textContent="Drag the "+correct.name+" to the box!"; speak(questionDisplay.textContent);
+    let options=[correct]; while(options.length<6){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
+    shuffleArray(options);
+    options.forEach(opt=>{
+      const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img);
+      enableTouchDrag(img,opt.sound); grid.appendChild(box);
+    });
 
-// === Missing Mode ===
-function generateMissing(){
-  const sequence=shuffleArray(items.slice(0)).slice(0,6); const missingIndex=Math.floor(Math.random()*sequence.length);
-  correctAnswer=sequence[missingIndex].src; questionDisplay.textContent="Find the missing piece!"; speak(questionDisplay.textContent);
-  sequence.forEach((it,i)=>{ if(i!==missingIndex){ const div=document.createElement("div"); div.className="answer-box"; const img=document.createElement("img"); img.src=it.src; div.appendChild(img); puzzleDisplay.appendChild(div); }});
-  const options=[sequence[missingIndex]]; while(options.length<3){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);} shuffleArray(options);
-  options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
-}
+    if(dragTutorialCount<2){
+      dragTutorialCount++;
+      showDragTutorial();
+    }
+  }
 
-// === Find Different Mode ===
-function generateDifferent(){
-  const same=items[Math.floor(Math.random()*items.length)];
-  let different; do{ different=items[Math.floor(Math.random()*items.length)]; }while(different===same);
-  correctAnswer=different.src; questionDisplay.textContent="Find the different item!"; speak(questionDisplay.textContent);
-  const options=[different]; for(let i=0;i<5;i++) options.push(same); shuffleArray(options);
-  options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
-}
+  function showDragTutorial(){
+    tutorialArrow.style.display="block";
+    let posX=grid.getBoundingClientRect().left+50; let posY=grid.getBoundingClientRect().top+50; let dir=1;
+    const interval=setInterval(()=>{ posX+=dir*2; if(posX>grid.getBoundingClientRect().left+200 || posX<grid.getBoundingClientRect().left+50) dir*=-1;
+      tutorialArrow.style.left=posX+"px"; tutorialArrow.style.top=posY+"px"; },20);
+    setTimeout(()=>{clearInterval(interval); tutorialArrow.style.display="none";},5000);
+  }
 
-// === Check Answer ===
-function checkAnswer(src,sound){
-  if(src===correctAnswer){ score++; scoreDisplay.textContent="Score: "+score; messageDisplay.textContent="✅ Correct!"; document.getElementById("success-sound").play();
-    const aud=new Audio(sound); aud.play(); speak("Correct!"); setTimeout(newRound,1000);
-  } else { messageDisplay.textContent="❌ Try again!"; document.getElementById("buzz-sound").play(); speak("Try again!"); }
-}
+  function enableTouchDrag(img,sound){
+    img.addEventListener("pointerdown", e=>{
+      e.preventDefault();
+      dragCopy.src=img.src; dragCopy.style.display="block"; dragCopy.style.left=e.pageX-45+"px"; dragCopy.style.top=e.pageY-45+"px";
+      const moveHandler = ev=>{ dragCopy.style.left=ev.pageX-45+"px"; dragCopy.style.top=ev.pageY-45+"px"; };
+      const upHandler = ev=>{
+        dragCopy.style.display="none";
+        document.removeEventListener("pointermove", moveHandler);
+        document.removeEventListener("pointerup", upHandler);
+        const dz=document.getElementById("drop-zone").getBoundingClientRect();
+        if(ev.clientX>dz.left && ev.clientX<dz.right && ev.clientY>dz.top && ev.clientY<dz.bottom){
+          checkAnswer(img.src,sound);
+        }
+      };
+      document.addEventListener("pointermove", moveHandler);
+      document.addEventListener("pointerup", upHandler);
+    });
+  }
 
-// === Start ===
-newRound();
+  // --- Missing Piece ---
+  function generateMissing(){
+    dropZone.style.display="none";
+    let puzzle=[], correct=Math.floor(Math.random()*items.length); correctAnswer=items[correct].src;
+    puzzle.push(items[correct]); for(let i=0;i<3;i++){ let it=Math.floor(Math.random()*items.length); if(it!==correct) puzzle.push(items[it]); }
+    shuffleArray(puzzle);
+    questionDisplay.textContent="Find the missing piece!"; speak(questionDisplay.textContent);
+    puzzleDisplay.innerHTML=""; puzzle.forEach(it=>{ const div=document.createElement("div"); const img=document.createElement("img"); img.src=it.src; div.appendChild(img); puzzleDisplay.appendChild(div); });
+    grid.innerHTML=""; let options=[items[correct]]; while(options.length<3){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it); } shuffleArray(options);
+    options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
+  }
+
+  // --- Find Different ---
+  function generateDifferent(){
+    dropZone.style.display="none";
+    const same=items[Math.floor(Math.random()*items.length)];
+    let different; do{ different=items[Math.floor(Math.random()*items.length)]; }while(different===same);
+    correctAnswer=different.src; questionDisplay.textContent="Find the different item!"; speak(questionDisplay.textContent);
+    let options=[different]; for(let i=0;i<5;i++) options.push(same); shuffleArray(options);
+    grid.innerHTML=""; options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
+  }
+
+  // --- Check Answer ---
+  function checkAnswer(src,sound){
+    if(src===correctAnswer){
+      messageDisplay.textContent="✅ Correct!"; document.getElementById("success-sound").play(); score++; scoreDisplay.textContent="Score: "+score; speak("Correct!");
+      setTimeout(newRound,1000);
+    } else { messageDisplay.textContent="❌ Try again!"; document.getElementById("buzz-sound").play(); speak("Try again!"); }
+  }
+
+  newRound();
+}
 </script>
 </body>
 </html>
