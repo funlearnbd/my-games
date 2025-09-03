@@ -1,164 +1,442 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Color & Pattern Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logic Quest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #00b894;
+      --secondary-color: #0984e3;
+      --accent-color: #ff7675;
+      --background-color: #dfe6e9;
+      --text-color-dark: #2d3436;
+      --box-shadow-light: rgba(0, 0, 0, 0.1);
+      --box-shadow-medium: rgba(0, 0, 0, 0.2);
+      --success-color: #27ae60;
+      --error-color: #e74c3c;
+    }
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       text-align: center;
-      background: #f0f8ff;
-    }
-    h1 {
-      margin-top: 20px;
-      font-size: 28px;
-      color: #333;
-    }
-    #question {
-      font-size: 22px;
-      margin: 20px 0;
-      color: #444;
-    }
-    #grid {
-      display: grid;
-      grid-template-columns: repeat(2, 120px);
-      gap: 15px;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .game-container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px var(--box-shadow-medium);
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .game-container h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--secondary-color);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    #jargon {
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      font-style: italic;
+      color: #6c757d;
+      margin-bottom: 1.5rem;
+      min-height: 25px;
+    }
+    #instructions {
+      font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+      font-weight: 600;
+      color: var(--text-color-dark);
+      min-height: 40px;
+    }
+    #clue-display {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      color: var(--text-color-dark);
       margin: 20px 0;
+      min-height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #pattern-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+      gap: 15px;
+    }
+    #pattern-display .item {
+      font-size: clamp(2em, 6vw, 4em);
+    }
+    #question-mark {
+      font-size: clamp(2em, 6vw, 4em);
+      color: #888;
+    }
+    #answer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
     }
     .answer-box {
-      width: 120px;
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      border: 2px solid #333;
-      border-radius: 12px;
-      background: white;
+      width: clamp(80px, 15vw, 100px);
+      height: clamp(80px, 15vw, 100px);
+      background-color: #f0f4f8;
+      border: 2px solid #ccc;
       cursor: pointer;
-      user-select: none;
-    }
-    .answer-box.dragging {
-      opacity: 0.5;
-    }
-    #drop-zone {
-      margin: 20px auto;
-      width: 200px;
-      height: 100px;
-      border: 2px dashed #666;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px var(--box-shadow-light);
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 18px;
-      border-radius: 12px;
-      color: #666;
+      align-items: center;
+      font-size: clamp(2em, 6vw, 4em);
+    }
+    .answer-box:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px var(--box-shadow-medium);
     }
     #message {
-      font-size: 20px;
-      margin-top: 10px;
-      height: 28px;
-      color: #333;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 600;
+      min-height: 20px;
+      margin-bottom: 15px;
     }
     #score {
-      font-size: 18px;
-      margin: 10px;
-      color: #444;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      margin: 10px 0;
+      color: var(--text-color-dark);
+    }
+    .button-group {
+      margin-top: 1.5rem;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    button {
+      font-size: clamp(1rem, 2vw, 1.1rem);
+      padding: 12px 24px;
+      margin: 0 8px;
+      cursor: pointer;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    #restart-button {
+      background-color: var(--primary-color);
+    }
+    #restart-button:hover {
+      background-color: #00a884;
+      transform: translateY(-2px);
+    }
+    #exit-button {
+      background-color: var(--error-color);
+    }
+    #exit-button:hover {
+      background-color: #c0392b;
+      transform: translateY(-2px);
+    }
+    .drag-drop-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      margin: 20px 0;
+      padding: 10px;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+    }
+    .drag-item {
+      font-size: clamp(2em, 6vw, 4em);
+      cursor: grab;
+    }
+    .drop-zone {
+      width: 100px;
+      height: 100px;
+      background-color: #f0f4f8;
+      border: 2px solid var(--secondary-color);
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   </style>
 </head>
 <body>
-  <h1>Color & Pattern Game</h1>
-  <div id="question">Loading...</div>
-  <div id="grid"></div>
-  <div id="drop-zone">Drag & Drop Answer Here</div>
-  <div id="message"></div>
-  <div id="score">Score: 0</div>
+  <div id="game-container" class="game-container">
+    <h1>Logic Quest</h1>
+    <div id="jargon"></div>
+    <div id="instructions"></div>
+    <div id="clue-display"></div>
+    <div id="pattern-display"></div>
+    <div id="answer-grid"></div>
+    <div id="drag-drop-container" style="display:none;"></div>
+    <div id="message"></div>
+    <div id="score">Score: 0</div>
+    <div class="button-group">
+      <button id="restart-button">New Game</button>
+      <button id="exit-button">Exit Game</button>
+    </div>
+  </div>
 
-  <audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-  <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+  <audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
+  <audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
 
   <script>
-    const colors = ["Red", "Blue", "Green", "Yellow", "Orange", "Purple"];
-    const patterns = ["Stripes", "Dots", "Waves", "Zigzag", "Checks"];
-    let correctAnswer = "";
-    let score = 0;
+    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'black', 'brown'];
+    const shapes = ['circle', 'square', 'heart'];
 
-    const questionDisplay = document.getElementById('question');
-    const grid = document.getElementById('grid');
-    const dropZone = document.getElementById('drop-zone');
+    const coloredEmojis = {
+      'circle': ['🔴','🔵','🟢','🟡','🟣','🟠','⚫','🟤'],
+      'square': ['🟥','🟦','🟩','🟨','🟪','🟧','⬛','🟫'],
+      'heart':  ['❤️','💙','💚','💛','💜','🧡','🖤','🤎']
+    };
+
+    const uniqueEmojis = {
+      'happy face':'😀','sad face':'😩','laughing face':'😂','angry face':'😠',
+      'celebrating face':'🥳','shocked face':'🤯','winking face':'😉','sleeping face':'😴',
+      'cold face':'🥶','light bulb':'💡','bell':'🔔'
+    };
+
+    const jargonList = [
+      "Cogito, ergo sum.","Semper ad astra.","De omnibus dubitandum.","Scientia potentia est.",
+      "Audentes Fortuna iuvat.","In vino veritas.","Carpe diem.","Veritas vos liberabit.",
+      "Amor vincit omnia.","Ad astra per aspera."
+    ];
+
+    let currentLevel = 1;
+    let score = 0;
+    let correctAnswer = '';
+    const synth = window.speechSynthesis;
+    let voiceSupported = !!synth;
+
+    const instructionsDisplay = document.getElementById('instructions');
+    const clueDisplay = document.getElementById('clue-display');
+    const patternDisplay = document.getElementById('pattern-display');
+    const answerGrid = document.getElementById('answer-grid');
+    const dragDropContainer = document.getElementById('drag-drop-container');
     const messageDisplay = document.getElementById('message');
     const scoreDisplay = document.getElementById('score');
+    const restartButton = document.getElementById('restart-button');
+    const exitButton = document.getElementById('exit-button');
+    const successSound = document.getElementById('success-sound');
+    const buzzSound = document.getElementById('buzz-sound');
+    const jargonDisplay = document.getElementById('jargon');
 
-    function shuffleArray(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+    function speak(text) {
+      if (voiceSupported) {
+        synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        synth.speak(utterance);
       }
     }
 
     function newRound() {
-      const type = Math.random() < 0.5 ? "color" : "pattern";
+      messageDisplay.textContent = '';
+      clueDisplay.textContent = '';
+      patternDisplay.innerHTML = '';
+      answerGrid.innerHTML = '';
+      dragDropContainer.style.display = 'none';
 
-      if (type === "color") {
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        correctAnswer = color;
-        questionDisplay.textContent = `Pick the color: ${color}`;
-        renderOptions([...colors]);
-      } else {
-        const pattern = patterns[Math.floor(Math.random() * patterns.length)];
-        correctAnswer = pattern;
-        questionDisplay.textContent = `Pick the pattern: ${pattern}`;
-        renderOptions([...patterns]);
+      if (currentLevel > 30) {
+        instructionsDisplay.textContent = '';
+        messageDisplay.textContent = '🎉 Congratulations! You completed all levels!';
+        messageDisplay.style.color = 'var(--success-color)';
+        speak('Congratulations! You have completed all levels!');
+        return;
+      }
+
+      const gameType = getGameTypeByLevel(currentLevel);
+
+      if (gameType === 'find-different') setupFindDifferent();
+      else if (gameType === 'find-matching') setupFindMatching();
+      else if (gameType === 'pattern') setupPattern();
+      else if (gameType === 'drag-drop') setupDragDrop();
+
+      instructionsDisplay.textContent = `Level ${currentLevel}: ${getGeneralInstruction(gameType)}`;
+      jargonDisplay.textContent = jargonList[Math.floor(Math.random() * jargonList.length)];
+    }
+
+    function getGameTypeByLevel(level) {
+      const gameTypes = ['find-different','find-matching','pattern','drag-drop'];
+      return gameTypes[(level-1) % gameTypes.length];
+    }
+
+    function getGeneralInstruction(type) {
+      switch(type) {
+        case 'find-different': return 'Find the one that is different.';
+        case 'find-matching': return 'Find the matching item.';
+        case 'pattern': return 'Find the missing item in the pattern.';
+        case 'drag-drop': return 'Complete the puzzle.';
       }
     }
 
-    function renderOptions(options) {
-      grid.innerHTML = "";
+    function setupFindDifferent() {
+      const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
+      const commonEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+      let differentEmoji;
+      do { differentEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)]; }
+      while (differentEmoji === commonEmoji);
+
+      const options = [differentEmoji, ...Array(8).fill(commonEmoji)];
+      correctAnswer = differentEmoji;
+      speak(`Level ${currentLevel}: Find the one that is different`);
+      renderGrid(options);
+    }
+
+    function setupFindMatching() {
+      const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
+      const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
+
+      let clueText;
+      if (Object.values(uniqueEmojis).includes(clueEmoji)) {
+        const clueKey = Object.keys(uniqueEmojis).find(k => uniqueEmojis[k] === clueEmoji);
+        clueText = `Find the ${clueKey}.`;
+      } else {
+        let foundShape='', foundColor='';
+        for (const shape in coloredEmojis) {
+          const idx = coloredEmojis[shape].indexOf(clueEmoji);
+          if (idx !== -1) { foundShape=shape; foundColor=colors[idx]; break; }
+        }
+        clueText = `Find the ${foundColor} ${foundShape}.`;
+      }
+
+      clueDisplay.textContent = clueText;
+      correctAnswer = clueEmoji;
+      const options = [clueEmoji];
+      const wrong = allEmojis.filter(e => e !== clueEmoji);
+      shuffleArray(wrong);
+      options.push(...wrong.slice(0,8));
+      speak(`Level ${currentLevel}: ${clueText}`);
+      renderGrid(options);
+    }
+
+    function setupPattern() {
+      clueDisplay.textContent = '';
+      let emoji1,emoji2;
+      if (Math.random()<0.5) {
+        const shape = shapes[Math.floor(Math.random()*shapes.length)];
+        const start = Math.floor(Math.random()*(colors.length-3));
+        emoji1=coloredEmojis[shape][start];
+        emoji2=coloredEmojis[shape][start+1];
+        correctAnswer=coloredEmojis[shape][start+2];
+      } else {
+        const colorIdx=Math.floor(Math.random()*colors.length);
+        const start=Math.floor(Math.random()*(shapes.length-2));
+        emoji1=coloredEmojis[shapes[start]][colorIdx];
+        emoji2=coloredEmojis[shapes[start+1]][colorIdx];
+        correctAnswer=coloredEmojis[shapes[start+2]][colorIdx];
+      }
+      patternDisplay.innerHTML='';
+      [emoji1,emoji2].forEach(em=>{
+        const d=document.createElement('div'); d.className='item'; d.textContent=em;
+        patternDisplay.appendChild(d);
+      });
+      const q=document.createElement('div'); q.id='question-mark'; q.textContent='?';
+      patternDisplay.appendChild(q);
+
+      const options=generateOptions(correctAnswer,3,Object.values(coloredEmojis).flat());
+      speak(`Level ${currentLevel}: Find the missing item in the pattern`);
+      renderGrid(options);
+    }
+
+    function setupDragDrop() {
+      answerGrid.innerHTML=''; patternDisplay.innerHTML='';
+      dragDropContainer.innerHTML=''; dragDropContainer.style.display='flex';
+
+      const shape=shapes[Math.floor(Math.random()*shapes.length)];
+      const colorIdx=Math.floor(Math.random()*colors.length);
+      const target=coloredEmojis[shape][colorIdx];
+      correctAnswer=target;
+      const q=`Drag the ${colors[colorIdx]} ${shape}.`;
+      clueDisplay.textContent=q;
+      speak(`Level ${currentLevel}: ${q}`);
+
+      const distractors=generateOptions(target,3,Object.values(coloredEmojis).flat());
+      shuffleArray(distractors);
+      distractors.forEach(e=>{
+        const item=document.createElement('div');
+        item.textContent=e;
+        item.className="drag-item";
+        item.draggable=true;
+        item.addEventListener('dragstart',ev=>ev.dataTransfer.setData('text/plain',e));
+        dragDropContainer.appendChild(item);
+      });
+      const drop=document.createElement('div');
+      drop.className="drop-zone";
+      drop.addEventListener('dragover',e=>e.preventDefault());
+      drop.addEventListener('drop',e=>{
+        e.preventDefault();
+        checkAnswer(e.dataTransfer.getData('text/plain'));
+      });
+      dragDropContainer.appendChild(drop);
+    }
+
+    function renderGrid(options) {
+      answerGrid.innerHTML='';
       shuffleArray(options);
-      options.forEach(opt => {
-        const box = document.createElement("div");
-        box.className = "answer-box";
-        box.textContent = opt;
-        box.draggable = true;
-
-        box.onclick = () => checkAnswer(opt);
-
-        box.addEventListener("dragstart", e => {
-          box.classList.add("dragging");
-          e.dataTransfer.setData("text/plain", opt);
-        });
-        box.addEventListener("dragend", () => {
-          box.classList.remove("dragging");
-        });
-
-        grid.appendChild(box);
+      options.forEach(e=>{
+        const box=document.createElement('div');
+        box.className='answer-box'; box.textContent=e;
+        box.onclick=()=>checkAnswer(e);
+        answerGrid.appendChild(box);
       });
     }
 
     function checkAnswer(choice) {
-      if (choice === correctAnswer) {
-        document.getElementById("success-sound").play();
-        score++;
-        scoreDisplay.textContent = `Score: ${score}`;
-        messageDisplay.textContent = "✅ Correct!";
-        setTimeout(() => {
-          messageDisplay.textContent = "";
-          newRound();
-        }, 1000);
+      if (choice===correctAnswer) {
+        successSound.play();
+        score++; scoreDisplay.textContent=`Score: ${score}`;
+        messageDisplay.textContent="✅ Correct!";
+        speak(["Great job!","Well done!","You got it!"][Math.floor(Math.random()*3)]);
+        currentLevel++; setTimeout(newRound,1200);
       } else {
-        document.getElementById("buzz-sound").play();
-        messageDisplay.textContent = "❌ Try again!";
+        buzzSound.play();
+        messageDisplay.textContent="❌ Try again!";
+        speak("Try again!");
       }
     }
 
-    dropZone.addEventListener("dragover", e => e.preventDefault());
-    dropZone.addEventListener("drop", e => {
-      e.preventDefault();
-      checkAnswer(e.dataTransfer.getData("text/plain"));
+    function generateOptions(correct,count,pool) {
+      const opts=new Set([correct]);
+      while(opts.size<count) opts.add(pool[Math.floor(Math.random()*pool.length)]);
+      return [...opts];
+    }
+    function shuffleArray(arr) {
+      for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+      }
+      return arr;
+    }
+
+    exitButton.addEventListener('click',()=>window.location.href='index.html');
+    restartButton.addEventListener('click',()=>{
+      score=0; scoreDisplay.textContent=`Score: ${score}`;
+      currentLevel=1; newRound();
     });
 
-    newRound();
+    window.onload=newRound;
   </script>
 </body>
 </html>
