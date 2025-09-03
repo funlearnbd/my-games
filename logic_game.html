@@ -83,15 +83,33 @@
   <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
   <script>
-    // prettier colorful emojis
-    const colorEmojis = [
-      "🍎", "🍊", "🍋", "🍏", "🍇", "🍓", "🍒", "🍉", "🥭", "🍍"
-    ];
-
-    const funEmojis = [
-      "😀", "😂", "🥳", "😍", "😎", "🤩", "😴", "😡",
-      "🐶", "🐱", "🦄", "🐼", "🐧", "🐸",
-      "⚽", "🏀", "🚗", "✈️", "🎸", "🎁"
+    // Game levels / categories
+    const levels = [
+      {
+        name: "Fruit Quest",
+        items: ["🍎","🍊","🍋","🍏","🍇","🍓","🍒","🍉","🥭","🍍"],
+        prefix: "Pick this fruit: "
+      },
+      {
+        name: "Emoji Faces",
+        items: ["😀","😂","🥳","😍","😎","🤩","😴","😡"],
+        prefix: "Find this face: "
+      },
+      {
+        name: "Animal Quest",
+        items: ["🐶","🐱","🦄","🐼","🐧","🐸"],
+        prefix: "Find this animal: "
+      },
+      {
+        name: "Object Quest",
+        items: ["⚽","🏀","🚗","✈️","🎸","🎁"],
+        prefix: "Pick this object: "
+      },
+      {
+        name: "Food Quest",
+        items: ["🍔","🍕","🍰","🍦","🥪","🌮"],
+        prefix: "Pick this food: "
+      }
     ];
 
     let correctAnswer = "";
@@ -125,32 +143,25 @@
 
     function newRound() {
       messageDisplay.textContent = "";
-      const type = Math.random() < 0.5 ? "color" : "emoji";
 
-      if (type === "color") {
-        const target = colorEmojis[Math.floor(Math.random() * colorEmojis.length)];
-        correctAnswer = target;
-        questionDisplay.textContent = "Pick this fruit: " + target;
-        speak("Pick this fruit");
-        renderOptions([...colorEmojis]);
-      } else {
-        const target = funEmojis[Math.floor(Math.random() * funEmojis.length)];
-        correctAnswer = target;
-        questionDisplay.textContent = "Find this: " + target;
-        speak("Find this");
-        renderOptions([...funEmojis]);
-      }
-    }
+      // Randomly pick a level/category
+      const level = levels[Math.floor(Math.random() * levels.length)];
+      const items = [...level.items];
+      shuffleArray(items);
 
-    function renderOptions(options) {
-      grid.innerHTML = "";
-      shuffleArray(options);
-      const shown = options.slice(0, 6); // show only 6 options
-      if (!shown.includes(correctAnswer)) {
-        shown[0] = correctAnswer; // ensure correct answer is inside
-      }
+      // Pick correct answer
+      correctAnswer = items[Math.floor(Math.random() * items.length)];
+
+      // Show question
+      questionDisplay.textContent = level.prefix + correctAnswer;
+      speak(level.prefix + correctAnswer);
+
+      // Render 6 options
+      const shown = items.slice(0,6);
+      if (!shown.includes(correctAnswer)) shown[0] = correctAnswer;
       shuffleArray(shown);
 
+      grid.innerHTML = "";
       shown.forEach(opt => {
         const box = document.createElement("div");
         box.className = "answer-box";
@@ -163,9 +174,7 @@
           box.classList.add("dragging");
           e.dataTransfer.setData("text/plain", opt);
         });
-        box.addEventListener("dragend", () => {
-          box.classList.remove("dragging");
-        });
+        box.addEventListener("dragend", () => box.classList.remove("dragging"));
 
         grid.appendChild(box);
       });
