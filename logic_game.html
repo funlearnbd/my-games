@@ -83,36 +83,72 @@
   <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
   <script>
-    // Game levels / categories
+    // Game levels / categories with names
     const levels = [
       {
         name: "Fruit Quest",
-        items: ["🍎","🍊","🍋","🍏","🍇","🍓","🍒","🍉","🥭","🍍"],
-        prefix: "Pick this fruit: "
+        items: [
+          {emoji:"🍎", name:"apple"},
+          {emoji:"🍊", name:"orange"},
+          {emoji:"🍋", name:"lemon"},
+          {emoji:"🍏", name:"green apple"},
+          {emoji:"🍇", name:"grapes"},
+          {emoji:"🍓", name:"strawberry"},
+          {emoji:"🍒", name:"cherry"},
+          {emoji:"🍉", name:"watermelon"},
+          {emoji:"🥭", name:"mango"},
+          {emoji:"🍍", name:"pineapple"}
+        ]
       },
       {
         name: "Emoji Faces",
-        items: ["😀","😂","🥳","😍","😎","🤩","😴","😡"],
-        prefix: "Find this face: "
+        items: [
+          {emoji:"😀", name:"happy face"},
+          {emoji:"😂", name:"laughing face"},
+          {emoji:"🥳", name:"celebrating face"},
+          {emoji:"😍", name:"loving face"},
+          {emoji:"😎", name:"cool face"},
+          {emoji:"🤩", name:"star-struck face"},
+          {emoji:"😴", name:"sleeping face"},
+          {emoji:"😡", name:"angry face"}
+        ]
       },
       {
         name: "Animal Quest",
-        items: ["🐶","🐱","🦄","🐼","🐧","🐸"],
-        prefix: "Find this animal: "
+        items: [
+          {emoji:"🐶", name:"dog"},
+          {emoji:"🐱", name:"cat"},
+          {emoji:"🦄", name:"unicorn"},
+          {emoji:"🐼", name:"panda"},
+          {emoji:"🐧", name:"penguin"},
+          {emoji:"🐸", name:"frog"}
+        ]
       },
       {
         name: "Object Quest",
-        items: ["⚽","🏀","🚗","✈️","🎸","🎁"],
-        prefix: "Pick this object: "
+        items: [
+          {emoji:"⚽", name:"soccer ball"},
+          {emoji:"🏀", name:"basketball"},
+          {emoji:"🚗", name:"car"},
+          {emoji:"✈️", name:"airplane"},
+          {emoji:"🎸", name:"guitar"},
+          {emoji:"🎁", name:"gift"}
+        ]
       },
       {
         name: "Food Quest",
-        items: ["🍔","🍕","🍰","🍦","🥪","🌮"],
-        prefix: "Pick this food: "
+        items: [
+          {emoji:"🍔", name:"burger"},
+          {emoji:"🍕", name:"pizza"},
+          {emoji:"🍰", name:"cake"},
+          {emoji:"🍦", name:"ice cream"},
+          {emoji:"🥪", name:"sandwich"},
+          {emoji:"🌮", name:"taco"}
+        ]
       }
     ];
 
-    let correctAnswer = "";
+    let correctAnswer = {};
     let score = 0;
 
     const questionDisplay = document.getElementById("question");
@@ -152,9 +188,9 @@
       // Pick correct answer
       correctAnswer = items[Math.floor(Math.random() * items.length)];
 
-      // Show question
-      questionDisplay.textContent = level.prefix + correctAnswer;
-      speak(level.prefix + correctAnswer);
+      // Show question using name
+      questionDisplay.textContent = "Find the " + correctAnswer.name;
+      speak("Find the " + correctAnswer.name);
 
       // Render 6 options
       const shown = items.slice(0,6);
@@ -165,14 +201,14 @@
       shown.forEach(opt => {
         const box = document.createElement("div");
         box.className = "answer-box";
-        box.textContent = opt;
+        box.textContent = opt.emoji;
         box.draggable = true;
 
         box.onclick = () => checkAnswer(opt);
 
         box.addEventListener("dragstart", e => {
           box.classList.add("dragging");
-          e.dataTransfer.setData("text/plain", opt);
+          e.dataTransfer.setData("text/plain", opt.emoji);
         });
         box.addEventListener("dragend", () => box.classList.remove("dragging"));
 
@@ -181,7 +217,7 @@
     }
 
     function checkAnswer(choice) {
-      if (choice === correctAnswer) {
+      if (choice === correctAnswer.emoji) {
         successSound.play();
         score++;
         scoreDisplay.textContent = `Score: ${score}`;
