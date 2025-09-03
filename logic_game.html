@@ -1,217 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Logic Quest</title>
+  <meta charset="UTF-8">
+  <title>Emoji Quest</title>
   <style>
-    :root{
-      --bg:#f4f7fb;
-      --card:#fff;
-      --ink:#2d3436;
-      --accent:#0984e3;
-      --shadow:0 10px 30px rgba(0,0,0,.15);
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f8fbff;
+      margin: 0;
+      padding: 20px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh;
-      display:flex; align-items:center; justify-content:center;
-      background:var(--bg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
-      color:var(--ink);
+    h1 {
+      margin-top: 10px;
+      font-size: 32px;
+      color: #2c3e50;
     }
-    .wrap{
-      width:min(680px,94vw); background:var(--card); border-radius:20px; box-shadow:var(--shadow);
-      padding:28px; text-align:center;
+    #question {
+      font-size: 24px;
+      margin: 20px 0;
+      color: #34495e;
+      min-height: 40px;
     }
-    h1{margin:0 0 8px; font-weight:800; letter-spacing:.2px; color:var(--accent)}
-    #question{font-size:clamp(18px,2.4vw,22px); margin:8px 0 16px; min-height:28px}
-    #pattern{display:flex; gap:14px; justify-content:center; align-items:center; min-height:84px; margin:6px 0 10px}
-    #pattern .qmark{font-size:48px; color:#9aa0a6}
-    #grid{
-      display:grid; gap:14px; justify-content:center;
-      grid-template-columns:repeat(auto-fit, minmax(96px, 1fr));
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 15px;
+      justify-content: center;
+      margin: 20px auto;
+      max-width: 500px;
     }
-    .choice{
-      background:#f1f5f9; border:2px solid #d3dae3; border-radius:14px;
-      height:110px; display:flex; align-items:center; justify-content:center;
-      cursor:pointer; transition:.18s ease; user-select:none;
+    .answer-box {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      border: 2px solid #ccc;
+      border-radius: 16px;
+      background: white;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s;
     }
-    .choice:active{transform:scale(.98)}
-    .choice.correct{animation:pop .28s ease}
-    .choice.wrong{animation:shake .28s ease}
-    @keyframes pop{50%{transform:scale(1.06)}}
-    @keyframes shake{20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)}}
-
-    /* Shape canvas */
-    .shape-wrap{width:70px; height:70px; position:relative}
-    /* circle */
-    .circle{width:100%;height:100%;border-radius:50%; background:var(--shape-color)}
-    /* square */
-    .square{width:100%;height:100%;background:var(--shape-color); border-radius:12px}
-    /* heart (pure CSS) */
-    .heart{position:relative; width:70px; height:62px; transform:translateY(4px)}
-    .heart::before,.heart::after{
-      content:""; position:absolute; width:36px; height:56px; background:var(--shape-color);
-      border-radius:36px 36px 0 0; top:0;
+    .answer-box:hover {
+      transform: scale(1.1);
     }
-    .heart::before{left:18px; transform:rotate(-45deg); transform-origin:0 100%}
-    .heart::after{left:0; transform:rotate(45deg); transform-origin:100% 100%}
-
-    /* subtle focus for accessibility */
-    .choice:focus-visible{outline:3px solid #8ab4f8; outline-offset:2px}
+    #drop-zone {
+      margin: 20px auto;
+      width: 220px;
+      height: 120px;
+      border: 2px dashed #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border-radius: 12px;
+      color: #666;
+    }
+    #message {
+      font-size: 22px;
+      margin-top: 10px;
+      height: 28px;
+    }
+    #score {
+      font-size: 20px;
+      margin-top: 5px;
+      color: #2c3e50;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Logic Quest</h1>
-    <div id="question">Loading…</div>
-    <div id="pattern"></div>
-    <div id="grid" aria-label="Answer choices"></div>
-  </div>
+  <h1>Emoji Quest</h1>
+  <div id="question">Loading...</div>
+  <div id="grid"></div>
+  <div id="drop-zone">Drag & Drop Answer Here</div>
+  <div id="message"></div>
+  <div id="score">Score: 0</div>
 
-  <!-- Sounds -->
-  <audio id="snd-ok" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
-  <audio id="snd-buzz" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+  <audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
   <script>
-    // ---------- Data ----------
-    const COLORS = {
-      red:"#e74c3c", blue:"#3498db", green:"#2ecc71", yellow:"#f1c40f",
-      purple:"#9b59b6", orange:"#e67e22", black:"#2d3436", brown:"#8e5a33"
-    };
-    const COLOR_NAMES = Object.keys(COLORS);
-    const SHAPES = ["circle","square","heart"];
+    // prettier colorful emojis
+    const colorEmojis = [
+      "🍎", "🍊", "🍋", "🍏", "🍇", "🍓", "🍒", "🍉", "🥭", "🍍"
+    ];
 
-    // ---------- State ----------
-    let correctKey = "";           // e.g. "circle:red"
-    let speechEnabled = false;     // browsers require a user gesture first
-    let currentQuestion = "";
+    const funEmojis = [
+      "😀", "😂", "🥳", "😍", "😎", "🤩", "😴", "😡",
+      "🐶", "🐱", "🦄", "🐼", "🐧", "🐸",
+      "⚽", "🏀", "🚗", "✈️", "🎸", "🎁"
+    ];
 
-    const elQ = document.getElementById("question");
-    const elPattern = document.getElementById("pattern");
-    const elGrid = document.getElementById("grid");
-    const sndOK = document.getElementById("snd-ok");
-    const sndBuzz = document.getElementById("snd-buzz");
+    let correctAnswer = "";
+    let score = 0;
 
-    // Enable voice/audio on first user interaction
-    window.addEventListener("pointerdown", () => { speechEnabled = true; speak(currentQuestion); }, { once:true });
+    const questionDisplay = document.getElementById("question");
+    const grid = document.getElementById("grid");
+    const dropZone = document.getElementById("drop-zone");
+    const messageDisplay = document.getElementById("message");
+    const scoreDisplay = document.getElementById("score");
 
-    // ---------- Utils ----------
-    function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
-    function speak(text){
-      if(!speechEnabled || !("speechSynthesis" in window)) return;
-      const synth = window.speechSynthesis;
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "en-US"; u.rate = 0.95; u.pitch = 1;
-      synth.speak(u);
-    }
-    function makeKey(shape,color){ return `${shape}:${color}`; }
+    const successSound = document.getElementById("success-sound");
+    const buzzSound = document.getElementById("buzz-sound");
 
-    function makeShapeEl(shape, colorName){
-      const color = COLORS[colorName];
-      const wrap = document.createElement("div");
-      wrap.className = "shape-wrap";
-      wrap.setAttribute("aria-label", `${colorName} ${shape}`);
-      wrap.style.setProperty("--shape-color", color);
+    const synth = window.speechSynthesis;
 
-      const inner = document.createElement("div");
-      inner.className = shape; // circle | square | heart (CSS shapes)
-      wrap.appendChild(inner);
-      return wrap;
+    function speak(text) {
+      if (!synth) return;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "en-US";
+      utter.rate = 1;
+      synth.speak(utter);
     }
 
-    function renderChoice(shape, color){
-      const box = document.createElement("button");
-      box.className = "choice";
-      box.type = "button";
-      box.dataset.key = makeKey(shape,color);
-      box.appendChild(makeShapeEl(shape,color));
-      box.addEventListener("click", () => checkAnswer(box.dataset.key, box));
-      return box;
-    }
-
-    // ---------- Rounds ----------
-    function newRound(){
-      elGrid.innerHTML = "";
-      elPattern.innerHTML = "";
-
-      // Randomly choose a mode: 'match' (question + 9 choices) or 'pattern' (show 2, pick 3rd)
-      const mode = Math.random() < 0.5 ? "match" : "pattern";
-
-      if(mode === "match"){
-        const shape = rand(SHAPES);
-        const color = rand(COLOR_NAMES);
-        correctKey = makeKey(shape,color);
-        currentQuestion = `Pick the ${color} ${shape}.`;
-        elQ.textContent = currentQuestion;
-
-        // Correct + 8 distractors (unique)
-        const allCombos = [];
-        for(const s of SHAPES){ for(const c of COLOR_NAMES){ allCombos.push([s,c]); } }
-        const options = new Set([JSON.stringify([shape,color])]);
-        while(options.size < 9){
-          const pick = rand(allCombos);
-          options.add(JSON.stringify(pick));
-        }
-        const choiceList = shuffle([...options].map(JSON.parse));
-
-        choiceList.forEach(([s,c]) => elGrid.appendChild(renderChoice(s,c)));
-        speak(currentQuestion);
-
-      } else { // pattern mode
-        const shape = rand(SHAPES);
-        // pick a start that allows +2 within the array
-        const start = Math.floor(Math.random() * (COLOR_NAMES.length - 2));
-        const c1 = COLOR_NAMES[start], c2 = COLOR_NAMES[start+1], c3 = COLOR_NAMES[start+2];
-        correctKey = makeKey(shape, c3);
-        currentQuestion = `What comes next in the pattern?`;
-        elQ.textContent = currentQuestion;
-
-        // Show pattern: two colored shapes + "?"
-        [c1, c2].forEach(c=>{
-          const holder = document.createElement("div");
-          holder.appendChild(makeShapeEl(shape,c));
-          elPattern.appendChild(holder);
-        });
-        const qm = document.createElement("div");
-        qm.className = "qmark";
-        qm.textContent = "?";
-        elPattern.appendChild(qm);
-
-        // Build options: correct + 5 random distractors (avoid duplicates)
-        const pool = [];
-        for(const c of COLOR_NAMES) pool.push([shape,c]);
-        const set = new Set([JSON.stringify([shape,c3])]);
-        while(set.size < 6){
-          const pick = rand(pool);
-          set.add(JSON.stringify(pick));
-        }
-        const opts = shuffle([...set].map(JSON.parse));
-        opts.forEach(([s,c]) => elGrid.appendChild(renderChoice(s,c)));
-
-        speak(currentQuestion);
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
       }
     }
 
-    // ---------- Answer logic ----------
-    function checkAnswer(key, el){
-      if(key === correctKey){
-        el.classList.add("correct");
-        try{ sndOK.currentTime = 0; sndOK.play(); }catch{}
-        speak("Correct!");
-        // brief pause then next round
-        setTimeout(newRound, 650);
+    function newRound() {
+      messageDisplay.textContent = "";
+      const type = Math.random() < 0.5 ? "color" : "emoji";
+
+      if (type === "color") {
+        const target = colorEmojis[Math.floor(Math.random() * colorEmojis.length)];
+        correctAnswer = target;
+        questionDisplay.textContent = "Pick this fruit: " + target;
+        speak("Pick this fruit");
+        renderOptions([...colorEmojis]);
       } else {
-        el.classList.add("wrong");
-        setTimeout(()=>el.classList.remove("wrong"), 300);
-        try{ sndBuzz.currentTime = 0; sndBuzz.play(); }catch{}
-        speak("Try again");
+        const target = funEmojis[Math.floor(Math.random() * funEmojis.length)];
+        correctAnswer = target;
+        questionDisplay.textContent = "Find this: " + target;
+        speak("Find this");
+        renderOptions([...funEmojis]);
       }
     }
 
-    // Start
+    function renderOptions(options) {
+      grid.innerHTML = "";
+      shuffleArray(options);
+      const shown = options.slice(0, 6); // show only 6 options
+      if (!shown.includes(correctAnswer)) {
+        shown[0] = correctAnswer; // ensure correct answer is inside
+      }
+      shuffleArray(shown);
+
+      shown.forEach(opt => {
+        const box = document.createElement("div");
+        box.className = "answer-box";
+        box.textContent = opt;
+        box.draggable = true;
+
+        box.onclick = () => checkAnswer(opt);
+
+        box.addEventListener("dragstart", e => {
+          box.classList.add("dragging");
+          e.dataTransfer.setData("text/plain", opt);
+        });
+        box.addEventListener("dragend", () => {
+          box.classList.remove("dragging");
+        });
+
+        grid.appendChild(box);
+      });
+    }
+
+    function checkAnswer(choice) {
+      if (choice === correctAnswer) {
+        successSound.play();
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+        messageDisplay.textContent = "✅ Correct!";
+        setTimeout(newRound, 1000);
+      } else {
+        buzzSound.play();
+        messageDisplay.textContent = "❌ Try again!";
+      }
+    }
+
+    dropZone.addEventListener("dragover", e => e.preventDefault());
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      checkAnswer(e.dataTransfer.getData("text/plain"));
+    });
+
     newRound();
   </script>
 </body>
