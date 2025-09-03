@@ -41,16 +41,17 @@ h1 { margin-top:15px; font-size:40px; color:#e74c3c; text-shadow:2px 2px #fff; }
 <script>
 // === Data ===
 const items=[
-{name:"apple", src:"https://i.imgur.com/6v0zK4F.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"banana", src:"https://i.imgur.com/7jZrK3l.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"dog", src:"https://i.imgur.com/EnYvQ2n.png", sound:"https://actions.google.com/sounds/v1/animals/dog_bark.ogg"},
-{name:"cat", src:"https://i.imgur.com/G6xE9wH.png", sound:"https://actions.google.com/sounds/v1/animals/cat_purr.ogg"},
-{name:"flower", src:"https://i.imgur.com/5zr0X8U.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"smile", src:"https://i.imgur.com/NZrFtXM.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"car", src:"https://i.imgur.com/V2M9j6H.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"ball", src:"https://i.imgur.com/B6pHymL.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"star", src:"https://i.imgur.com/5C4qk6B.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
-{name:"tree", src:"https://i.imgur.com/x0EXZxT.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"}];
+{name:"apple", src:"https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"banana", src:"https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"dog", src:"https://upload.wikimedia.org/wikipedia/commons/5/5f/Golden_Retriever_Carlos_(10581910556).jpg", sound:"https://actions.google.com/sounds/v1/animals/dog_bark.ogg"},
+{name:"cat", src:"https://upload.wikimedia.org/wikipedia/commons/3/3a/Cat03.jpg", sound:"https://actions.google.com/sounds/v1/animals/cat_purr.ogg"},
+{name:"flower", src:"https://upload.wikimedia.org/wikipedia/commons/e/e4/Flower_PNG_Clipart.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"smile", src:"https://upload.wikimedia.org/wikipedia/commons/1/13/Emojione_1F604.svg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"car", src:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Toy_car.jpg", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"ball", src:"https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"star", src:"https://upload.wikimedia.org/wikipedia/commons/4/44/Plain_Yellow_Star.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"},
+{name:"tree", src:"https://upload.wikimedia.org/wikipedia/commons/e/ec/Tree_icon.png", sound:"https://actions.google.com/sounds/v1/cartoon/pop.ogg"}
+];
 
 let score=0, correctAnswer="", currentMode="select", dragTutorialCount=0;
 const questionDisplay=document.getElementById("question"), grid=document.getElementById("grid"),
@@ -140,35 +141,27 @@ function generateMissing(){
   const sequence=shuffleArray(items.slice(0)).slice(0,6); const missingIndex=Math.floor(Math.random()*sequence.length);
   correctAnswer=sequence[missingIndex].src; questionDisplay.textContent="Find the missing piece!"; speak(questionDisplay.textContent);
   sequence.forEach((it,i)=>{ if(i!==missingIndex){ const div=document.createElement("div"); div.className="answer-box"; const img=document.createElement("img"); img.src=it.src; div.appendChild(img); puzzleDisplay.appendChild(div); }});
-  const options=[sequence[missingIndex]]; while(options.length<3){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);}
-  shuffleArray(options);
+  const options=[sequence[missingIndex]]; while(options.length<3){ const it=items[Math.floor(Math.random()*items.length)]; if(!options.includes(it)) options.push(it);} shuffleArray(options);
   options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
 }
 
-// === Find Different ===
+// === Find Different Mode ===
 function generateDifferent(){
-  const base=items[Math.floor(Math.random()*items.length)];
-  let different=items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)]; correctAnswer=different.src;
-  questionDisplay.textContent="Find the different item!"; speak(questionDisplay.textContent);
-  const options=[base,base,base,different]; shuffleArray(options);
+  const same=items[Math.floor(Math.random()*items.length)];
+  let different; do{ different=items[Math.floor(Math.random()*items.length)]; }while(different===same);
+  correctAnswer=different.src; questionDisplay.textContent="Find the different item!"; speak(questionDisplay.textContent);
+  const options=[different]; for(let i=0;i<5;i++) options.push(same); shuffleArray(options);
   options.forEach(opt=>{ const box=document.createElement("div"); box.className="answer-box"; const img=document.createElement("img"); img.src=opt.src; box.appendChild(img); box.onclick=()=>checkAnswer(opt.src,opt.sound); grid.appendChild(box); });
 }
 
 // === Check Answer ===
-function checkAnswer(selected,sound){
-  const boxes=document.querySelectorAll(".answer-box"); boxes.forEach(b=>b.classList.remove("correct","wrong"));
-  if(selected===correctAnswer){
-    document.getElementById("success-sound").play();
-    if(sound) new Audio(sound).play();
-    messageDisplay.textContent="✅ Correct!"; speak("Correct!"); score++; scoreDisplay.textContent="Score: "+score;
-    boxes.forEach(b=>{ if(b.querySelector("img").src===selected) b.classList.add("correct"); });
-    setTimeout(newRound,1200);
-  } else { document.getElementById("buzz-sound").play(); messageDisplay.textContent="❌ Try again!"; speak("Try again!");
-    boxes.forEach(b=>{ if(b.querySelector("img").src===selected) b.classList.add("wrong"); });
-  }
+function checkAnswer(src,sound){
+  if(src===correctAnswer){ score++; scoreDisplay.textContent="Score: "+score; messageDisplay.textContent="✅ Correct!"; document.getElementById("success-sound").play();
+    const aud=new Audio(sound); aud.play(); speak("Correct!"); setTimeout(newRound,1000);
+  } else { messageDisplay.textContent="❌ Try again!"; document.getElementById("buzz-sound").play(); speak("Try again!"); }
 }
 
-// === Start Game ===
+// === Start ===
 newRound();
 </script>
 </body>
