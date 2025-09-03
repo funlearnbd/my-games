@@ -1,442 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Logic Quest</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary-color: #00b894;
-      --secondary-color: #0984e3;
-      --accent-color: #ff7675;
-      --background-color: #dfe6e9;
-      --text-color-dark: #2d3436;
-      --box-shadow-light: rgba(0, 0, 0, 0.1);
-      --box-shadow-medium: rgba(0, 0, 0, 0.2);
-      --success-color: #27ae60;
-      --error-color: #e74c3c;
+    :root{
+      --bg:#f4f7fb;
+      --card:#fff;
+      --ink:#2d3436;
+      --accent:#0984e3;
+      --shadow:0 10px 30px rgba(0,0,0,.15);
     }
-    body {
-      font-family: 'Poppins', sans-serif;
-      text-align: center;
-      background-color: var(--background-color);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      overflow: hidden;
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--bg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
+      color:var(--ink);
     }
-    .game-container {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px var(--box-shadow-medium);
-      max-width: 600px;
-      width: 90%;
-      max-height: 85vh;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
+    .wrap{
+      width:min(680px,94vw); background:var(--card); border-radius:20px; box-shadow:var(--shadow);
+      padding:28px; text-align:center;
     }
-    .game-container h1 {
-      font-size: clamp(2rem, 4vw, 3rem);
-      color: var(--secondary-color);
-      font-weight: 700;
-      margin-bottom: 1rem;
+    h1{margin:0 0 8px; font-weight:800; letter-spacing:.2px; color:var(--accent)}
+    #question{font-size:clamp(18px,2.4vw,22px); margin:8px 0 16px; min-height:28px}
+    #pattern{display:flex; gap:14px; justify-content:center; align-items:center; min-height:84px; margin:6px 0 10px}
+    #pattern .qmark{font-size:48px; color:#9aa0a6}
+    #grid{
+      display:grid; gap:14px; justify-content:center;
+      grid-template-columns:repeat(auto-fit, minmax(96px, 1fr));
     }
-    #jargon {
-      font-size: clamp(0.9rem, 2vw, 1.1rem);
-      font-style: italic;
-      color: #6c757d;
-      margin-bottom: 1.5rem;
-      min-height: 25px;
+    .choice{
+      background:#f1f5f9; border:2px solid #d3dae3; border-radius:14px;
+      height:110px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:.18s ease; user-select:none;
     }
-    #instructions {
-      font-size: clamp(1.4rem, 2.5vw, 1.8rem);
-      font-weight: 600;
-      color: var(--text-color-dark);
-      min-height: 40px;
+    .choice:active{transform:scale(.98)}
+    .choice.correct{animation:pop .28s ease}
+    .choice.wrong{animation:shake .28s ease}
+    @keyframes pop{50%{transform:scale(1.06)}}
+    @keyframes shake{20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)}}
+
+    /* Shape canvas */
+    .shape-wrap{width:70px; height:70px; position:relative}
+    /* circle */
+    .circle{width:100%;height:100%;border-radius:50%; background:var(--shape-color)}
+    /* square */
+    .square{width:100%;height:100%;background:var(--shape-color); border-radius:12px}
+    /* heart (pure CSS) */
+    .heart{position:relative; width:70px; height:62px; transform:translateY(4px)}
+    .heart::before,.heart::after{
+      content:""; position:absolute; width:36px; height:56px; background:var(--shape-color);
+      border-radius:36px 36px 0 0; top:0;
     }
-    #clue-display {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 700;
-      color: var(--text-color-dark);
-      margin: 20px 0;
-      min-height: 50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #pattern-display {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 20px 0;
-      gap: 15px;
-    }
-    #pattern-display .item {
-      font-size: clamp(2em, 6vw, 4em);
-    }
-    #question-mark {
-      font-size: clamp(2em, 6vw, 4em);
-      color: #888;
-    }
-    #answer-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    .answer-box {
-      width: clamp(80px, 15vw, 100px);
-      height: clamp(80px, 15vw, 100px);
-      background-color: #f0f4f8;
-      border: 2px solid #ccc;
-      cursor: pointer;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px var(--box-shadow-light);
-      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: clamp(2em, 6vw, 4em);
-    }
-    .answer-box:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px var(--box-shadow-medium);
-    }
-    #message {
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
-      font-weight: 600;
-      min-height: 20px;
-      margin-bottom: 15px;
-    }
-    #score {
-      font-size: clamp(1rem, 2vw, 1.2rem);
-      margin: 10px 0;
-      color: var(--text-color-dark);
-    }
-    .button-group {
-      margin-top: 1.5rem;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    button {
-      font-size: clamp(1rem, 2vw, 1.1rem);
-      padding: 12px 24px;
-      margin: 0 8px;
-      cursor: pointer;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    #restart-button {
-      background-color: var(--primary-color);
-    }
-    #restart-button:hover {
-      background-color: #00a884;
-      transform: translateY(-2px);
-    }
-    #exit-button {
-      background-color: var(--error-color);
-    }
-    #exit-button:hover {
-      background-color: #c0392b;
-      transform: translateY(-2px);
-    }
-    .drag-drop-container {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      width: 100%;
-      margin: 20px 0;
-      padding: 10px;
-      border: 2px dashed #ccc;
-      border-radius: 10px;
-    }
-    .drag-item {
-      font-size: clamp(2em, 6vw, 4em);
-      cursor: grab;
-    }
-    .drop-zone {
-      width: 100px;
-      height: 100px;
-      background-color: #f0f4f8;
-      border: 2px solid var(--secondary-color);
-      border-radius: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    .heart::before{left:18px; transform:rotate(-45deg); transform-origin:0 100%}
+    .heart::after{left:0; transform:rotate(45deg); transform-origin:100% 100%}
+
+    /* subtle focus for accessibility */
+    .choice:focus-visible{outline:3px solid #8ab4f8; outline-offset:2px}
   </style>
 </head>
 <body>
-  <div id="game-container" class="game-container">
+  <div class="wrap">
     <h1>Logic Quest</h1>
-    <div id="jargon"></div>
-    <div id="instructions"></div>
-    <div id="clue-display"></div>
-    <div id="pattern-display"></div>
-    <div id="answer-grid"></div>
-    <div id="drag-drop-container" style="display:none;"></div>
-    <div id="message"></div>
-    <div id="score">Score: 0</div>
-    <div class="button-group">
-      <button id="restart-button">New Game</button>
-      <button id="exit-button">Exit Game</button>
-    </div>
+    <div id="question">Loading…</div>
+    <div id="pattern"></div>
+    <div id="grid" aria-label="Answer choices"></div>
   </div>
 
-  <audio id="success-sound" src="https://www.soundjay.com/button/button-3.mp3" preload="auto"></audio>
-  <audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
+  <!-- Sounds -->
+  <audio id="snd-ok" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="snd-buzz" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
   <script>
-    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'black', 'brown'];
-    const shapes = ['circle', 'square', 'heart'];
-
-    const coloredEmojis = {
-      'circle': ['🔴','🔵','🟢','🟡','🟣','🟠','⚫','🟤'],
-      'square': ['🟥','🟦','🟩','🟨','🟪','🟧','⬛','🟫'],
-      'heart':  ['❤️','💙','💚','💛','💜','🧡','🖤','🤎']
+    // ---------- Data ----------
+    const COLORS = {
+      red:"#e74c3c", blue:"#3498db", green:"#2ecc71", yellow:"#f1c40f",
+      purple:"#9b59b6", orange:"#e67e22", black:"#2d3436", brown:"#8e5a33"
     };
+    const COLOR_NAMES = Object.keys(COLORS);
+    const SHAPES = ["circle","square","heart"];
 
-    const uniqueEmojis = {
-      'happy face':'😀','sad face':'😩','laughing face':'😂','angry face':'😠',
-      'celebrating face':'🥳','shocked face':'🤯','winking face':'😉','sleeping face':'😴',
-      'cold face':'🥶','light bulb':'💡','bell':'🔔'
-    };
+    // ---------- State ----------
+    let correctKey = "";           // e.g. "circle:red"
+    let speechEnabled = false;     // browsers require a user gesture first
+    let currentQuestion = "";
 
-    const jargonList = [
-      "Cogito, ergo sum.","Semper ad astra.","De omnibus dubitandum.","Scientia potentia est.",
-      "Audentes Fortuna iuvat.","In vino veritas.","Carpe diem.","Veritas vos liberabit.",
-      "Amor vincit omnia.","Ad astra per aspera."
-    ];
+    const elQ = document.getElementById("question");
+    const elPattern = document.getElementById("pattern");
+    const elGrid = document.getElementById("grid");
+    const sndOK = document.getElementById("snd-ok");
+    const sndBuzz = document.getElementById("snd-buzz");
 
-    let currentLevel = 1;
-    let score = 0;
-    let correctAnswer = '';
-    const synth = window.speechSynthesis;
-    let voiceSupported = !!synth;
+    // Enable voice/audio on first user interaction
+    window.addEventListener("pointerdown", () => { speechEnabled = true; speak(currentQuestion); }, { once:true });
 
-    const instructionsDisplay = document.getElementById('instructions');
-    const clueDisplay = document.getElementById('clue-display');
-    const patternDisplay = document.getElementById('pattern-display');
-    const answerGrid = document.getElementById('answer-grid');
-    const dragDropContainer = document.getElementById('drag-drop-container');
-    const messageDisplay = document.getElementById('message');
-    const scoreDisplay = document.getElementById('score');
-    const restartButton = document.getElementById('restart-button');
-    const exitButton = document.getElementById('exit-button');
-    const successSound = document.getElementById('success-sound');
-    const buzzSound = document.getElementById('buzz-sound');
-    const jargonDisplay = document.getElementById('jargon');
+    // ---------- Utils ----------
+    function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+    function speak(text){
+      if(!speechEnabled || !("speechSynthesis" in window)) return;
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-US"; u.rate = 0.95; u.pitch = 1;
+      synth.speak(u);
+    }
+    function makeKey(shape,color){ return `${shape}:${color}`; }
 
-    function speak(text) {
-      if (voiceSupported) {
-        synth.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-        synth.speak(utterance);
-      }
+    function makeShapeEl(shape, colorName){
+      const color = COLORS[colorName];
+      const wrap = document.createElement("div");
+      wrap.className = "shape-wrap";
+      wrap.setAttribute("aria-label", `${colorName} ${shape}`);
+      wrap.style.setProperty("--shape-color", color);
+
+      const inner = document.createElement("div");
+      inner.className = shape; // circle | square | heart (CSS shapes)
+      wrap.appendChild(inner);
+      return wrap;
     }
 
-    function newRound() {
-      messageDisplay.textContent = '';
-      clueDisplay.textContent = '';
-      patternDisplay.innerHTML = '';
-      answerGrid.innerHTML = '';
-      dragDropContainer.style.display = 'none';
-
-      if (currentLevel > 30) {
-        instructionsDisplay.textContent = '';
-        messageDisplay.textContent = '🎉 Congratulations! You completed all levels!';
-        messageDisplay.style.color = 'var(--success-color)';
-        speak('Congratulations! You have completed all levels!');
-        return;
-      }
-
-      const gameType = getGameTypeByLevel(currentLevel);
-
-      if (gameType === 'find-different') setupFindDifferent();
-      else if (gameType === 'find-matching') setupFindMatching();
-      else if (gameType === 'pattern') setupPattern();
-      else if (gameType === 'drag-drop') setupDragDrop();
-
-      instructionsDisplay.textContent = `Level ${currentLevel}: ${getGeneralInstruction(gameType)}`;
-      jargonDisplay.textContent = jargonList[Math.floor(Math.random() * jargonList.length)];
+    function renderChoice(shape, color){
+      const box = document.createElement("button");
+      box.className = "choice";
+      box.type = "button";
+      box.dataset.key = makeKey(shape,color);
+      box.appendChild(makeShapeEl(shape,color));
+      box.addEventListener("click", () => checkAnswer(box.dataset.key, box));
+      return box;
     }
 
-    function getGameTypeByLevel(level) {
-      const gameTypes = ['find-different','find-matching','pattern','drag-drop'];
-      return gameTypes[(level-1) % gameTypes.length];
-    }
+    // ---------- Rounds ----------
+    function newRound(){
+      elGrid.innerHTML = "";
+      elPattern.innerHTML = "";
 
-    function getGeneralInstruction(type) {
-      switch(type) {
-        case 'find-different': return 'Find the one that is different.';
-        case 'find-matching': return 'Find the matching item.';
-        case 'pattern': return 'Find the missing item in the pattern.';
-        case 'drag-drop': return 'Complete the puzzle.';
-      }
-    }
+      // Randomly choose a mode: 'match' (question + 9 choices) or 'pattern' (show 2, pick 3rd)
+      const mode = Math.random() < 0.5 ? "match" : "pattern";
 
-    function setupFindDifferent() {
-      const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
-      const commonEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-      let differentEmoji;
-      do { differentEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)]; }
-      while (differentEmoji === commonEmoji);
+      if(mode === "match"){
+        const shape = rand(SHAPES);
+        const color = rand(COLOR_NAMES);
+        correctKey = makeKey(shape,color);
+        currentQuestion = `Pick the ${color} ${shape}.`;
+        elQ.textContent = currentQuestion;
 
-      const options = [differentEmoji, ...Array(8).fill(commonEmoji)];
-      correctAnswer = differentEmoji;
-      speak(`Level ${currentLevel}: Find the one that is different`);
-      renderGrid(options);
-    }
-
-    function setupFindMatching() {
-      const allEmojis = Object.values(coloredEmojis).flat().concat(Object.values(uniqueEmojis));
-      const clueEmoji = allEmojis[Math.floor(Math.random() * allEmojis.length)];
-
-      let clueText;
-      if (Object.values(uniqueEmojis).includes(clueEmoji)) {
-        const clueKey = Object.keys(uniqueEmojis).find(k => uniqueEmojis[k] === clueEmoji);
-        clueText = `Find the ${clueKey}.`;
-      } else {
-        let foundShape='', foundColor='';
-        for (const shape in coloredEmojis) {
-          const idx = coloredEmojis[shape].indexOf(clueEmoji);
-          if (idx !== -1) { foundShape=shape; foundColor=colors[idx]; break; }
+        // Correct + 8 distractors (unique)
+        const allCombos = [];
+        for(const s of SHAPES){ for(const c of COLOR_NAMES){ allCombos.push([s,c]); } }
+        const options = new Set([JSON.stringify([shape,color])]);
+        while(options.size < 9){
+          const pick = rand(allCombos);
+          options.add(JSON.stringify(pick));
         }
-        clueText = `Find the ${foundColor} ${foundShape}.`;
-      }
+        const choiceList = shuffle([...options].map(JSON.parse));
 
-      clueDisplay.textContent = clueText;
-      correctAnswer = clueEmoji;
-      const options = [clueEmoji];
-      const wrong = allEmojis.filter(e => e !== clueEmoji);
-      shuffleArray(wrong);
-      options.push(...wrong.slice(0,8));
-      speak(`Level ${currentLevel}: ${clueText}`);
-      renderGrid(options);
+        choiceList.forEach(([s,c]) => elGrid.appendChild(renderChoice(s,c)));
+        speak(currentQuestion);
+
+      } else { // pattern mode
+        const shape = rand(SHAPES);
+        // pick a start that allows +2 within the array
+        const start = Math.floor(Math.random() * (COLOR_NAMES.length - 2));
+        const c1 = COLOR_NAMES[start], c2 = COLOR_NAMES[start+1], c3 = COLOR_NAMES[start+2];
+        correctKey = makeKey(shape, c3);
+        currentQuestion = `What comes next in the pattern?`;
+        elQ.textContent = currentQuestion;
+
+        // Show pattern: two colored shapes + "?"
+        [c1, c2].forEach(c=>{
+          const holder = document.createElement("div");
+          holder.appendChild(makeShapeEl(shape,c));
+          elPattern.appendChild(holder);
+        });
+        const qm = document.createElement("div");
+        qm.className = "qmark";
+        qm.textContent = "?";
+        elPattern.appendChild(qm);
+
+        // Build options: correct + 5 random distractors (avoid duplicates)
+        const pool = [];
+        for(const c of COLOR_NAMES) pool.push([shape,c]);
+        const set = new Set([JSON.stringify([shape,c3])]);
+        while(set.size < 6){
+          const pick = rand(pool);
+          set.add(JSON.stringify(pick));
+        }
+        const opts = shuffle([...set].map(JSON.parse));
+        opts.forEach(([s,c]) => elGrid.appendChild(renderChoice(s,c)));
+
+        speak(currentQuestion);
+      }
     }
 
-    function setupPattern() {
-      clueDisplay.textContent = '';
-      let emoji1,emoji2;
-      if (Math.random()<0.5) {
-        const shape = shapes[Math.floor(Math.random()*shapes.length)];
-        const start = Math.floor(Math.random()*(colors.length-3));
-        emoji1=coloredEmojis[shape][start];
-        emoji2=coloredEmojis[shape][start+1];
-        correctAnswer=coloredEmojis[shape][start+2];
+    // ---------- Answer logic ----------
+    function checkAnswer(key, el){
+      if(key === correctKey){
+        el.classList.add("correct");
+        try{ sndOK.currentTime = 0; sndOK.play(); }catch{}
+        speak("Correct!");
+        // brief pause then next round
+        setTimeout(newRound, 650);
       } else {
-        const colorIdx=Math.floor(Math.random()*colors.length);
-        const start=Math.floor(Math.random()*(shapes.length-2));
-        emoji1=coloredEmojis[shapes[start]][colorIdx];
-        emoji2=coloredEmojis[shapes[start+1]][colorIdx];
-        correctAnswer=coloredEmojis[shapes[start+2]][colorIdx];
-      }
-      patternDisplay.innerHTML='';
-      [emoji1,emoji2].forEach(em=>{
-        const d=document.createElement('div'); d.className='item'; d.textContent=em;
-        patternDisplay.appendChild(d);
-      });
-      const q=document.createElement('div'); q.id='question-mark'; q.textContent='?';
-      patternDisplay.appendChild(q);
-
-      const options=generateOptions(correctAnswer,3,Object.values(coloredEmojis).flat());
-      speak(`Level ${currentLevel}: Find the missing item in the pattern`);
-      renderGrid(options);
-    }
-
-    function setupDragDrop() {
-      answerGrid.innerHTML=''; patternDisplay.innerHTML='';
-      dragDropContainer.innerHTML=''; dragDropContainer.style.display='flex';
-
-      const shape=shapes[Math.floor(Math.random()*shapes.length)];
-      const colorIdx=Math.floor(Math.random()*colors.length);
-      const target=coloredEmojis[shape][colorIdx];
-      correctAnswer=target;
-      const q=`Drag the ${colors[colorIdx]} ${shape}.`;
-      clueDisplay.textContent=q;
-      speak(`Level ${currentLevel}: ${q}`);
-
-      const distractors=generateOptions(target,3,Object.values(coloredEmojis).flat());
-      shuffleArray(distractors);
-      distractors.forEach(e=>{
-        const item=document.createElement('div');
-        item.textContent=e;
-        item.className="drag-item";
-        item.draggable=true;
-        item.addEventListener('dragstart',ev=>ev.dataTransfer.setData('text/plain',e));
-        dragDropContainer.appendChild(item);
-      });
-      const drop=document.createElement('div');
-      drop.className="drop-zone";
-      drop.addEventListener('dragover',e=>e.preventDefault());
-      drop.addEventListener('drop',e=>{
-        e.preventDefault();
-        checkAnswer(e.dataTransfer.getData('text/plain'));
-      });
-      dragDropContainer.appendChild(drop);
-    }
-
-    function renderGrid(options) {
-      answerGrid.innerHTML='';
-      shuffleArray(options);
-      options.forEach(e=>{
-        const box=document.createElement('div');
-        box.className='answer-box'; box.textContent=e;
-        box.onclick=()=>checkAnswer(e);
-        answerGrid.appendChild(box);
-      });
-    }
-
-    function checkAnswer(choice) {
-      if (choice===correctAnswer) {
-        successSound.play();
-        score++; scoreDisplay.textContent=`Score: ${score}`;
-        messageDisplay.textContent="✅ Correct!";
-        speak(["Great job!","Well done!","You got it!"][Math.floor(Math.random()*3)]);
-        currentLevel++; setTimeout(newRound,1200);
-      } else {
-        buzzSound.play();
-        messageDisplay.textContent="❌ Try again!";
-        speak("Try again!");
+        el.classList.add("wrong");
+        setTimeout(()=>el.classList.remove("wrong"), 300);
+        try{ sndBuzz.currentTime = 0; sndBuzz.play(); }catch{}
+        speak("Try again");
       }
     }
 
-    function generateOptions(correct,count,pool) {
-      const opts=new Set([correct]);
-      while(opts.size<count) opts.add(pool[Math.floor(Math.random()*pool.length)]);
-      return [...opts];
-    }
-    function shuffleArray(arr) {
-      for(let i=arr.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [arr[i],arr[j]]=[arr[j],arr[i]];
-      }
-      return arr;
-    }
-
-    exitButton.addEventListener('click',()=>window.location.href='index.html');
-    restartButton.addEventListener('click',()=>{
-      score=0; scoreDisplay.textContent=`Score: ${score}`;
-      currentLevel=1; newRound();
-    });
-
-    window.onload=newRound;
+    // Start
+    newRound();
   </script>
 </body>
 </html>
