@@ -282,8 +282,8 @@
         if (!synth) {
             voiceSupported = false;
         }
-        
-        // This function will now be called after the rest of the game is loaded
+
+        // Modified speakInstructions to only be called when needed
         function speakInstructions(gameType, clueText = '') {
             if (!voiceSupported) return;
             const generalInstruction = getGeneralInstruction(gameType);
@@ -305,7 +305,8 @@
                 synth.speak(utterance);
             }
         }
-
+        
+        // Refined newRound to only set up the next puzzle
         function newRound() {
             messageDisplay.textContent = '';
             clueDisplay.textContent = '';
@@ -337,6 +338,12 @@
             
             instructionsDisplay.textContent = `Level ${currentLevel}: ${getGeneralInstruction(gameType)}`;
             jargonDisplay.textContent = jargonList[Math.floor(Math.random() * jargonList.length)];
+        }
+        
+        // This function will handle the initial load, ensuring the UI is ready instantly
+        function initializeGame() {
+            scoreDisplay.textContent = `Score: ${score}`;
+            newRound();
         }
 
         function getGameTypeByLevel(level) {
@@ -566,7 +573,7 @@
             newRound();
         });
 
-        window.onload = newRound;
+        window.onload = initializeGame;
     </script>
 </body>
 </html>
