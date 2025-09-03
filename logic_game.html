@@ -58,6 +58,7 @@
       font-size: 18px;
       border-radius: 12px;
       color: #666;
+      display: none; /* hidden for select mode */
     }
     #message {
       font-size: 22px;
@@ -83,7 +84,6 @@
   <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
   <script>
-    // Game levels / categories with names
     const levels = [
       {
         name: "Fruit Quest",
@@ -150,7 +150,6 @@
 
     let correctAnswer = {};
     let score = 0;
-
     const questionDisplay = document.getElementById("question");
     const grid = document.getElementById("grid");
     const dropZone = document.getElementById("drop-zone");
@@ -180,31 +179,36 @@
     function newRound() {
       messageDisplay.textContent = "";
 
-      // Randomly pick a level/category
-      const level = levels[Math.floor(Math.random() * levels.length)];
+      // Choose level based on score (progressive difficulty)
+      let availableLevels;
+      if(score < 5) availableLevels = levels.map(l=>({...l, items:l.items.slice(0,6)}));
+      else if(score < 10) availableLevels = levels.map(l=>({...l, items:l.items.slice(0,8)}));
+      else availableLevels = levels;
+
+      const level = availableLevels[Math.floor(Math.random() * availableLevels.length)];
       const items = [...level.items];
       shuffleArray(items);
 
-      // Pick correct answer
       correctAnswer = items[Math.floor(Math.random() * items.length)];
 
-      // Show question using name
+      // Decide if round is drag or select randomly
+      const isDrag = Math.random() < 0.5;
+
       questionDisplay.textContent = "Find the " + correctAnswer.name;
       speak("Find the " + correctAnswer.name);
 
-      // Render 6 options
+      dropZone.style.display = isDrag ? "flex" : "none";
+      grid.innerHTML = "";
       const shown = items.slice(0,6);
       if (!shown.includes(correctAnswer)) shown[0] = correctAnswer;
       shuffleArray(shown);
 
-      grid.innerHTML = "";
       shown.forEach(opt => {
         const box = document.createElement("div");
         box.className = "answer-box";
         box.textContent = opt.emoji;
-        box.draggable = true;
-
-        box.onclick = () => checkAnswer(opt);
+        box.draggable = isDrag;
+        box.onclick = () => { if(!isDrag) checkAnswer(opt) };
 
         box.addEventListener("dragstart", e => {
           box.classList.add("dragging");
