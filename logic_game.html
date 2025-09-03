@@ -1,245 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Emoji Quest</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f8fbff;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      margin-top: 10px;
-      font-size: 32px;
-      color: #2c3e50;
-    }
-    #question {
-      font-size: 24px;
-      margin: 20px 0;
-      color: #34495e;
-      min-height: 40px;
-    }
-    #grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 15px;
-      justify-content: center;
-      margin: 20px auto;
-      max-width: 500px;
-    }
-    .answer-box {
-      width: 100px;
-      height: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      border: 2px solid #ccc;
-      border-radius: 16px;
-      background: white;
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.2s;
-    }
-    .answer-box:hover {
-      transform: scale(1.1);
-    }
-    #drop-zone {
-      margin: 20px auto;
-      width: 220px;
-      height: 120px;
-      border: 2px dashed #666;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      border-radius: 12px;
-      color: #666;
-      display: none; /* hidden for select mode */
-    }
-    #message {
-      font-size: 22px;
-      margin-top: 10px;
-      height: 28px;
-    }
-    #score {
-      font-size: 20px;
-      margin-top: 5px;
-      color: #2c3e50;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Kids Logic Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f8fbff;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    margin-top: 10px;
+    font-size: 32px;
+    color: #2c3e50;
+  }
+  #question {
+    font-size: 24px;
+    margin: 20px 0;
+    color: #34495e;
+    min-height: 40px;
+  }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    justify-content: center;
+    margin: 20px auto;
+    max-width: 500px;
+  }
+  .answer-box {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    border: 2px solid #ccc;
+    border-radius: 16px;
+    background: white;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s;
+  }
+  .answer-box:hover {
+    transform: scale(1.1);
+  }
+  #drop-zone {
+    margin: 20px auto;
+    width: 220px;
+    height: 120px;
+    border: 2px dashed #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 12px;
+    color: #666;
+    display: none;
+  }
+  #message {
+    font-size: 22px;
+    margin-top: 10px;
+    height: 28px;
+  }
+  #score {
+    font-size: 20px;
+    margin-top: 5px;
+    color: #2c3e50;
+  }
+</style>
 </head>
 <body>
-  <h1>Emoji Quest</h1>
-  <div id="question">Loading...</div>
-  <div id="grid"></div>
-  <div id="drop-zone">Drag & Drop Answer Here</div>
-  <div id="message"></div>
-  <div id="score">Score: 0</div>
+<h1>Kids Logic Game</h1>
+<div id="question">Loading...</div>
+<div id="grid"></div>
+<div id="drop-zone">Drag & Drop Answer Here</div>
+<div id="message"></div>
+<div id="score">Score: 0</div>
 
-  <audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-  <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
-  <script>
-    const levels = [
-      {
-        name: "Fruit Quest",
-        items: [
-          {emoji:"🍎", name:"apple"},
-          {emoji:"🍊", name:"orange"},
-          {emoji:"🍋", name:"lemon"},
-          {emoji:"🍏", name:"green apple"},
-          {emoji:"🍇", name:"grapes"},
-          {emoji:"🍓", name:"strawberry"},
-          {emoji:"🍒", name:"cherry"},
-          {emoji:"🍉", name:"watermelon"},
-          {emoji:"🥭", name:"mango"},
-          {emoji:"🍍", name:"pineapple"}
-        ]
-      },
-      {
-        name: "Emoji Faces",
-        items: [
-          {emoji:"😀", name:"happy face"},
-          {emoji:"😂", name:"laughing face"},
-          {emoji:"🥳", name:"celebrating face"},
-          {emoji:"😍", name:"loving face"},
-          {emoji:"😎", name:"cool face"},
-          {emoji:"🤩", name:"star-struck face"},
-          {emoji:"😴", name:"sleeping face"},
-          {emoji:"😡", name:"angry face"}
-        ]
-      },
-      {
-        name: "Animal Quest",
-        items: [
-          {emoji:"🐶", name:"dog"},
-          {emoji:"🐱", name:"cat"},
-          {emoji:"🦄", name:"unicorn"},
-          {emoji:"🐼", name:"panda"},
-          {emoji:"🐧", name:"penguin"},
-          {emoji:"🐸", name:"frog"}
-        ]
-      },
-      {
-        name: "Object Quest",
-        items: [
-          {emoji:"⚽", name:"soccer ball"},
-          {emoji:"🏀", name:"basketball"},
-          {emoji:"🚗", name:"car"},
-          {emoji:"✈️", name:"airplane"},
-          {emoji:"🎸", name:"guitar"},
-          {emoji:"🎁", name:"gift"}
-        ]
-      },
-      {
-        name: "Food Quest",
-        items: [
-          {emoji:"🍔", name:"burger"},
-          {emoji:"🍕", name:"pizza"},
-          {emoji:"🍰", name:"cake"},
-          {emoji:"🍦", name:"ice cream"},
-          {emoji:"🥪", name:"sandwich"},
-          {emoji:"🌮", name:"taco"}
-        ]
-      }
-    ];
+<script>
+const synth = window.speechSynthesis;
+const scoreDisplay = document.getElementById("score");
+const questionDisplay = document.getElementById("question");
+const grid = document.getElementById("grid");
+const dropZone = document.getElementById("drop-zone");
+const messageDisplay = document.getElementById("message");
+const successSound = document.getElementById("success-sound");
+const buzzSound = document.getElementById("buzz-sound");
 
-    let correctAnswer = {};
-    let score = 0;
-    const questionDisplay = document.getElementById("question");
-    const grid = document.getElementById("grid");
-    const dropZone = document.getElementById("drop-zone");
-    const messageDisplay = document.getElementById("message");
-    const scoreDisplay = document.getElementById("score");
+let score = 0;
+let correctAnswer = {};
+let currentMode = "select";
 
-    const successSound = document.getElementById("success-sound");
-    const buzzSound = document.getElementById("buzz-sound");
+const items = [
+  {emoji:"🍎", name:"apple"},
+  {emoji:"🍊", name:"orange"},
+  {emoji:"🍋", name:"lemon"},
+  {emoji:"🍏", name:"green apple"},
+  {emoji:"🍇", name:"grapes"},
+  {emoji:"🍓", name:"strawberry"},
+  {emoji:"🍒", name:"cherry"},
+  {emoji:"🍉", name:"watermelon"},
+  {emoji:"🥭", name:"mango"},
+  {emoji:"🍍", name:"pineapple"},
+  {emoji:"😀", name:"happy face"},
+  {emoji:"😂", name:"laughing face"},
+  {emoji:"🥳", name:"celebrating face"},
+  {emoji:"😍", name:"loving face"},
+  {emoji:"😎", name:"cool face"},
+  {emoji:"🤩", name:"star-struck face"},
+  {emoji:"🐶", name:"dog"},
+  {emoji:"🐱", name:"cat"},
+  {emoji:"🦄", name:"unicorn"},
+  {emoji:"🐼", name:"panda"},
+  {emoji:"⚽", name:"soccer ball"},
+  {emoji:"🏀", name:"basketball"},
+  {emoji:"🚗", name:"car"},
+  {emoji:"✈️", name:"airplane"},
+  {emoji:"🎸", name:"guitar"},
+  {emoji:"🎁", name:"gift"},
+  {emoji:"🍔", name:"burger"},
+  {emoji:"🍕", name:"pizza"},
+  {emoji:"🍰", name:"cake"},
+  {emoji:"🍦", name:"ice cream"},
+  {emoji:"🥪", name:"sandwich"},
+  {emoji:"🌮", name:"taco"}
+];
 
-    const synth = window.speechSynthesis;
+function speak(text){
+  if(!synth) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "en-US";
+  utter.rate = 1;
+  synth.speak(utter);
+}
 
-    function speak(text) {
-      if (!synth) return;
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = "en-US";
-      utter.rate = 1;
-      synth.speak(utter);
-    }
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
 
-    function shuffleArray(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-    }
+function newRound(){
+  messageDisplay.textContent = "";
+  dropZone.style.display = "none";
+  grid.innerHTML = "";
 
-    function newRound() {
-      messageDisplay.textContent = "";
+  // Choose mode randomly
+  const modes = ["select","drag","different","puzzle"];
+  currentMode = modes[Math.floor(Math.random()*modes.length)];
 
-      // Choose level based on score (progressive difficulty)
-      let availableLevels;
-      if(score < 5) availableLevels = levels.map(l=>({...l, items:l.items.slice(0,6)}));
-      else if(score < 10) availableLevels = levels.map(l=>({...l, items:l.items.slice(0,8)}));
-      else availableLevels = levels;
+  if(currentMode==="select" || currentMode==="drag"){
+    const availableItems = score<5?items.slice(0,15):items; // progressive difficulty
+    shuffleArray(availableItems);
+    correctAnswer = availableItems[Math.floor(Math.random()*availableItems.length)];
+    questionDisplay.textContent = "Find the " + correctAnswer.name;
+    speak("Find the " + correctAnswer.name);
 
-      const level = availableLevels[Math.floor(Math.random() * availableLevels.length)];
-      const items = [...level.items];
-      shuffleArray(items);
+    const options = availableItems.slice(0,6);
+    if(!options.includes(correctAnswer)) options[0]=correctAnswer;
+    shuffleArray(options);
 
-      correctAnswer = items[Math.floor(Math.random() * items.length)];
+    if(currentMode==="drag") dropZone.style.display = "flex";
 
-      // Decide if round is drag or select randomly
-      const isDrag = Math.random() < 0.5;
+    options.forEach(opt=>{
+      const box = document.createElement("div");
+      box.className = "answer-box";
+      box.textContent = opt.emoji;
+      box.draggable = currentMode==="drag";
+      if(currentMode==="select") box.onclick = ()=>checkAnswer(opt.emoji);
 
-      questionDisplay.textContent = "Find the " + correctAnswer.name;
-      speak("Find the " + correctAnswer.name);
-
-      dropZone.style.display = isDrag ? "flex" : "none";
-      grid.innerHTML = "";
-      const shown = items.slice(0,6);
-      if (!shown.includes(correctAnswer)) shown[0] = correctAnswer;
-      shuffleArray(shown);
-
-      shown.forEach(opt => {
-        const box = document.createElement("div");
-        box.className = "answer-box";
-        box.textContent = opt.emoji;
-        box.draggable = isDrag;
-        box.onclick = () => { if(!isDrag) checkAnswer(opt) };
-
-        box.addEventListener("dragstart", e => {
-          box.classList.add("dragging");
-          e.dataTransfer.setData("text/plain", opt.emoji);
-        });
-        box.addEventListener("dragend", () => box.classList.remove("dragging"));
-
-        grid.appendChild(box);
+      box.addEventListener("dragstart", e=>{
+        if(currentMode==="drag") e.dataTransfer.setData("text/plain",opt.emoji);
       });
-    }
 
-    function checkAnswer(choice) {
-      if (choice === correctAnswer.emoji) {
-        successSound.play();
-        score++;
-        scoreDisplay.textContent = `Score: ${score}`;
-        messageDisplay.textContent = "✅ Correct!";
-        setTimeout(newRound, 1000);
-      } else {
-        buzzSound.play();
-        messageDisplay.textContent = "❌ Try again!";
-      }
-    }
-
-    dropZone.addEventListener("dragover", e => e.preventDefault());
-    dropZone.addEventListener("drop", e => {
-      e.preventDefault();
-      checkAnswer(e.dataTransfer.getData("text/plain"));
+      grid.appendChild(box);
     });
+  }
 
-    newRound();
-  </script>
+  else if(currentMode==="different"){
+    // 6 boxes, 5 same, 1 different
+    const base = items[Math.floor(Math.random()*items.length)];
+    const different = items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)];
+    correctAnswer = different;
+
+    questionDisplay.textContent = "Find the different one!";
+    speak("Find the different one!");
+
+    const arr = Array(5).fill(base).concat(different);
+    shuffleArray(arr);
+
+    arr.forEach(opt=>{
+      const box = document.createElement("div");
+      box.className = "answer-box";
+      box.textContent = opt.emoji;
+      box.onclick = ()=>checkAnswer(opt.emoji);
+      grid.appendChild(box);
+    });
+  }
+
+  else if(currentMode==="puzzle"){
+    // Missing piece: show 2 emojis + 1 missing
+    const puzzleItems = score<5?items.slice(0,15):items;
+    shuffleArray(puzzleItems);
+    const correct = puzzleItems[Math.floor(Math.random()*puzzleItems.length)];
+    correctAnswer = correct;
+
+    const wrongs = puzzleItems.filter(it=>it!==correct).slice(0,2);
+    const arr = [correct,...wrongs];
+    shuffleArray(arr);
+
+    questionDisplay.textContent = "Find the missing piece!";
+    speak("Find the missing piece!");
+
+    arr.forEach(opt=>{
+      const box = document.createElement("div");
+      box.className = "answer-box";
+      box.textContent = opt.emoji;
+      box.onclick = ()=>checkAnswer(opt.emoji);
+      grid.appendChild(box);
+    });
+  }
+}
+
+function checkAnswer(choice){
+  if(choice===correctAnswer.emoji){
+    successSound.play();
+    score++;
+    scoreDisplay.textContent="Score: "+score;
+    messageDisplay.textContent="✅ Correct!";
+    setTimeout(newRound,1000);
+  }else{
+    buzzSound.play();
+    messageDisplay.textContent="❌ Try again!";
+  }
+}
+
+dropZone.addEventListener("dragover", e=>e.preventDefault());
+dropZone.addEventListener("drop", e=>{
+  e.preventDefault();
+  checkAnswer(e.dataTransfer.getData("text/plain"));
+});
+
+newRound();
+</script>
 </body>
 </html>
