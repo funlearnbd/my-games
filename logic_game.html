@@ -1,71 +1,252 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Kids Logic — Fixed & Improved</title>
+<title>Kids Logic Game - Fun & Smart!</title>
 <style>
-  :root{
-    --bg1:#ffecd2; --bg2:#fcb69f; --accent:#2d9cdb; --good:#27ae60; --bad:#e74c3c;
+:root{
+  --bg1:#ffecd2;
+  --bg2:#fcb69f;
+  --accent:#2d9cdb;
+  --good:#27ae60;
+  --bad:#e74c3c;
+  --main-color:#c0392b;
+  --text-color:#223;
+  --light-gray:#f3f3f3;
+}
+
+html,body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Comic Sans MS', cursive, sans-serif; /* A more playful font */
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--bg1), var(--bg2));
+  padding: 12px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Page containers */
+#start-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+}
+
+#game-page {
+  display: none; /* Initially hidden */
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 980px;
+}
+
+header {
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+h1 {
+  margin: 0;
+  color: var(--main-color);
+  font-size: clamp(24px, 5vw, 40px); /* Responsive font size */
+  text-shadow: 2px 2px 0px #fff, 4px 4px 0px rgba(0,0,0,0.1); /* Funky shadow */
+}
+
+#score {
+  font-weight: 700;
+  font-size: 1.5em;
+  color: var(--text-color);
+}
+
+#question {
+  font-size: clamp(18px, 4vw, 24px);
+  margin: 10px 0 8px;
+  color: var(--text-color);
+  min-height: 48px;
+  text-align: center;
+  max-width: 920px;
+}
+
+main {
+  width: 100%;
+  max-width: 920px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+#puzzle {
+  display: grid;
+  grid-template-columns: repeat(3, 160px);
+  gap: 12px;
+  justify-content: center;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: 880px;
+  justify-items: center;
+  padding: 6px;
+}
+
+.answer-box {
+  width: 140px;
+  height: 140px;
+  border-radius: 14px;
+  background: #fff;
+  border: 4px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.answer-box img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 10px;
+  pointer-events: none;
+  display: block;
+}
+
+.answer-box:active {
+  transform: scale(.98)
+}
+
+.answer-box.correct {
+  border-color: var(--good);
+  box-shadow: 0 18px 34px rgba(39, 174, 96, 0.14);
+  animation: bounce .6s;
+}
+
+.answer-box.wrong {
+  border-color: var(--bad);
+  box-shadow: 0 18px 34px rgba(231, 76, 60, 0.14);
+  animation: shake .45s;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0) }
+  40% { transform: translateY(-14px) }
+  60% { transform: translateY(-7px) }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0) }
+  25% { transform: translateX(-8px) }
+  50% { transform: translateX(8px) }
+  75% { transform: translateX(-6px) }
+  100% { transform: translateX(0) }
+}
+
+#message {
+  min-height: 28px;
+  color: var(--text-color);
+  font-weight: 700;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.hintPulse {
+  box-shadow: 0 0 22px 8px rgba(241, 196, 15, 0.18);
+  border-color: #f1c40f !important;
+}
+
+@media (max-width: 560px) {
+  #puzzle {
+    grid-template-columns: repeat(2, 120px);
+    gap: 10px;
   }
-  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
-  body{
-    display:flex;flex-direction:column;align-items:center;
-    background:linear-gradient(160deg,var(--bg1),var(--bg2));padding:12px;
-    -webkit-user-select:none; user-select:none;
+  .answer-box {
+    width: 110px;
+    height: 110px
   }
-
-  header{width:100%;max-width:980px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  h1{margin:0;color:#c0392b;font-size:30px;text-shadow:0 1px 0 #fff}
-  #score{font-weight:700;color:#223}
-  #question{font-size:20px;margin:10px 0 8px;color:#223;min-height:48px;text-align:center;max-width:920px}
-
-  main{width:100%;max-width:920px;display:flex;flex-direction:column;align-items:center;gap:12px}
-  #puzzle { display:grid; grid-template-columns: repeat(3,160px); gap:12px; justify-content:center; }
-  #grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; width:100%; max-width:880px; justify-items:center; padding:6px; }
-
-  .answer-box{
-    width:140px; height:140px; border-radius:14px; background:#fff; border:4px solid var(--accent);
-    display:flex; align-items:center; justify-content:center; box-shadow:0 10px 24px rgba(0,0,0,0.12);
-    cursor:pointer; transition:transform .12s, box-shadow .12s; -webkit-tap-highlight-color:transparent;
+  .answer-box img {
+    width: 94px;
+    height: 94px
   }
-  .answer-box img{ width:120px; height:120px; object-fit:contain; border-radius:10px; pointer-events:none; display:block; }
-  .answer-box:active{ transform:scale(.98) }
-  .answer-box.correct{ border-color:var(--good); box-shadow:0 18px 34px rgba(39,174,96,0.14); animation:bounce .6s; }
-  .answer-box.wrong{ border-color:var(--bad); box-shadow:0 18px 34px rgba(231,76,60,0.14); animation:shake .45s; }
+}
 
-  @keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}60%{transform:translateY(-7px)}}
-  @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-6px)}100%{transform:translateX(0)}}
+/* Button Styles */
+.game-button {
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1.2em;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s, transform 0.2s;
+}
+.game-button:hover {
+  background-color: #3ca2e0;
+  transform: translateY(-2px);
+}
+.game-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
 
-  #message{min-height:28px;color:#223;font-weight:700;margin-top:6px;text-align:center}
-  .hintPulse{ box-shadow:0 0 22px 8px rgba(241,196,15,0.18); border-color:#f1c40f !important; }
-  @media (max-width:560px){
-    #puzzle { grid-template-columns: repeat(2,120px); gap:10px; }
-    .answer-box{ width:110px; height:110px }
-    .answer-box img{ width:94px; height:94px }
-  }
-
-  /* small footer note */
-  footer{margin-top:8px;font-size:13px;color:#334;opacity:.9}
+.exit-button {
+  background-color: var(--main-color);
+}
+.exit-button:hover {
+  background-color: #e75042;
+}
 </style>
 </head>
+
 <body>
-  <header>
+  <div id="start-page">
     <h1>Kids Logic Game</h1>
-    <div id="score">Score: 0</div>
-  </header>
+    <p>A fun way to learn and improve logical thinking!</p>
+    <button class="game-button" onclick="startGame()">Start Game</button>
+  </div>
 
-  <div id="question">Loading…</div>
+  <div id="game-page">
+    <header>
+      <h1>Kids Logic Game</h1>
+      <div id="score">Score: 0</div>
+    </header>
 
-  <main>
-    <div id="puzzle" aria-hidden="true"></div>
-    <div id="grid" role="list"></div>
-    <div id="message" aria-live="polite"></div>
-  </main>
+    <div id="question">Loading…</div>
 
-  <footer>Mode: Select → Missing → Different (guided warmup: first 2 rounds each)</footer>
+    <main>
+      <div id="puzzle" aria-hidden="true"></div>
+      <div id="grid" role="list"></div>
+      <div id="message" aria-live="polite"></div>
+    </main>
+    
+    <div style="margin-top: 20px;">
+      <button class="game-button exit-button" onclick="exitGame()">Exit Game</button>
+    </div>
+  </div>
 
-  <!-- sounds -->
   <audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
   <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
@@ -73,7 +254,7 @@
 /* ============================
    Utility: encode SVG -> data URI
    ============================ */
-function svgDataURI(svgText){
+function svgDataURI(svgText) {
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgText);
 }
 
@@ -99,7 +280,7 @@ const SVG = {
     <g fill="#8e44ad"><circle cx="40" cy="28" r="9"/><circle cx="53" cy="24" r="9"/><circle cx="66" cy="30" r="9"/><circle cx="47" cy="40" r="9"/><circle cx="60" cy="44" r="9"/><circle cx="50" cy="54" r="9"/></g>
     <rect x="48" y="8" width="4" height="18" fill="#2c3e50"/>
   </svg>`,
-  strawberry:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  strawberry: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
     <path d="M50 18c-12 0-24 10-24 21 0 18 24 40 24 40s24-22 24-40c0-11-12-21-24-21z" fill="#e74c3c"/>
     <path d="M36 12c6-6 18-6 24 0" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/>
     <g fill="#fff"><circle cx="42" cy="42" r="1.8"/><circle cx="50" cy="36" r="1.8"/><circle cx="58" cy="44" r="1.8"/></g>
@@ -118,28 +299,28 @@ const SVG = {
     <circle cx="42" cy="50" r="1.8" fill="#000"/><circle cx="58" cy="50" r="1.8" fill="#000"/>
     <path d="M40 64 Q50 72 60 64" stroke="#6b6b6b" stroke-width="2" fill="none"/>
   </svg>`,
-  flower:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  flower: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
     <circle cx="50" cy="40" r="11" fill="#f1c40f"/>
     <circle cx="50" cy="18" r="12" fill="#ff6ea1"/><circle cx="70" cy="35" r="12" fill="#ff6ea1"/><circle cx="30" cy="35" r="12" fill="#ff6ea1"/>
     <circle cx="36" cy="55" r="12" fill="#ff6ea1"/><circle cx="64" cy="55" r="12" fill="#ff6ea1"/>
     <rect x="48" y="55" width="4" height="25" fill="#2ecc71"/>
   </svg>`,
-  star:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  star: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
     <polygon points="50,12 61,40 92,40 66,58 76,88 50,70 24,88 34,58 8,40 39,40" fill="#f1c40f"/>
   </svg>`,
-  car:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 80'>
+  car: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 80'>
     <rect x="10" y="30" width="120" height="30" rx="8" fill="#3498db"/>
     <rect x="34" y="12" width="72" height="30" rx="6" fill="#2c82d4"/>
     <circle cx="34" cy="62" r="10" fill="#333"/><circle cx="106" cy="62" r="10" fill="#333"/>
   </svg>`,
-  ball:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  ball: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
     <circle cx="50" cy="50" r="30" fill="#e74c3c"/><path d="M20 50 a30 30 0 0 0 60 0" stroke="#fff" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="2" fill="#fff"/>
   </svg>`,
-  tree:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  tree: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
     <rect x="46" y="60" width="8" height="20" fill="#8b5a2b"/>
     <circle cx="50" cy="42" r="20" fill="#2ecc71"/><circle cx="36" cy="50" r="12" fill="#2ecc71"/><circle cx="64" cy="50" r="12" fill="#2ecc71"/>
   </svg>`,
-  smile:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  smile: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
     <circle cx="50" cy="50" r="30" fill="#ffd93b"/>
     <circle cx="40" cy="45" r="4" fill="#3d3d3d"/><circle cx="60" cy="45" r="4" fill="#3d3d3d"/>
     <path d="M38 60 Q50 72 62 60" stroke="#3d3d3d" stroke-width="4" fill="none" stroke-linecap="round"/>
@@ -157,83 +338,89 @@ const ITEMS = Object.keys(SVG).map(key => ({
 /* ========== Game state ========== */
 let score = 0;
 let correctId = null;
-let modeCounters = { select:0, missing:0, different:0 };
+let modeCounters = { select: 0, missing: 0, different: 0 };
 let accepting = true;
 
 /* DOM refs */
+const startPageEl = document.getElementById('start-page');
+const gamePageEl = document.getElementById('game-page');
 const questionEl = document.getElementById('question');
-const gridEl     = document.getElementById('grid');
-const puzzleEl   = document.getElementById('puzzle');
-const messageEl  = document.getElementById('message');
-const scoreEl    = document.getElementById('score');
+const gridEl = document.getElementById('grid');
+const puzzleEl = document.getElementById('puzzle');
+const messageEl = document.getElementById('message');
+const scoreEl = document.getElementById('score');
 const successSnd = document.getElementById('success-sound');
-const buzzSnd    = document.getElementById('buzz-sound');
+const buzzSnd = document.getElementById('buzz-sound');
 
 /* Helpers */
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-function speak(text){ if('speechSynthesis' in window){ try{ const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; u.rate=0.95; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);}catch(e){} } }
-function showHint(id){
-  setTimeout(()=>{
-    const img = document.querySelector(`img[data-id="${id}"]`);
-    if(img && img.parentElement){
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function speak(text) { if ('speechSynthesis' in window) { try { const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.95; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); } catch (e) { } } }
+function showHint(id) {
+  setTimeout(() => {
+    const img = document.querySelector(`#grid img[data-id="${id}"]`);
+    if (img && img.parentElement) {
       const box = img.parentElement;
       box.classList.add('hintPulse');
-      setTimeout(()=>box.classList.remove('hintPulse'),1500);
+      setTimeout(() => box.classList.remove('hintPulse'), 1500);
     }
   }, 120);
 }
 
 /* Mode selection: warmups for first two rounds each, then random */
-function pickMode(){
-  if(modeCounters.select < 2) return 'select';
-  if(modeCounters.missing < 2) return 'missing';
-  if(modeCounters.different < 2) return 'different';
-  const modes = ['select','select','missing','different'];
-  return modes[Math.floor(Math.random()*modes.length)];
+function pickMode() {
+  if (modeCounters.select < 2) return 'select';
+  if (modeCounters.missing < 2) return 'missing';
+  if (modeCounters.different < 2) return 'different';
+  const modes = ['select', 'select', 'missing', 'different'];
+  return modes[Math.floor(Math.random() * modes.length)];
 }
 
 /* Start next round */
-function newRound(){
+function newRound() {
   accepting = true;
   messageEl.textContent = '';
   gridEl.innerHTML = '';
   puzzleEl.innerHTML = '';
   const mode = pickMode();
-  if(mode === 'select'){ modeCounters.select++; generateSelect(); }
-  else if(mode === 'missing'){ modeCounters.missing++; generateMissing(); }
+  if (mode === 'select') { modeCounters.select++; generateSelect(); }
+  else if (mode === 'missing') { modeCounters.missing++; generateMissing(); }
   else { modeCounters.different++; generateDifferent(); }
 }
 
 /* ---------- SELECT MODE ---------- */
-function generateSelect(){
-  const correct = ITEMS[Math.floor(Math.random()*ITEMS.length)];
+function generateSelect() {
+  const correct = ITEMS[Math.floor(Math.random() * ITEMS.length)];
   correctId = correct.id;
   questionEl.textContent = `Find the ${correct.name}!`;
   speak(questionEl.textContent);
 
   // Build 6 unique options
   let options = [correct];
-  while(options.length < 6){
-    const it = ITEMS[Math.floor(Math.random()*ITEMS.length)];
-    if(!options.find(o=>o.id===it.id)) options.push(it);
+  while (options.length < 6) {
+    const it = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+    if (!options.find(o => o.id === it.id)) options.push(it);
   }
   shuffle(options);
 
   options.forEach(opt => {
-    const box = document.createElement('div'); box.className='answer-box';
-    const img = document.createElement('img'); img.src = opt.src; img.alt = opt.name; img.dataset.id = opt.id;
+    const box = document.createElement('div');
+    box.className = 'answer-box';
+    const img = document.createElement('img');
+    img.src = opt.src;
+    img.alt = opt.name;
+    img.dataset.id = opt.id;
     box.appendChild(img);
-    box.addEventListener('click', ()=> onSelect(opt.id, opt.sound, box));
+    box.addEventListener('click', () => onSelect(opt.id, opt.sound, box));
     gridEl.appendChild(box);
   });
 
-  if(modeCounters.select <= 2) showHint(correctId);
+  if (modeCounters.select <= 2) showHint(correctId);
 }
 
 /* ---------- MISSING PIECE MODE ---------- */
-function generateMissing(){
-  const seq = shuffle(ITEMS.slice()).slice(0,6); // unique 6
-  const missingIndex = Math.floor(Math.random()*seq.length);
+function generateMissing() {
+  const seq = shuffle(ITEMS.slice()).slice(0, 6); // unique 6
+  const missingIndex = Math.floor(Math.random() * seq.length);
   correctId = seq[missingIndex].id;
 
   questionEl.textContent = 'Find the missing piece!';
@@ -242,13 +429,16 @@ function generateMissing(){
   // Puzzle area shows 6 slots but one blank
   puzzleEl.innerHTML = '';
   seq.forEach((it, idx) => {
-    const shell = document.createElement('div'); shell.className='answer-box';
-    if(idx !== missingIndex){
-      const img = document.createElement('img'); img.src = it.src; img.alt = it.name;
+    const shell = document.createElement('div');
+    shell.className = 'answer-box';
+    if (idx !== missingIndex) {
+      const img = document.createElement('img');
+      img.src = it.src;
+      img.alt = it.name;
       shell.appendChild(img);
     } else {
       // blank placeholder (keeps same sizing)
-      shell.style.background = 'linear-gradient(180deg,#fff,#f3f3f3)';
+      shell.style.background = 'linear-gradient(180deg, var(--light-gray), #e8e8e8)';
       shell.dataset.missing = 'true';
     }
     puzzleEl.appendChild(shell);
@@ -256,67 +446,33 @@ function generateMissing(){
 
   // Build 3 options (correct + 2 distinct distractors)
   let options = [seq[missingIndex]];
-  while(options.length < 3){
-    const it = ITEMS[Math.floor(Math.random()*ITEMS.length)];
-    if(!options.find(o=>o.id===it.id)) options.push(it);
+  while (options.length < 3) {
+    const it = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+    if (!options.find(o => o.id === it.id)) options.push(it);
   }
   shuffle(options);
 
   gridEl.innerHTML = '';
   options.forEach(opt => {
-    const box = document.createElement('div'); box.className='answer-box';
-    const img = document.createElement('img'); img.src = opt.src; img.alt = opt.name; img.dataset.id = opt.id;
+    const box = document.createElement('div');
+    box.className = 'answer-box';
+    const img = document.createElement('img');
+    img.src = opt.src;
+    img.alt = opt.name;
+    img.dataset.id = opt.id;
     box.appendChild(img);
-    box.addEventListener('click', ()=> onSelectMissing(opt.id, opt.sound, box));
+    box.addEventListener('click', () => onSelect(opt.id, opt.sound, box, true));
     gridEl.appendChild(box);
   });
 
-  if(modeCounters.missing <= 2) showHint(correctId);
-}
-
-/* Handler specifically for missing mode: if correct, fill blank slot first */
-function onSelectMissing(selectedId, soundURL, boxEl){
-  if(!accepting) return;
-  accepting = false;
-  // clear hints
-  document.querySelectorAll('.answer-box').forEach(b=>b.classList.remove('hintPulse'));
-
-  if(selectedId === correctId){
-    // play success sound
-    successSnd.currentTime = 0; successSnd.play();
-    if(soundURL) try{ new Audio(soundURL).play(); }catch(e){}
-    messageEl.textContent = '✅ Correct!';
-    speak('Correct!');
-
-    // find missing slot and insert image
-    const missingSlot = Array.from(puzzleEl.children).find(ch => ch.dataset && ch.dataset.missing === 'true');
-    if(missingSlot){
-      const item = ITEMS.find(it => it.id === selectedId);
-      missingSlot.innerHTML = '';
-      const img = document.createElement('img'); img.src = item.src; img.alt = item.name;
-      missingSlot.appendChild(img);
-      missingSlot.classList.add('correct');
-    }
-    // also mark the chosen option as correct to show feedback
-    boxEl.classList.add('correct');
-    // increment score, then next round after a short delay
-    score++; scoreEl.textContent = 'Score: ' + score;
-    setTimeout(()=> { accepting = true; newRound(); }, 1000);
-  } else {
-    // wrong
-    buzzSnd.currentTime = 0; buzzSnd.play();
-    boxEl.classList.add('wrong');
-    messageEl.textContent = '❌ Try again!';
-    speak('Try again!');
-    setTimeout(()=> { boxEl.classList.remove('wrong'); accepting = true; messageEl.textContent = ''; }, 800);
-  }
+  if (modeCounters.missing <= 2) showHint(correctId);
 }
 
 /* ---------- FIND DIFFERENT MODE ---------- */
-function generateDifferent(){
-  const base = ITEMS[Math.floor(Math.random()*ITEMS.length)];
+function generateDifferent() {
+  const base = ITEMS[Math.floor(Math.random() * ITEMS.length)];
   let diff;
-  do { diff = ITEMS[Math.floor(Math.random()*ITEMS.length)]; } while(diff.id === base.id);
+  do { diff = ITEMS[Math.floor(Math.random() * ITEMS.length)]; } while (diff.id === base.id);
   correctId = diff.id;
 
   questionEl.textContent = 'Find the different item!';
@@ -325,51 +481,85 @@ function generateDifferent(){
   const arr = [diff, base, base, base, base, base];
   shuffle(arr);
   arr.forEach(opt => {
-    const box = document.createElement('div'); box.className = 'answer-box';
-    const img = document.createElement('img'); img.src = opt.src; img.alt = opt.name; img.dataset.id = opt.id;
+    const box = document.createElement('div');
+    box.className = 'answer-box';
+    const img = document.createElement('img');
+    img.src = opt.src;
+    img.alt = opt.name;
+    img.dataset.id = opt.id;
     box.appendChild(img);
-    box.addEventListener('click', ()=> onSelect(opt.id, opt.sound, box));
+    box.addEventListener('click', () => onSelect(opt.id, opt.sound, box));
     gridEl.appendChild(box);
   });
 
-  if(modeCounters.different <= 2) showHint(correctId);
+  if (modeCounters.different <= 2) showHint(correctId);
 }
 
-/* ---------- Generic select handler (for select & different modes) ---------- */
-function onSelect(selectedId, soundURL, boxEl){
-  if(!accepting) return;
+/* ---------- Generic select handler (for all modes) ---------- */
+function onSelect(selectedId, soundURL, boxEl, isMissingMode = false) {
+  if (!accepting) return;
   accepting = false;
-  // remove any hint visuals
   document.querySelectorAll('.answer-box').forEach(b => b.classList.remove('hintPulse'));
 
-  if(selectedId === correctId){
-    successSnd.currentTime = 0; successSnd.play();
-    if(soundURL) try{ new Audio(soundURL).play(); }catch(e){}
+  if (selectedId === correctId) {
+    successSnd.currentTime = 0;
+    successSnd.play();
+    if (soundURL) try { new Audio(soundURL).play(); } catch (e) { }
+
+    // If it's the missing mode, fill the puzzle slot first
+    if (isMissingMode) {
+      const missingSlot = Array.from(puzzleEl.children).find(ch => ch.dataset && ch.dataset.missing === 'true');
+      if (missingSlot) {
+        const item = ITEMS.find(it => it.id === selectedId);
+        missingSlot.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.alt = item.name;
+        missingSlot.appendChild(img);
+        missingSlot.classList.add('correct');
+      }
+    }
     boxEl.classList.add('correct');
     messageEl.textContent = '✅ Correct!';
     speak('Correct!');
-    score++; scoreEl.textContent = 'Score: ' + score;
-    setTimeout(()=> { accepting = true; newRound(); }, 900);
+    score++;
+    scoreEl.textContent = 'Score: ' + score;
+    setTimeout(() => { accepting = true; newRound(); }, 900);
   } else {
-    buzzSnd.currentTime = 0; buzzSnd.play();
+    buzzSnd.currentTime = 0;
+    buzzSnd.play();
     boxEl.classList.add('wrong');
     messageEl.textContent = '❌ Try again!';
     speak('Try again!');
-    setTimeout(()=> { boxEl.classList.remove('wrong'); accepting = true; messageEl.textContent = ''; }, 800);
+    setTimeout(() => { boxEl.classList.remove('wrong'); accepting = true; messageEl.textContent = ''; }, 800);
   }
 }
 
-/* Preload images (inline URIs — instant, but helps to avoid layout flashes) */
-function preload(){
-  ITEMS.forEach(it => {
-    const i = new Image();
-    i.src = it.src;
-  });
+/* ---------- Game Flow Functions ---------- */
+function startGame() {
+  startPageEl.style.display = 'none';
+  gamePageEl.style.display = 'flex';
+  score = 0;
+  scoreEl.textContent = 'Score: ' + score;
+  modeCounters = { select: 0, missing: 0, different: 0 };
+  newRound();
+}
+
+function exitGame() {
+  // Option 1: Go back to the welcome screen (best for single-page apps)
+  gamePageEl.style.display = 'none';
+  startPageEl.style.display = 'flex';
+  
+  // Option 2: Redirect to a different page (if index.html is separate)
+  // window.location.href = 'index.html';
 }
 
 /* Start */
-preload();
-newRound();
+// Preload images (inline URIs — instant, but helps to avoid layout flashes)
+ITEMS.forEach(it => {
+  const i = new Image();
+  i.src = it.src;
+});
 
 </script>
 </body>
