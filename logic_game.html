@@ -70,11 +70,19 @@
     margin-top: 5px;
     color: #2c3e50;
   }
+  #puzzle-display {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-size: 48px;
+  }
 </style>
 </head>
 <body>
 <h1>Kids Logic Game</h1>
 <div id="question">Loading...</div>
+<div id="puzzle-display"></div>
 <div id="grid"></div>
 <div id="drop-zone">Drag & Drop Answer Here</div>
 <div id="message"></div>
@@ -90,6 +98,7 @@ const questionDisplay = document.getElementById("question");
 const grid = document.getElementById("grid");
 const dropZone = document.getElementById("drop-zone");
 const messageDisplay = document.getElementById("message");
+const puzzleDisplay = document.getElementById("puzzle-display");
 const successSound = document.getElementById("success-sound");
 const buzzSound = document.getElementById("buzz-sound");
 
@@ -151,13 +160,13 @@ function newRound(){
   messageDisplay.textContent = "";
   dropZone.style.display = "none";
   grid.innerHTML = "";
+  puzzleDisplay.innerHTML = "";
 
-  // Choose mode randomly
   const modes = ["select","drag","different","puzzle"];
   currentMode = modes[Math.floor(Math.random()*modes.length)];
 
   if(currentMode==="select" || currentMode==="drag"){
-    const availableItems = score<5?items.slice(0,15):items; // progressive difficulty
+    const availableItems = score<5?items.slice(0,15):items;
     shuffleArray(availableItems);
     correctAnswer = availableItems[Math.floor(Math.random()*availableItems.length)];
     questionDisplay.textContent = "Find the " + correctAnswer.name;
@@ -185,7 +194,6 @@ function newRound(){
   }
 
   else if(currentMode==="different"){
-    // 6 boxes, 5 same, 1 different
     const base = items[Math.floor(Math.random()*items.length)];
     const different = items.filter(it=>it!==base)[Math.floor(Math.random()*items.length)];
     correctAnswer = different;
@@ -206,20 +214,30 @@ function newRound(){
   }
 
   else if(currentMode==="puzzle"){
-    // Missing piece: show 2 emojis + 1 missing
-    const puzzleItems = score<5?items.slice(0,15):items;
-    shuffleArray(puzzleItems);
-    const correct = puzzleItems[Math.floor(Math.random()*puzzleItems.length)];
-    correctAnswer = correct;
+    // Proper missing piece: show 2 emojis + 1 missing
+    const availableItems = score<5?items.slice(0,15):items;
+    shuffleArray(availableItems);
+    const sequence = availableItems.slice(0,3); // 3 emojis
+    correctAnswer = sequence[Math.floor(Math.random()*sequence.length)];
 
-    const wrongs = puzzleItems.filter(it=>it!==correct).slice(0,2);
-    const arr = [correct,...wrongs];
-    shuffleArray(arr);
+    const missingIndex = Math.floor(Math.random()*sequence.length);
+    const puzzleDisplayArr = sequence.map((it,i)=> i===missingIndex?"❓":it.emoji);
+
+    puzzleDisplay.innerHTML = "";
+    puzzleDisplayArr.forEach(e=>{
+      const div = document.createElement("div");
+      div.textContent = e;
+      puzzleDisplay.appendChild(div);
+    });
 
     questionDisplay.textContent = "Find the missing piece!";
     speak("Find the missing piece!");
 
-    arr.forEach(opt=>{
+    const wrongs = availableItems.filter(it=>it!==correctAnswer).slice(0,2);
+    const options = [correctAnswer,...wrongs];
+    shuffleArray(options);
+
+    options.forEach(opt=>{
       const box = document.createElement("div");
       box.className = "answer-box";
       box.textContent = opt.emoji;
