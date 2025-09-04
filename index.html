@@ -1,22 +1,295 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Logic Quest</title>
-<link rel="stylesheet" href="style_logic.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 My Awesome Game Hub 🌟</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6f61; /* Coral Red */
+            --secondary-color: #6a0572; /* Dark Purple */
+            --accent-color: #fed766; /* Sunny Yellow */
+            --text-dark: #333;
+            --text-light: #f8f8f8;
+            --card-background: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); /* Sunset gradient */
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 L 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)"/></svg>') repeat;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            margin: 2rem;
+            box-shadow: 0 15px 30px var(--card-shadow);
+            text-align: center;
+            width: 90%;
+            max-width: 1000px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--secondary-color);
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 4px 4px 0 var(--accent-color), 6px 6px 0 var(--primary-color);
+            letter-spacing: 2px;
+            animation: bounceIn 1s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0%, 20%, 40%, 60%, 80%, 100% {
+                transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+            }
+            0% {
+                opacity: 0;
+                transform: scale3d(.3, .3, .3);
+            }
+            20% {
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+            40% {
+                transform: scale3d(.9, .9, .9);
+            }
+            60% {
+                opacity: 1;
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+            80% {
+                transform: scale3d(.97, .97, .97);
+            }
+            100% {
+                opacity: 1;
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            padding: 0;
+            list-style: none;
+            margin-top: 3rem;
+        }
+
+        .game-card {
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px var(--card-shadow);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 180px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--primary-color);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 18px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border-color: var(--secondary-color);
+        }
+
+        .game-card:hover::before {
+            opacity: 0.1;
+        }
+        
+        /* New styling for the link that wraps the entire card */
+        .game-card a {
+            text-decoration: none;
+            color: var(--secondary-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: 'Fredoka One', cursive;
+            display: flex; /* This is key to making content a column */
+            flex-direction: column; /* Stacks the icon and text vertically */
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transition: color 0.3s ease;
+        }
+
+        .game-card a:hover {
+            color: var(--primary-color);
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            line-height: 1;
+            color: var(--primary-color);
+            margin-bottom: 0.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+                text-shadow: 3px 3px 0 var(--accent-color), 5px 5px 0 var(--primary-color);
+            }
+            .container {
+                padding: 2rem 1rem;
+                margin: 1rem;
+            }
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+            .game-card {
+                min-height: 150px;
+            }
+            .game-icon {
+                font-size: 3rem;
+            }
+            .game-card a {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+                text-shadow: 2px 2px 0 var(--accent-color), 4px 4px 0 var(--primary-color);
+            }
+            .container {
+                padding: 1.5rem 0.8rem;
+                margin: 0.5rem;
+            }
+            .game-grid {
+                gap: 1rem;
+            }
+            .game-card {
+                padding: 1rem;
+            }
+            .game-icon {
+                font-size: 2.5rem;
+            }
+            .game-card a {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>Logic Quest</h1>
-        <div id="clue" class="clue"></div>
-        <div id="grid" class="grid"></div>
-        <div id="message" class="message"></div>
-        <div class="button-group">
-            <button id="newBtn">New Game</button>
-            <button id="exitBtn">Exit Game</button>
-        </div>
+    <div class="container">
+        <h1>🌟 My Awesome Game Hub 🌟</h1>
+        <ul class="game-grid">
+            <li class="game-card">
+                <a href="color_game.html">
+                    <span class="game-icon">🎨</span>
+                    Color Challenge
+                </a>
+            </li>
+            <li class="game-card">
+                <a href="alphabet_game2.html">
+                    <span class="game-icon">🔠</span>
+                    Alphabet Adventure
+                </a>
+            </li>
+            <li class="game-card">
+                <a href="logic_game.html">
+                    <span class="game-icon">🧠</span>
+                    Logic Puzzle
+                </a>
+            </li>
+            <li class="game-card">
+                <a href="math_fun (2).html">
+                    <span class="game-icon">➕</span>
+                    Math Fun
+                </a>
+            </li>
+            <li class="game-card">
+                <a href="math_game.html">
+                    <span class="game-icon">📊</span>
+                    Math Mania
+                </a>
+            </li>
+            <li class="game-card">
+                <a href="simple_math.html">
+                    <span class="game-icon">➖</span>
+                    Simple Math
+                </a>
+            </li>
+            <li class="game-card">
+                <a href="vertical_addition (1).html">
+                    <span class="game-icon">📈</span>
+                    Vertical Addition
+                </a>
+            </li>
+            <li class="game-card">
+                <a href="vertical_addition_bangla.html">
+                    <span class="game-icon">📚</span>
+                    Bangla Addition
+                </a>
+            </li>
+        </ul>
     </div>
-    <script src="game_logic.js"></script>
 </body>
 </html>
