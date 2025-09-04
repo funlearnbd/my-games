@@ -21,7 +21,7 @@ h1 {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 15px;
   justify-items: center;
   margin: 20px auto;
@@ -36,6 +36,7 @@ h1 {
   border: 2px solid transparent;
   border-radius: 12px;
   transition: transform 0.2s, border-color 0.2s;
+  background: #fff;
 }
 
 .grid img:hover {
@@ -53,6 +54,7 @@ h1 {
   align-items: center;
   justify-content: center;
   background: #fff;
+  font-size: 40px;
 }
 
 .exit-btn {
@@ -64,4 +66,16 @@ h1 {
   border-radius: 10px;
   color: white;
   cursor: pointer;
+}
+
+#next-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background: #4CAF50;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  margin-right: 10px;
 }
