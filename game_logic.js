@@ -12,10 +12,10 @@ const items = [
   { name:"Angry Face", emoji:"😡" },
   { name:"Winking Face", emoji:"😉" },
   { name:"Celebrating Face", emoji:"🥳" }
-  // Add more items as needed, total 40+ recommended
+  // Add more items as needed (40+ recommended)
 ];
 
-// Optional sounds for items (make sure to place mp3 files in a 'sounds' folder)
+// Optional sounds for items
 const itemSounds = {
   "Apple":"sounds/apple.mp3",
   "Banana":"sounds/banana.mp3",
@@ -82,56 +82,95 @@ function gameFindFace(){
 }
 
 function gameDifferent(){
-  const pool = shuffle(items.filter(i=>i.src)).slice(0,6);
-  const same = pool.slice(0,5);
-  const diff = pool[5];
-  let options = shuffle([...same, diff]);
-  renderGrid(options, diff, "Find the different item");
+  // Pick one item to repeat 5 times
+  const repeatItem = items.filter(i=>i.src).sort(()=>0.5-Math.random())[0];
+  const diffItem = items.filter(i=>i.src && i!==repeatItem).sort(()=>0.5-Math.random())[0];
+  
+  const options = [];
+  for(let i=0;i<5;i++) options.push(repeatItem);
+  options.push(diffItem);
+  shuffle(options);
+  
+  renderGrid(options, diffItem, "Find the different item");
 }
 
 function gameMissing(){
+  // Pick 4 items for puzzle
   const pool = shuffle(items.filter(i=>i.src)).slice(0,4);
-  const missing = pool.pop();
-  renderGrid(pool, missing, "Find the missing piece", true);
+  const missing = pool[Math.floor(Math.random()*pool.length)];
+  const puzzleDisplay = pool.filter(i=>i!==missing); // show puzzle without missing
+
+  // Options = include missing item so kid can select it
+  const options = shuffle([...puzzleDisplay, missing]);
+
+  renderGrid(options, missing, "Find the missing piece", true, puzzleDisplay);
 }
 
 // ---------- RENDER GRID ----------
-function renderGrid(options, correct, clueText, missing=false){
+function renderGrid(options, correct, clueText, missing=false, puzzleDisplay=null){
   clueDiv.textContent = clueText;
   gridDiv.innerHTML = "";
-  
+
+  // If missing piece mode, render puzzle with blank
+  if(missing && puzzleDisplay){
+    const puzzleContainer = document.createElement("div");
+    puzzleContainer.style.display = "flex";
+    puzzleContainer.style.gap = "10px";
+    puzzleDisplay.forEach(opt=>{
+      const el = document.createElement(opt.src?"img":"div");
+      if(opt.src){ el.src = opt.src; el.style.objectFit="cover"; }
+      else el.textContent = opt.emoji;
+      el.style.width="120px";
+      el.style.height="120px";
+      el.style.borderRadius="15px";
+      puzzleContainer.appendChild(el);
+    });
+
+    // Add blank for missing
+    const blank = document.createElement("div");
+    blank.style.width="120px";
+    blank.style.height="120px";
+    blank.style.border="2px dashed #555";
+    blank.style.borderRadius="15px";
+    puzzleContainer.appendChild(blank);
+
+    gridDiv.appendChild(puzzleContainer);
+  }
+
+  // Render options for selection
+  const optionsContainer = document.createElement("div");
+  optionsContainer.style.display = "flex";
+  optionsContainer.style.flexWrap = "wrap";
+  optionsContainer.style.gap = "15px";
+  optionsContainer.style.marginTop = "15px";
+
   options.forEach(opt=>{
     let el;
     if(opt.src){
-      // IMAGE ITEM
       el = document.createElement("img");
       el.src = opt.src;
       el.style.width="120px";
       el.style.height="120px";
       el.style.objectFit="cover";
+      el.style.borderRadius="15px";
     } else if(opt.emoji){
-      // EMOJI ITEM
       el = document.createElement("div");
       el.textContent = opt.emoji;
-      el.style.fontSize = "80px";
-      el.style.textAlign = "center";
-      el.style.width = "120px";
-      el.style.height = "120px";
-      el.style.display = "flex";
-      el.style.alignItems = "center";
-      el.style.justifyContent = "center";
-      el.style.border = "2px solid #ccc";
-      el.style.borderRadius = "15px";
-      el.style.cursor = "pointer";
-      el.style.background = "#f9f9f9";
+      el.style.fontSize="80px";
+      el.style.display="flex";
+      el.style.alignItems="center";
+      el.style.justifyContent="center";
+      el.style.width="120px";
+      el.style.height="120px";
+      el.style.border="2px solid #ccc";
+      el.style.borderRadius="15px";
+      el.style.background="#f9f9f9";
     }
-
-    el.alt = opt.name || opt.emoji;
-    el.style.cursor = "pointer";
+    el.style.cursor="pointer";
     el.onclick = ()=>{
-      if(opt === correct){
+      if(opt===correct){
         messageDiv.textContent="✅ Correct!";
-        if(itemSounds[correct.name]){ new Audio(itemSounds[correct.name]).play(); }
+        if(itemSounds[correct.name]) new Audio(itemSounds[correct.name]).play();
         speak("Great job!");
         if(missing && correct.src){
           gridDiv.innerHTML = `<img src="${correct.src}" style="width:120px;height:120px;border-radius:15px;">`;
@@ -142,8 +181,9 @@ function renderGrid(options, correct, clueText, missing=false){
         speak("Try again!");
       }
     };
-    gridDiv.appendChild(el);
+    optionsContainer.appendChild(el);
   });
+  gridDiv.appendChild(optionsContainer);
 }
 
 // ---------- START ----------
