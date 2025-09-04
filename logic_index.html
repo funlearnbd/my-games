@@ -1,24 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Logic Game</title>
-    <link rel="stylesheet" href="logic_style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logic Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .game-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      max-width: 800px;
+      width: 95%;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 0;
+      color: #0984e3;
+    }
+    #question {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .item {
+      background: #f0f0f0;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s ease;
+      height: 120px;
+    }
+    .item:hover {
+      transform: scale(1.05);
+      border-color: #0984e3;
+    }
+    .item img {
+      max-width: 80%;
+      max-height: 80%;
+    }
+    #message {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-top: 10px;
+      min-height: 30px;
+    }
+    #score {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      color: #2d3436;
+    }
+    .btns {
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      margin: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #fff;
+    }
+    #newGameBtn { background: #00b894; }
+    #exitBtn { background: #d63031; }
+  </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>Logic Game</h1>
-        <div class="score-container">Score: <span id="score">0</span></div>
-        <p id="instruction">Loading...</p>
-
-        <div id="missing-slot"></div>
-        <div id="game-area" class="grid"></div>
-        
-        <div id="message" class="message-text"></div>
-
-        <button id="next-btn" style="display:none;">Next Puzzle</button>
-        <button onclick="window.location.href='index.html'" class="exit-btn">Exit Game</button>
+  <div class="game-container">
+    <h1>Logic Game</h1>
+    <div id="question"></div>
+    <div id="grid"></div>
+    <div id="message"></div>
+    <div id="score">Score: 0</div>
+    <div class="btns">
+      <button id="newGameBtn">New Game</button>
+      <button id="exitBtn">Exit Game</button>
     </div>
-    <script src="logic_game.js"></script>
+  </div>
+
+  <script>
+    const items = [
+      { name: "Apple", img: "image/apple.png" },
+      { name: "Banana", img: "image/banana.png" },
+      { name: "Car", img: "image/car.png" },
+      { name: "Dog", img: "image/dog.png" },
+      { name: "Cat", img: "image/cat.png" },
+      { name: "Flower", img: "image/flower.png" },
+      { name: "Ball", img: "image/ball.png" },
+      { name: "Star", img: "image/star.png" },
+      { name: "Tree", img: "image/tree.png" },
+      { name: "Fish", img: "image/fish.png" }
+    ];
+
+    let score = 0;
+    let correctAnswer = null;
+    let mode = "";
+
+    function shuffle(arr) {
+      return arr.sort(() => Math.random() - 0.5);
+    }
+
+    function newRound() {
+      document.getElementById("message").textContent = "";
+      const gameModes = ["find", "different", "missing"];
+      mode = gameModes[Math.floor(Math.random() * gameModes.length)];
+      if (mode === "find") setupFind();
+      else if (mode === "different") setupDifferent();
+      else if (mode === "missing") setupMissing();
+    }
+
+    function setupFind() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      const chosen = items[Math.floor(Math.random() * items.length)];
+      correctAnswer = chosen.name;
+      document.getElementById("question").textContent = `Find the ${chosen.name}`;
+      const options = shuffle([chosen, ...shuffle(items).slice(0, 5)]);
+      options.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `<img src="${opt.img}" alt="${opt.name}">`;
+        div.onclick = () => checkAnswer(opt.name);
+        grid.appendChild(div);
+      });
+    }
+
+    function setupDifferent() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      const common = items[Math.floor(Math.random() * items.length)];
+      let diff;
+      do {
+        diff = items[Math.floor(Math.random() * items.length)];
+      } while (diff.name === common.name);
+      correctAnswer = diff.name;
+      document.getElementById("question").textContent = "Find the different item";
+      let options = Array(5).fill(common).concat(diff);
+      options = shuffle(options);
+      options.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `<img src="${opt.img}" alt="${opt.name}">`;
+        div.onclick = () => checkAnswer(opt.name);
+        grid.appendChild(div);
+      });
+    }
+
+    function setupMissing() {
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+      const chosen = shuffle(items).slice(0, 3);
+      correctAnswer = chosen[2].name;
+      document.getElementById("question").textContent = "Find the missing piece!";
+      // Show first two
+      chosen.slice(0, 2).forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `<img src="${opt.img}" alt="${opt.name}">`;
+        div.style.cursor = "default";
+        grid.appendChild(div);
+      });
+      // Placeholder
+      const placeholder = document.createElement("div");
+      placeholder.className = "item";
+      placeholder.textContent = "?";
+      placeholder.style.fontSize = "2rem";
+      grid.appendChild(placeholder);
+      // Answer choices
+      const answers = shuffle([chosen[2], ...shuffle(items).slice(0, 3)]);
+      answers.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `<img src="${opt.img}" alt="${opt.name}">`;
+        div.onclick = () => {
+          if (opt.name === correctAnswer) {
+            placeholder.innerHTML = `<img src="${opt.img}" alt="${opt.name}">`;
+          }
+          checkAnswer(opt.name);
+        };
+        grid.appendChild(div);
+      });
+    }
+
+    function checkAnswer(ans) {
+      if (ans === correctAnswer) {
+        document.getElementById("message").textContent = "✅ Correct!";
+        score++;
+        document.getElementById("score").textContent = "Score: " + score;
+        setTimeout(newRound, 1200);
+      } else {
+        document.getElementById("message").textContent = "❌ Try again!";
+      }
+    }
+
+    document.getElementById("newGameBtn").onclick = () => {
+      score = 0;
+      document.getElementById("score").textContent = "Score: 0";
+      newRound();
+    };
+    document.getElementById("exitBtn").onclick = () => {
+      window.location.href = "index.html";
+    };
+
+    window.onload = newRound;
+  </script>
 </body>
 </html>
