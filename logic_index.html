@@ -1,34 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Logic Quest</title>
-  <link rel="stylesheet" href="logic_style.css" />
+  <meta charset="UTF-8">
+  <title>Logic Game</title>
+  <link rel="stylesheet" href="logic_style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Logic Quest</h1>
-      <div class="controls">
-        <button id="newBtn">New Game</button>
-        <button id="exitBtn">Exit Game</button>
-      </div>
-    </header>
-
-    <main>
-      <div id="clue" class="clue">Loading assets…</div>
-
-      <div id="grid" class="grid"></div>
-
-      <div id="message" class="message"></div>
-    </main>
+  <div class="game-container">
+    <h1>Logic Game</h1>
+    <p id="instruction">Loading...</p>
+    <div id="game-area" class="grid"></div>
+    <div id="missing-slot"></div>
+    <button id="next-btn">Next</button>
+    <button onclick="window.location.href='index.html'" class="exit-btn">Exit Game</button>
   </div>
-
-  <!-- optional audio (if you provide files in /sounds) -->
-  <audio id="successAudio" src="sounds/success.mp3" preload="auto"></audio>
-  <audio id="failAudio" src="sounds/fail.mp3" preload="auto"></audio>
-
   <script src="logic_game.js"></script>
 </body>
 </html>
