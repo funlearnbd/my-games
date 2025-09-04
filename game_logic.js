@@ -5,7 +5,7 @@ const items = [
   { name:"Cherry", src:"image/cherry.png" },
   { name:"Dog", src:"image/dog.png" },
   { name:"Cat", src:"image/cat.png" },
-  { name:"Flower", src:"image/flower.png" },
+  { name:"Flower", src:"image/Flower.png" },
   { name:"Happy Face", emoji:"😀" },
   { name:"Sad Face", emoji:"😢" },
   { name:"Laughing Face", emoji:"😂" },
