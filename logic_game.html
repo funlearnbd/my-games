@@ -3,229 +3,217 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fun Kids Game</title>
+<title>Logic Quest</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: #f9f9f9;
-    margin: 0;
-    padding: 0;
-  }
-  h1 { background: #ffcc00; margin:0; padding:15px; }
-  #question { font-size: 1.5em; margin: 20px 0; }
-  #game-area {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
-    gap: 15px;
-    padding: 10px;
-    max-width: 700px;
-    margin: auto;
-  }
-  .answer-box {
-    background: #fff;
-    border: 3px solid #ccc;
-    border-radius: 15px;
-    padding: 10px;
-    cursor: pointer;
-    transition: transform .2s;
-  }
-  .answer-box:hover { transform: scale(1.1); }
-  .answer-box img {
-    width: 100px; height: 100px; object-fit: contain;
-  }
-  #puzzle-container {
-    margin: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-  }
-  #puzzle-container img {
-    width: 100px; height: 100px;
-  }
-  #message { font-size:1.3em; margin-top:15px; min-height: 1.5em; }
-  #score { margin: 10px; font-weight: bold; }
-  #controls { margin: 15px; }
-  button {
-    margin: 5px; padding: 10px 20px;
-    font-size: 1em;
-    border-radius: 10px;
-    border: none;
-    background: #ff9900;
-    color: #fff; cursor: pointer;
-  }
-  button:hover { background: #e68a00; }
+body {
+    margin:0; padding:0;
+    font-family:'Poppins', sans-serif;
+    background:#f0f8ff;
+    display:flex; justify-content:center; align-items:center;
+    flex-direction:column; min-height:100vh;
+}
+.game-container {
+    background:white; padding:20px; border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    width:90%; max-width:700px;
+}
+h1 {text-align:center; color:#0984e3; font-size:2.5rem;}
+#clue {font-size:1.5rem; text-align:center; margin:10px 0;}
+#grid {display:grid; gap:10px; justify-content:center; margin:15px 0;}
+#grid img {
+    width:100px; height:100px; cursor:pointer; border-radius:15px;
+    border:2px solid #ccc; transition:transform 0.2s;
+}
+#grid img:hover {transform:scale(1.05);}
+#message {font-size:1.2rem; text-align:center; height:30px; margin:10px 0;}
+button {padding:10px 20px; margin:10px; border:none; border-radius:20px; cursor:pointer; font-size:1rem;}
+#exitBtn {background:#e74c3c; color:white;}
+#newBtn {background:#00b894; color:white;}
 </style>
 </head>
 <body>
-<h1>Fun Kids Game</h1>
-<div id="score">Score: 0</div>
-<div id="question"></div>
-<div id="game-area"></div>
+<div class="game-container">
+<h1>Logic Quest</h1>
+<div id="clue"></div>
+<div id="grid"></div>
 <div id="message"></div>
-<div id="controls">
-  <button onclick="newGame()">New Game</button>
-  <button onclick="exitGame()">Exit Game</button>
+<div style="text-align:center;">
+<button id="newBtn">New Game</button>
+<button id="exitBtn">Exit Game</button>
+</div>
+<audio id="successSound" src=""></audio>
+<audio id="failSound" src=""></audio>
 </div>
 
-<!-- Sounds -->
-<audio id="success-sound" src="https://cdn.pixabay.com/download/audio/2021/09/01/audio_d90b40f19e.mp3?filename=success-1-6297.mp3"></audio>
-<audio id="buzz-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_fa2f61cb34.mp3?filename=error-126627.mp3"></audio>
-
 <script>
-// === Cartoon image set ===
+// ---------- IMAGE DATA (Base64) ----------
 const items = [
-  { name:"apple", src:"https://img.icons8.com/emoji/96/apple.png" },
-  { name:"banana", src:"https://img.icons8.com/emoji/96/banana.png" },
-  { name:"dog", src:"https://img.icons8.com/emoji/96/dog.png" },
-  { name:"cat", src:"https://img.icons8.com/emoji/96/cat.png" },
-  { name:"flower", src:"https://img.icons8.com/emoji/96/hibiscus.png" },
-  { name:"star", src:"https://img.icons8.com/emoji/96/star.png" },
-  { name:"grapes", src:"https://img.icons8.com/emoji/96/grapes.png" },
-  { name:"cherry", src:"https://img.icons8.com/emoji/96/cherries.png" },
-  { name:"car", src:"https://img.icons8.com/emoji/96/red-car.png" },
-  { name:"ball", src:"https://img.icons8.com/emoji/96/soccer-ball.png" }
+{ name:"Apple", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Banana", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Grapes", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Cherry", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Pineapple", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Dog", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Cat", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Rabbit", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Bird", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Fish", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Ball", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Car", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Train", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Teddy", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Flower", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Sun", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Star", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+{ name:"Rainbow", src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..." },
+// Emojis for faces
+{ name:"Happy Face", emoji:"😀" },
+{ name:"Sad Face", emoji:"😢" },
+{ name:"Laughing Face", emoji:"😂" },
+{ name:"Angry Face", emoji:"😡" },
+{ name:"Celebrating Face", emoji:"🥳" },
+{ name:"Winking Face", emoji:"😉" },
+{ name:"Sleeping Face", emoji:"😴" }
 ];
 
-let score=0, correctAnswer="", gameCount=0, currentMode="";
+// ---------- SOUND DATA ----------
+const itemSounds = {
+"Apple":"data:audio/mp3;base64,//uQxAA...",
+"Banana":"data:audio/mp3;base64,//uQxAA...",
+"Dog":"data:audio/mp3;base64,//uQxAA..."
+// Add more for each item as desired
+};
 
-const questionDisplay=document.getElementById("question");
-const gameArea=document.getElementById("game-area");
-const messageDisplay=document.getElementById("message");
-const scoreDisplay=document.getElementById("score");
+// ---------- GAME STATE ----------
+let currentModeIndex = 0;
+let currentRound = 0;
+const modes = ["findItem","findFace","different","missing","shadow","oddOne","sequence","color"];
+let laps = 100;
+let tutorialRounds = 2;
 
-// speak helper
-function speak(text){
-  const u=new SpeechSynthesisUtterance(text);
-  u.rate=1.1;
-  speechSynthesis.speak(u);
+const clueDiv = document.getElementById('clue');
+const gridDiv = document.getElementById('grid');
+const messageDiv = document.getElementById('message');
+const successSound = document.getElementById('successSound');
+const failSound = document.getElementById('failSound');
+const newBtn = document.getElementById('newBtn');
+const exitBtn = document.getElementById('exitBtn');
+
+newBtn.onclick = startGame;
+exitBtn.onclick = ()=>{window.location.href="index.html";};
+
+// ---------- UTILS ----------
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];} return arr;}
+function speak(text){if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.volume=1;u.rate=0.9;u.pitch=1;window.speechSynthesis.speak(u);}}
+
+// ---------- GAME FUNCTIONS ----------
+function startGame(){
+    currentModeIndex=0; currentRound=0;
+    nextRound();
 }
 
-// shuffle helper
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
-
-// new game
-function newGame(){
-  score=0; gameCount=0;
-  scoreDisplay.textContent="Score: 0";
-  newRound();
-}
-function exitGame(){
-  window.location.href="index.html";
-}
-
-// main round
-function newRound(){
-  gameCount++;
-  gameArea.innerHTML="";
-  messageDisplay.textContent="";
-  
-  if(gameCount%3===1) generateSelect();
-  else if(gameCount%3===2) generateMissing();
-  else generateDifferent();
+function nextRound(){
+    if(currentRound>=laps){clueDiv.textContent="🎉 Congratulations! You completed all rounds!";gridDiv.innerHTML="";messageDiv.textContent="";return;}
+    const mode=modes[currentModeIndex];
+    currentModeIndex=(currentModeIndex+1)%modes.length;
+    currentRound++;
+    messageDiv.textContent="";
+    if(mode==="findItem") gameFindItem();
+    else if(mode==="findFace") gameFindFace();
+    else if(mode==="different") gameDifferent();
+    else if(mode==="missing") gameMissing();
+    else if(mode==="shadow") gameShadow();
+    else if(mode==="oddOne") gameOddOne();
+    else if(mode==="sequence") gameSequence();
+    else if(mode==="color") gameColor();
 }
 
-// === Select Mode ===
-function generateSelect(){
-  currentMode="select";
-  const item=items[Math.floor(Math.random()*items.length)];
-  correctAnswer=item.src;
-  questionDisplay.textContent="Find the "+item.name+"!";
-  speak(questionDisplay.textContent);
-  let options=[item];
-  while(options.length<6){
-    const it=items[Math.floor(Math.random()*items.length)];
-    if(!options.includes(it)) options.push(it);
-  }
-  shuffle(options);
-  options.forEach(opt=>{
-    const box=document.createElement("div"); box.className="answer-box";
-    const img=document.createElement("img"); img.src=opt.src;
-    box.appendChild(img);
-    box.onclick=()=>checkAnswer(opt.src, box, item);
-    gameArea.appendChild(box);
-  });
+// ---------- GAME MODES ----------
+function gameFindItem(){
+    const itemPool=items.filter(i=>i.src || i.emoji);
+    const correct=itemPool[Math.floor(Math.random()*itemPool.length)];
+    let options=shuffle(itemPool).slice(0,5);
+    if(!options.includes(correct)) options[0]=correct;
+    renderGrid(options, correct,"Find the "+correct.name);
 }
 
-// === Missing Piece ===
-function generateMissing(){
-  currentMode="missing";
-  const item=items[Math.floor(Math.random()*items.length)];
-  correctAnswer=item.src;
-  questionDisplay.textContent="Find the missing "+item.name+"!";
-  speak(questionDisplay.textContent);
-  
-  // Puzzle container
-  const puzzle=document.createElement("div");
-  puzzle.id="puzzle-container";
-  const placeholder=document.createElement("div");
-  placeholder.style.width="100px"; placeholder.style.height="100px";
-  placeholder.style.border="2px dashed #aaa";
-  puzzle.appendChild(placeholder);
-  gameArea.appendChild(puzzle);
-  
-  // Options
-  let options=[item];
-  while(options.length<3){
-    const it=items[Math.floor(Math.random()*items.length)];
-    if(!options.includes(it)) options.push(it);
-  }
-  shuffle(options);
-  options.forEach(opt=>{
-    const box=document.createElement("div"); box.className="answer-box";
-    const img=document.createElement("img"); img.src=opt.src;
-    box.appendChild(img);
-    box.onclick=()=>{
-      if(opt.src===correctAnswer){
-        placeholder.innerHTML="<img src='"+opt.src+"' width='100' height='100'>";
-        checkAnswer(opt.src, box, item);
-      } else {
-        checkAnswer(opt.src, box, item);
-      }
-    };
-    gameArea.appendChild(box);
-  });
+function gameFindFace(){
+    const faces=items.filter(i=>i.emoji);
+    const correct=faces[Math.floor(Math.random()*faces.length)];
+    renderGrid(faces,correct,"Find the "+correct.name);
 }
 
-// === Find Different ===
-function generateDifferent(){
-  currentMode="different";
-  const same=items[Math.floor(Math.random()*items.length)];
-  let different; do{ different=items[Math.floor(Math.random()*items.length)]; }while(different===same);
-  correctAnswer=different.src;
-  questionDisplay.textContent="Find the different item!";
-  speak(questionDisplay.textContent);
-  
-  let options=[different];
-  for(let i=0;i<5;i++) options.push(same);
-  shuffle(options);
-  options.forEach(opt=>{
-    const box=document.createElement("div"); box.className="answer-box";
-    const img=document.createElement("img"); img.src=opt.src;
-    box.appendChild(img);
-    box.onclick=()=>checkAnswer(opt.src, box, different);
-    gameArea.appendChild(box);
-  });
+function gameDifferent(){
+    const pool=shuffle(items.filter(i=>i.src));
+    const same=pool.slice(0,5);
+    const diff=pool[5];
+    let options=shuffle([...same,diff]);
+    renderGrid(options,diff,"Find the different item");
 }
 
-// === Check Answer ===
-function checkAnswer(src, box, item){
-  if(src===correctAnswer){
-    messageDisplay.textContent="✅ Correct!";
-    document.getElementById("success-sound").play();
-    score++; scoreDisplay.textContent="Score: "+score;
-    speak("Correct!");
-    setTimeout(newRound,1200);
-  } else {
-    messageDisplay.textContent="❌ Try again!";
-    document.getElementById("buzz-sound").play();
-    speak("Try again!");
-  }
+function gameMissing(){
+    const pool=shuffle(items.filter(i=>i.src)).slice(0,4);
+    const missing=pool.pop();
+    renderGrid(pool,missing,"Find the missing piece",true);
 }
 
-// start game
-newGame();
+function gameShadow(){
+    const pool=shuffle(items.filter(i=>i.src));
+    const correct=pool[0];
+    clueDiv.innerHTML=`<img src="${correct.src}" style="filter:brightness(0) invert(1); width:100px; height:100px;">`; 
+    let options=shuffle(pool.slice(0,5));
+    if(!options.includes(correct)) options[0]=correct;
+    renderGrid(options,correct,"Match the shadow");
+}
+
+function gameOddOne(){
+    const pool=shuffle(items.filter(i=>i.src));
+    const odd=pool[0]; const same=pool.slice(1,4);
+    let options=shuffle([odd,...same]);
+    renderGrid(options,odd,"Find the odd one out");
+}
+
+function gameSequence(){
+    const pool=shuffle(items.filter(i=>i.src)).slice(0,2);
+    const correct=pool[0];
+    renderGrid([...pool,correct],correct,"Complete the sequence");
+}
+
+function gameColor(){
+    const pool=shuffle(items.filter(i=>i.src)).slice(0,5);
+    const correct=pool[0];
+    renderGrid(pool,correct,"Find the same color as this one");
+}
+
+// ---------- RENDER GRID ----------
+function renderGrid(options,correct,clueText,missing=false){
+    clueDiv.textContent=clueText;
+    gridDiv.innerHTML="";
+    options.forEach(opt=>{
+        const img=document.createElement("img");
+        if(opt.src) img.src=opt.src;
+        else img.src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHe..."; // fallback for emoji as image
+        img.alt=opt.name || opt.emoji;
+        img.onclick=()=>{
+            if(opt===correct){
+                successSound.play();
+                messageDiv.textContent="✅ Correct!";
+                if(itemSounds[correct.name]){new Audio(itemSounds[correct.name]).play();}
+                if(missing) gridDiv.innerHTML=`<img src="${correct.src}" style="width:100px;height:100px;border-radius:15px;">`;
+                speak("Great job!");
+                setTimeout(nextRound,1200);
+            } else {
+                failSound.play();
+                messageDiv.textContent="❌ Try again!";
+                speak("Try again!");
+            }
+        };
+        gridDiv.appendChild(img);
+    });
+}
+
+// ---------- START ----------
+startGame();
 </script>
 </body>
 </html>
