@@ -35,6 +35,15 @@ h1 {
     gap: 20px;
 }
 
+/* For option buttons/images */
+.options-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    width: 100%;
+    max-width: 500px;
+}
+
 .message {
     font-size: 1.3rem;
     font-weight: 600;
