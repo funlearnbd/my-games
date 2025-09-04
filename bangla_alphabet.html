@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bengali Letter Game!</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        #game-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #target-letter-display {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #letter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .letter-box {
+            width: 80px;
+            height: 80px;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em; /* Larger font size for Bengali letters */
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .letter-box:hover {
+            background-color: #ddd;
+        }
+
+        #message {
+            min-height: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        #start-button, #exit-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            margin: 5px;
+        }
+
+        #start-button {
+            background-color: #4CAF50; /* Green */
+        }
+
+        #exit-button {
+            background-color: #f44336; /* Red */
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Bengali Letter Game!</h1>
+        <div id="target-letter-display"></div>
+        <div id="letter-grid"></div>
+        <div id="message"></div>
+        <button id="start-button">শুরু করুন</button>
+        <button id="exit-button">বেরিয়ে যান</button>
+    </div>
+
+    <script>
+        const allLetters = ['অ', 'আ', 'ই', 'ঈ', 'উ', 'ঊ', 'ঋ', 'এ', 'ঐ', 'ও', 'ঔ',
+                            'ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ', 'ছ', 'জ', 'ঝ', 'ঞ', 'ট', 'ঠ', 'ড', 'ঢ', 'ণ',
+                            'ত', 'থ', 'দ', 'ধ', 'ন', 'প', 'ফ', 'ব', 'ভ', 'ম', 'য', 'র', 'ল', 'শ', 'ষ',
+                            'স', 'হ', 'ড়', 'ঢ়', 'য়'];
+        let targetLetter = '';
+        
+        const startButton = document.getElementById('start-button');
+        const exitButton = document.getElementById('exit-button');
+        const targetLetterDisplay = document.getElementById('target-letter-display');
+        const letterGrid = document.getElementById('letter-grid');
+        const messageDisplay = document.getElementById('message');
+
+        startButton.addEventListener('click', startGame);
+        exitButton.addEventListener('click', exitGame);
+
+        function startGame() {
+            messageDisplay.textContent = '';
+            newRound();
+        }
+
+        function exitGame() {
+            targetLetterDisplay.textContent = '';
+            letterGrid.innerHTML = '';
+            messageDisplay.textContent = 'খেলা শেষ! খেলার জন্য ধন্যবাদ!';
+            speak('খেলা শেষ! খেলার জন্য ধন্যবাদ!');
+        }
+
+        function newRound() {
+            messageDisplay.textContent = '';
+            targetLetter = allLetters[Math.floor(Math.random() * allLetters.length)];
+            targetLetterDisplay.textContent = `খুঁজে বের করুন: ${targetLetter}`;
+            speak(`খুঁজে বের করুন: ${targetLetter}`);
+            
+            const lettersForGrid = selectRandomLetters(targetLetter, 9);
+            
+            letterGrid.innerHTML = '';
+            lettersForGrid.forEach(letter => {
+                const letterBox = document.createElement('div');
+                letterBox.classList.add('letter-box');
+                letterBox.textContent = letter;
+                letterBox.addEventListener('click', () => checkLetter(letter));
+                letterGrid.appendChild(letterBox);
+            });
+        }
+
+        function checkLetter(clickedLetter) {
+            if (clickedLetter === targetLetter) {
+                messageDisplay.textContent = 'সঠিক! খুব ভালো!';
+                speak('সঠিক! খুব ভালো!');
+                setTimeout(newRound, 1500);
+            } else {
+                messageDisplay.textContent = 'আবার চেষ্টা করুন!';
+                speak('আবার চেষ্টা করুন!');
+            }
+        }
+
+        function selectRandomLetters(correctLetter, count) {
+            const tempLetters = allLetters.filter(l => l !== correctLetter);
+            const shuffled = shuffleArray(tempLetters);
+            const randomLetters = shuffled.slice(0, count - 1);
+            randomLetters.push(correctLetter);
+            return shuffleArray(randomLetters);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'bn-IN';
+                speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>
