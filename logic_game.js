@@ -115,10 +115,7 @@ function renderGrid(options, correct, clueText, missing=false, puzzleDisplay=nul
 
   // Options
   const optionsContainer = document.createElement("div");
-  optionsContainer.style.display="flex";
-  optionsContainer.style.flexWrap="wrap";
-  optionsContainer.style.gap="15px";
-  optionsContainer.style.marginTop="15px";
+optionsContainer.className = "options-container";
 
   options.forEach(opt=>{
     let el;
