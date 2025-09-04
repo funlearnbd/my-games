@@ -6,8 +6,8 @@
     <title>Logic Game</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f6fa;
+            font-family: 'Inter', sans-serif;
+            background: #eef2f8;
             margin: 0;
             padding: 0;
             display: flex;
@@ -17,62 +17,67 @@
         }
         .game-container {
             background: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             max-width: 900px;
             width: 95%;
             text-align: center;
+            transition: all 0.3s ease;
         }
         h1 {
             margin-top: 0;
-            color: #0984e3;
+            color: #2c3e50;
         }
         #question {
             font-size: 1.5rem;
             font-weight: bold;
             margin: 15px 0;
+            color: #34495e;
+            min-height: 2rem;
         }
-        #game-area {
+        .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 15px;
-            margin: 20px auto;
+            margin: 20px 0;
         }
-        #choices-area {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 15px;
-            margin: 20px auto;
+        #puzzle-grid {
+            margin-bottom: 0;
+        }
+        #choices-grid {
+            margin-top: 10px;
         }
         .item {
-            background: #f0f0f0;
-            border: 2px solid #ccc;
-            border-radius: 10px;
+            background: #f8f9fa;
+            border: 2px solid #ced4da;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100px;
-            font-size: 2.5rem;
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            font-size: 3rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        .item:hover {
+        .item:hover:not(.disabled) {
             transform: scale(1.05);
-            border-color: #0984e3;
+            border-color: #2980b9;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         .item.correct {
-            border-color: #00b894;
+            border-color: #27ae60;
             background-color: #e8f9f5;
             animation: bounce 0.5s;
         }
         .item.incorrect {
-            border-color: #d63031;
+            border-color: #c0392b;
             background-color: #ffe8e8;
             animation: shake 0.5s;
         }
         .item.disabled {
             cursor: default;
+            opacity: 0.7;
         }
         #message {
             font-size: 1.3rem;
@@ -89,17 +94,22 @@
             margin-top: 20px;
         }
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 25px;
+            border-radius: 30px;
             margin: 5px;
             cursor: pointer;
             font-size: 1rem;
             font-weight: bold;
             color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, background 0.2s ease;
         }
-        #newGameBtn { background: #00b894; }
-        #exitBtn { background: #d63031; }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        #newGameBtn { background: #27ae60; }
+        #exitBtn { background: #e74c3c; }
 
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
@@ -116,8 +126,8 @@
     <div class="game-container">
         <h1>Logic Game</h1>
         <div id="question"></div>
-        <div id="game-area"></div>
-        <div id="choices-area"></div>
+        <div id="puzzle-grid" class="grid"></div>
+        <div id="choices-grid" class="grid"></div>
         <div id="message"></div>
         <div id="score">Score: 0</div>
         <div class="btns">
@@ -147,109 +157,148 @@
 
         let score = 0;
         let correctAnswer = null;
+        let gameActive = true;
+
+        const puzzleGrid = document.getElementById("puzzle-grid");
+        const choicesGrid = document.getElementById("choices-grid");
+        const questionEl = document.getElementById("question");
+        const messageEl = document.getElementById("message");
+        const scoreEl = document.getElementById("score");
+        const newGameBtn = document.getElementById("newGameBtn");
+        const exitBtn = document.getElementById("exitBtn");
 
         function shuffle(arr) {
             return arr.sort(() => Math.random() - 0.5);
         }
 
         function newRound() {
-            document.getElementById("message").textContent = "";
-            document.getElementById("game-area").innerHTML = "";
-            document.getElementById("choices-area").innerHTML = "";
-
+            gameActive = true;
+            messageEl.textContent = "";
+            puzzleGrid.innerHTML = "";
+            choicesGrid.innerHTML = "";
             const gameModes = ["find", "different", "missing"];
             const mode = gameModes[Math.floor(Math.random() * gameModes.length)];
 
-            if (mode === "find") setupFind();
-            else if (mode === "different") setupDifferent();
-            else if (mode === "missing") setupMissing();
+            if (mode === "find") {
+                setupFind();
+                puzzleGrid.style.display = 'grid';
+                choicesGrid.style.display = 'none';
+            }
+            else if (mode === "different") {
+                setupDifferent();
+                puzzleGrid.style.display = 'grid';
+                choicesGrid.style.display = 'none';
+            }
+            else if (mode === "missing") {
+                setupMissing();
+                puzzleGrid.style.display = 'grid';
+                choicesGrid.style.display = 'grid';
+            }
         }
 
         function setupFind() {
-            const grid = document.getElementById("game-area");
             const chosen = items[Math.floor(Math.random() * items.length)];
             correctAnswer = chosen.name;
-            document.getElementById("question").textContent = `Find the ${chosen.name}`;
-            const options = shuffle([chosen, ...shuffle(items).slice(0, 5)]);
+            questionEl.textContent = `Find the ${chosen.name}!`;
+            const options = shuffle([chosen, ...shuffle(items).filter(item => item.name !== chosen.name).slice(0, 5)]);
 
             options.forEach(opt => {
                 const div = document.createElement("div");
                 div.className = "item";
                 div.textContent = opt.emoji;
                 div.onclick = () => checkAnswer(opt.name, div);
-                grid.appendChild(div);
+                puzzleGrid.appendChild(div);
             });
         }
 
         function setupDifferent() {
-            const grid = document.getElementById("game-area");
             const common = items[Math.floor(Math.random() * items.length)];
             let diff;
             do {
                 diff = items[Math.floor(Math.random() * items.length)];
             } while (diff.name === common.name);
             correctAnswer = diff.name;
-            document.getElementById("question").textContent = "Find the different item";
+            questionEl.textContent = "Find the different item!";
+
             let options = Array(5).fill(common).concat(diff);
             options = shuffle(options);
-
+            
             options.forEach(opt => {
                 const div = document.createElement("div");
                 div.className = "item";
                 div.textContent = opt.emoji;
                 div.onclick = () => checkAnswer(opt.name, div);
-                grid.appendChild(div);
+                puzzleGrid.appendChild(div);
             });
         }
 
         function setupMissing() {
-            const gameArea = document.getElementById("game-area");
-            const choicesArea = document.getElementById("choices-area");
-            const chosen = shuffle(items).slice(0, 3);
-            correctAnswer = chosen[2].name;
-            document.getElementById("question").textContent = "Find the missing piece!";
+            // Select 3 unique items for the puzzle pattern and the answer
+            let selectedItems = shuffle(items).slice(0, 3);
+            const puzzleItemA = selectedItems[0];
+            const puzzleItemB = selectedItems[1];
+            const correctItem = selectedItems[2];
 
-            // Display puzzle items
-            chosen.slice(0, 2).forEach(opt => {
+            correctAnswer = correctItem.name;
+            questionEl.textContent = "Find the missing piece!";
+
+            // Display the puzzle pattern and blank box
+            puzzleGrid.innerHTML = '';
+            const puzzleSequence = [puzzleItemA, puzzleItemB, puzzleItemA, puzzleItemB];
+            
+            puzzleSequence.forEach(opt => {
                 const div = document.createElement("div");
                 div.className = "item disabled";
                 div.textContent = opt.emoji;
-                gameArea.appendChild(div);
+                puzzleGrid.appendChild(div);
             });
-            // Display placeholder
             const placeholder = document.createElement("div");
             placeholder.className = "item disabled";
             placeholder.textContent = "?";
-            gameArea.appendChild(placeholder);
+            puzzleGrid.appendChild(placeholder);
 
-            // Display answer choices
-            const answers = shuffle([chosen[2], ...shuffle(items).slice(0, 3)]);
+            // Create answer choices: the correct one and three incorrect ones
+            // Ensure incorrect choices are unique from the puzzle items and correct answer
+            let incorrectChoices = shuffle(items.filter(i => 
+                i.name !== puzzleItemA.name && i.name !== puzzleItemB.name && i.name !== correctItem.name
+            )).slice(0, 1);
+            
+            // Combine the correct item and incorrect choices for the answers grid
+            const answers = shuffle([correctItem, puzzleItemA, puzzleItemB, ...incorrectChoices]);
+            choicesGrid.innerHTML = '';
+
+            // Render the answer choices
             answers.forEach(opt => {
                 const div = document.createElement("div");
                 div.className = "item";
                 div.textContent = opt.emoji;
                 div.onclick = () => {
-                    checkAnswer(opt.name, div);
-                    if (opt.name === correctAnswer) {
-                        placeholder.textContent = opt.emoji;
+                    if (gameActive) {
+                        if (opt.name === correctAnswer) {
+                            placeholder.textContent = opt.emoji;
+                            placeholder.classList.add('correct');
+                        }
+                        checkAnswer(opt.name, div);
                     }
                 };
-                choicesArea.appendChild(div);
+                choicesGrid.appendChild(div);
             });
         }
 
         function checkAnswer(ans, element) {
-            const messageEl = document.getElementById("message");
+            if (!gameActive) return;
+
             if (ans === correctAnswer) {
+                gameActive = false;
                 messageEl.textContent = "✅ Correct!";
-                messageEl.style.color = "#00b894";
+                messageEl.style.color = "#27ae60";
                 score++;
-                document.getElementById("score").textContent = "Score: " + score;
+                scoreEl.textContent = "Score: " + score;
                 element.classList.add("correct");
                 setTimeout(newRound, 1500);
             } else {
                 messageEl.textContent = "❌ Try again!";
-                messageEl.style.color = "#d63031";
+                messageEl.style.color = "#e74c3c";
                 element.classList.add("incorrect");
                 setTimeout(() => {
                     element.classList.remove("incorrect");
@@ -259,13 +308,13 @@
             }
         }
 
-        document.getElementById("newGameBtn").onclick = () => {
+        newGameBtn.onclick = () => {
             score = 0;
-            document.getElementById("score").textContent = "Score: 0";
+            scoreEl.textContent = "Score: 0";
             newRound();
         };
 
-        document.getElementById("exitBtn").onclick = () => {
+        exitBtn.onclick = () => {
             window.location.href = "index.html";
         };
 
