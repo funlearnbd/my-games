@@ -1,230 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Logic Game</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f6fa;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .game-container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-      max-width: 900px;
-      width: 95%;
-      text-align: center;
-    }
-    h1 {
-      margin-top: 0;
-      color: #0984e3;
-    }
-    #question {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin: 15px 0;
-    }
-    #grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 15px;
-      margin: 20px 0;
-    }
-    .item {
-      background: #f0f0f0;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100px;
-      font-size: 2.5rem;
-      transition: transform 0.2s ease;
-    }
-    .item:hover {
-      transform: scale(1.05);
-      border-color: #0984e3;
-    }
-    #message {
-      font-size: 1.3rem;
-      font-weight: bold;
-      margin-top: 10px;
-      min-height: 30px;
-    }
-    #score {
-      margin-top: 10px;
-      font-size: 1.1rem;
-      color: #2d3436;
-    }
-    .btns {
-      margin-top: 20px;
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 25px;
-      margin: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      color: #fff;
-    }
-    #newGameBtn { background: #00b894; }
-    #exitBtn { background: #d63031; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 95%;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 0;
+            color: #0984e3;
+        }
+        #question {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        #game-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin: 20px auto;
+        }
+        #choices-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin: 20px auto;
+        }
+        .item {
+            background: #f0f0f0;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            font-size: 2.5rem;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .item:hover {
+            transform: scale(1.05);
+            border-color: #0984e3;
+        }
+        .item.correct {
+            border-color: #00b894;
+            background-color: #e8f9f5;
+            animation: bounce 0.5s;
+        }
+        .item.incorrect {
+            border-color: #d63031;
+            background-color: #ffe8e8;
+            animation: shake 0.5s;
+        }
+        .item.disabled {
+            cursor: default;
+        }
+        #message {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 30px;
+        }
+        #score {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: #2d3436;
+        }
+        .btns {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        #newGameBtn { background: #00b894; }
+        #exitBtn { background: #d63031; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+    </style>
 </head>
 <body>
-  <div class="game-container">
-    <h1>Logic Game</h1>
-    <div id="question"></div>
-    <div id="grid"></div>
-    <div id="message"></div>
-    <div id="score">Score: 0</div>
-    <div class="btns">
-      <button id="newGameBtn">New Game</button>
-      <button id="exitBtn">Exit Game</button>
+    <div class="game-container">
+        <h1>Logic Game</h1>
+        <div id="question"></div>
+        <div id="game-area"></div>
+        <div id="choices-area"></div>
+        <div id="message"></div>
+        <div id="score">Score: 0</div>
+        <div class="btns">
+            <button id="newGameBtn">New Game</button>
+            <button id="exitBtn">Exit Game</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const items = [
-      { name: "Apple", emoji: "🍎" },
-      { name: "Banana", emoji: "🍌" },
-      { name: "Car", emoji: "🚗" },
-      { name: "Dog", emoji: "🐶" },
-      { name: "Cat", emoji: "🐱" },
-      { name: "Flower", emoji: "🌸" },
-      { name: "Ball", emoji: "⚽" },
-      { name: "Star", emoji: "⭐" },
-      { name: "Tree", emoji: "🌳" },
-      { name: "Fish", emoji: "🐟" },
-      { name: "Happy Face", emoji: "😊" },
-      { name: "Sad Face", emoji: "😢" },
-      { name: "Sun", emoji: "☀️" },
-      { name: "Moon", emoji: "🌙" },
-      { name: "Heart", emoji: "❤️" }
-    ];
+    <script>
+        const items = [
+            { name: "Apple", emoji: "🍎" },
+            { name: "Banana", emoji: "🍌" },
+            { name: "Car", emoji: "🚗" },
+            { name: "Dog", emoji: "🐶" },
+            { name: "Cat", emoji: "🐱" },
+            { name: "Flower", emoji: "🌸" },
+            { name: "Ball", emoji: "⚽" },
+            { name: "Star", emoji: "⭐" },
+            { name: "Tree", emoji: "🌳" },
+            { name: "Fish", emoji: "🐟" },
+            { name: "Happy Face", emoji: "😊" },
+            { name: "Sad Face", emoji: "😢" },
+            { name: "Sun", emoji: "☀️" },
+            { name: "Moon", emoji: "🌙" },
+            { name: "Heart", emoji: "❤️" }
+        ];
 
-    let score = 0;
-    let correctAnswer = null;
-    let mode = "";
+        let score = 0;
+        let correctAnswer = null;
 
-    function shuffle(arr) {
-      return arr.sort(() => Math.random() - 0.5);
-    }
+        function shuffle(arr) {
+            return arr.sort(() => Math.random() - 0.5);
+        }
 
-    function newRound() {
-      document.getElementById("message").textContent = "";
-      const gameModes = ["find", "different", "missing"];
-      mode = gameModes[Math.floor(Math.random() * gameModes.length)];
-      if (mode === "find") setupFind();
-      else if (mode === "different") setupDifferent();
-      else if (mode === "missing") setupMissing();
-    }
+        function newRound() {
+            document.getElementById("message").textContent = "";
+            document.getElementById("game-area").innerHTML = "";
+            document.getElementById("choices-area").innerHTML = "";
 
-    function setupFind() {
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
-      const chosen = items[Math.floor(Math.random() * items.length)];
-      correctAnswer = chosen.name;
-      document.getElementById("question").textContent = `Find the ${chosen.name}`;
-      const options = shuffle([chosen, ...shuffle(items).slice(0, 5)]);
-      options.forEach(opt => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.textContent = opt.emoji;
-        div.onclick = () => checkAnswer(opt.name);
-        grid.appendChild(div);
-      });
-    }
+            const gameModes = ["find", "different", "missing"];
+            const mode = gameModes[Math.floor(Math.random() * gameModes.length)];
 
-    function setupDifferent() {
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
-      const common = items[Math.floor(Math.random() * items.length)];
-      let diff;
-      do {
-        diff = items[Math.floor(Math.random() * items.length)];
-      } while (diff.name === common.name);
-      correctAnswer = diff.name;
-      document.getElementById("question").textContent = "Find the different item";
-      let options = Array(5).fill(common).concat(diff);
-      options = shuffle(options);
-      options.forEach(opt => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.textContent = opt.emoji;
-        div.onclick = () => checkAnswer(opt.name);
-        grid.appendChild(div);
-      });
-    }
+            if (mode === "find") setupFind();
+            else if (mode === "different") setupDifferent();
+            else if (mode === "missing") setupMissing();
+        }
 
-    function setupMissing() {
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
-      const chosen = shuffle(items).slice(0, 3);
-      correctAnswer = chosen[2].name;
-      document.getElementById("question").textContent = "Find the missing piece!";
-      // show first 2
-      chosen.slice(0, 2).forEach(opt => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.textContent = opt.emoji;
-        div.style.cursor = "default";
-        grid.appendChild(div);
-      });
-      // placeholder
-      const placeholder = document.createElement("div");
-      placeholder.className = "item";
-      placeholder.textContent = "?";
-      grid.appendChild(placeholder);
-      // answer choices
-      const answers = shuffle([chosen[2], ...shuffle(items).slice(0, 3)]);
-      answers.forEach(opt => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.textContent = opt.emoji;
-        div.onclick = () => {
-          if (opt.name === correctAnswer) {
-            placeholder.textContent = opt.emoji;
-          }
-          checkAnswer(opt.name);
+        function setupFind() {
+            const grid = document.getElementById("game-area");
+            const chosen = items[Math.floor(Math.random() * items.length)];
+            correctAnswer = chosen.name;
+            document.getElementById("question").textContent = `Find the ${chosen.name}`;
+            const options = shuffle([chosen, ...shuffle(items).slice(0, 5)]);
+
+            options.forEach(opt => {
+                const div = document.createElement("div");
+                div.className = "item";
+                div.textContent = opt.emoji;
+                div.onclick = () => checkAnswer(opt.name, div);
+                grid.appendChild(div);
+            });
+        }
+
+        function setupDifferent() {
+            const grid = document.getElementById("game-area");
+            const common = items[Math.floor(Math.random() * items.length)];
+            let diff;
+            do {
+                diff = items[Math.floor(Math.random() * items.length)];
+            } while (diff.name === common.name);
+            correctAnswer = diff.name;
+            document.getElementById("question").textContent = "Find the different item";
+            let options = Array(5).fill(common).concat(diff);
+            options = shuffle(options);
+
+            options.forEach(opt => {
+                const div = document.createElement("div");
+                div.className = "item";
+                div.textContent = opt.emoji;
+                div.onclick = () => checkAnswer(opt.name, div);
+                grid.appendChild(div);
+            });
+        }
+
+        function setupMissing() {
+            const gameArea = document.getElementById("game-area");
+            const choicesArea = document.getElementById("choices-area");
+            const chosen = shuffle(items).slice(0, 3);
+            correctAnswer = chosen[2].name;
+            document.getElementById("question").textContent = "Find the missing piece!";
+
+            // Display puzzle items
+            chosen.slice(0, 2).forEach(opt => {
+                const div = document.createElement("div");
+                div.className = "item disabled";
+                div.textContent = opt.emoji;
+                gameArea.appendChild(div);
+            });
+            // Display placeholder
+            const placeholder = document.createElement("div");
+            placeholder.className = "item disabled";
+            placeholder.textContent = "?";
+            gameArea.appendChild(placeholder);
+
+            // Display answer choices
+            const answers = shuffle([chosen[2], ...shuffle(items).slice(0, 3)]);
+            answers.forEach(opt => {
+                const div = document.createElement("div");
+                div.className = "item";
+                div.textContent = opt.emoji;
+                div.onclick = () => {
+                    checkAnswer(opt.name, div);
+                    if (opt.name === correctAnswer) {
+                        placeholder.textContent = opt.emoji;
+                    }
+                };
+                choicesArea.appendChild(div);
+            });
+        }
+
+        function checkAnswer(ans, element) {
+            const messageEl = document.getElementById("message");
+            if (ans === correctAnswer) {
+                messageEl.textContent = "✅ Correct!";
+                messageEl.style.color = "#00b894";
+                score++;
+                document.getElementById("score").textContent = "Score: " + score;
+                element.classList.add("correct");
+                setTimeout(newRound, 1500);
+            } else {
+                messageEl.textContent = "❌ Try again!";
+                messageEl.style.color = "#d63031";
+                element.classList.add("incorrect");
+                setTimeout(() => {
+                    element.classList.remove("incorrect");
+                    messageEl.textContent = "";
+                    messageEl.style.color = "";
+                }, 800);
+            }
+        }
+
+        document.getElementById("newGameBtn").onclick = () => {
+            score = 0;
+            document.getElementById("score").textContent = "Score: 0";
+            newRound();
         };
-        grid.appendChild(div);
-      });
-    }
 
-    function checkAnswer(ans) {
-      if (ans === correctAnswer) {
-        document.getElementById("message").textContent = "✅ Correct!";
-        score++;
-        document.getElementById("score").textContent = "Score: " + score;
-        setTimeout(newRound, 1000);
-      } else {
-        document.getElementById("message").textContent = "❌ Try again!";
-      }
-    }
+        document.getElementById("exitBtn").onclick = () => {
+            window.location.href = "index.html";
+        };
 
-    document.getElementById("newGameBtn").onclick = () => {
-      score = 0;
-      document.getElementById("score").textContent = "Score: 0";
-      newRound();
-    };
-    document.getElementById("exitBtn").onclick = () => {
-      window.location.href = "index.html";
-    };
-
-    window.onload = newRound;
-  </script>
+        window.onload = newRound;
+    </script>
 </body>
 </html>
