@@ -8,7 +8,7 @@
 */
 
 const IMAGE_PATH_CANDIDATES = [
-  "images/",
+  "image/",
   "logic_images/",
   "assets/images/",
   "" // root
