@@ -24,6 +24,9 @@ function loadGame() {
   else if (mode === "missing") loadMissingGame();
 }
 
+// -----------------------------
+// Mode: Find the Item
+// -----------------------------
 function loadFindGame() {
   const area = document.getElementById("game-area");
   const instruction = document.getElementById("instruction");
@@ -39,13 +42,16 @@ function loadFindGame() {
     img.src = opt.img;
     img.alt = opt.name;
     img.onclick = () => {
-      if (opt.name === correct.name) alert("Correct!");
-      else alert("Try again!");
+      if (opt.name === correct.name) alert("✅ Correct!");
+      else alert("❌ Try again!");
     };
     area.appendChild(img);
   });
 }
 
+// -----------------------------
+// Mode: Find the Different Item
+// -----------------------------
 function loadDifferentGame() {
   const area = document.getElementById("game-area");
   const instruction = document.getElementById("instruction");
@@ -66,13 +72,16 @@ function loadDifferentGame() {
     img.src = opt.img;
     img.alt = opt.name;
     img.onclick = () => {
-      if (opt.name === different.name) alert("Correct!");
-      else alert("Wrong, try again!");
+      if (opt.name === different.name) alert("✅ Correct!");
+      else alert("❌ Wrong, try again!");
     };
     area.appendChild(img);
   });
 }
 
+// -----------------------------
+// Mode: Find the Missing Piece
+// -----------------------------
 function loadMissingGame() {
   const area = document.getElementById("game-area");
   const instruction = document.getElementById("instruction");
@@ -92,8 +101,8 @@ function loadMissingGame() {
     img.onclick = () => {
       if (opt.name === correct.name) {
         slot.innerHTML = `<img src="${opt.img}" alt="${opt.name}" style="width:100%; height:100%;">`;
-        alert("Correct!");
-      } else alert("Try again!");
+        alert("✅ Correct!");
+      } else alert("❌ Try again!");
     };
     area.appendChild(img);
   });
