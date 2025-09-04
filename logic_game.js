@@ -1,11 +1,11 @@
 // ---------- ITEMS ----------
 const items = [
-  { name:"Apple", src:"image/apple.png" },
-  { name:"Banana", src:"image/banana.png" },
-  { name:"Cherry", src:"image/cherry.png" },
-  { name:"Dog", src:"image/dog.png" },
-  { name:"Cat", src:"image/cat.png" },
-  { name:"Flower", src:"image/flower.png" },
+  { name:"Apple", src:"images/apple.png" },
+  { name:"Banana", src:"images/banana.png" },
+  { name:"Cherry", src:"images/cherry.png" },
+  { name:"Dog", src:"images/dog.png" },
+  { name:"Cat", src:"images/cat.png" },
+  { name:"Flower", src:"images/flower.png" },
   { name:"Happy Face", emoji:"😀" },
   { name:"Sad Face", emoji:"😢" },
   { name:"Laughing Face", emoji:"😂" },
