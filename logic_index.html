@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Logic Game</title>
-  <link rel="stylesheet" href="logic_style.css">
+    <meta charset="UTF-8">
+    <title>Logic Game</title>
+    <link rel="stylesheet" href="logic_style.css">
 </head>
 <body>
-  <div class="game-container">
-    <h1>Logic Game</h1>
-    <p id="instruction">Loading...</p>
+    <div class="game-container">
+        <h1>Logic Game</h1>
+        <div class="score-container">Score: <span id="score">0</span></div>
+        <p id="instruction">Loading...</p>
 
-    <div id="missing-slot"></div>
-    <div id="game-area" class="grid"></div>
+        <div id="missing-slot"></div>
+        <div id="game-area" class="grid"></div>
+        
+        <div id="message" class="message-text"></div>
 
-    <button id="next-btn">Next</button>
-    <button onclick="window.location.href='index.html'" class="exit-btn">Exit Game</button>
-  </div>
-  <script src="logic_game.js"></script>
+        <button id="next-btn" style="display:none;">Next Puzzle</button>
+        <button onclick="window.location.href='index.html'" class="exit-btn">Exit Game</button>
+    </div>
+    <script src="logic_game.js"></script>
 </body>
 </html>
