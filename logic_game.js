@@ -89,29 +89,58 @@ function gameMissing(){
 }
 
 // ---------- RENDER GRID ----------
-function renderGrid(options, correct, clueText, missing=false, puzzleDisplay=null){
-  clueDiv.textContent=clueText;
-  gridDiv.innerHTML="";
+function renderGrid(puzzleItems, options, correctItem) {
+  grid.innerHTML = "";
 
-  // Puzzle with blank for missing mode
-  if(missing && puzzleDisplay){
-    const puzzleContainer = document.createElement("div");
-    puzzleContainer.style.display="flex";
-    puzzleContainer.style.gap="10px";
-    puzzleDisplay.forEach(opt=>{
-      const el = document.createElement("img");
-      el.src = opt.src;
-      el.style.width="120px";
-      el.style.height="120px";
-      el.style.objectFit="cover";
-      el.style.borderRadius="15px";
-      puzzleContainer.appendChild(el);
+  // Puzzle row
+  const puzzleRow = document.createElement("div");
+  puzzleRow.className = "puzzle";
+  puzzleItems.forEach(item => {
+    if (item.blank) {
+      const blank = document.createElement("div");
+      blank.className = "blank";
+      blank.textContent = "???";
+      puzzleRow.appendChild(blank);
+    } else {
+      const img = document.createElement("img");
+      img.src = item.src;
+      img.alt = item.name;
+      img.style.width = "100px";
+      img.style.height = "100px";
+      puzzleRow.appendChild(img);
+    }
+  });
+  grid.appendChild(puzzleRow);
+
+  // Options row
+  const optionsContainer = document.createElement("div");
+  optionsContainer.className = "options-container";
+
+  options.forEach(item => {
+    const optDiv = document.createElement("div");
+    optDiv.className = "option";
+    const img = document.createElement("img");
+    img.src = item.src;
+    img.alt = item.name;
+    optDiv.appendChild(img);
+
+    optDiv.addEventListener("click", () => {
+      if (item.name === correctItem.name) {
+        speak("Correct!");
+        feedback.textContent = "✅ Correct!";
+        puzzleRow.querySelector(".blank").innerHTML = `<img src="${item.src}" width="100" height="100">`;
+        setTimeout(() => nextLevel(), 1000);
+      } else {
+        speak("Try again!");
+        feedback.textContent = "❌ Try again!";
+      }
     });
-    const blank = document.createElement("div");
-    blank.style.width="120px"; blank.style.height="120px"; blank.style.border="2px dashed #555"; blank.style.borderRadius="15px";
-    puzzleContainer.appendChild(blank);
-    gridDiv.appendChild(puzzleContainer);
-  }
+
+    optionsContainer.appendChild(optDiv);
+  });
+
+  grid.appendChild(optionsContainer);
+}
 
   // Options
   const optionsContainer = document.createElement("div");
