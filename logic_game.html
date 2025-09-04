@@ -1,450 +1,231 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Kids Logic — Improved</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fun Kids Game</title>
 <style>
-  :root{
-    --bg1:#ffecd2; --bg2:#fcb69f; --accent:#2d9cdb; --good:#27ae60; --bad:#e74c3c;
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f9f9f9;
+    margin: 0;
+    padding: 0;
   }
-  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
-  body{
-    display:flex;flex-direction:column;align-items:center;
-    background:linear-gradient(160deg,var(--bg1),var(--bg2));padding:12px;
-    -webkit-user-select:none; user-select:none;
+  h1 { background: #ffcc00; margin:0; padding:15px; }
+  #question { font-size: 1.5em; margin: 20px 0; }
+  #game-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
+    gap: 15px;
+    padding: 10px;
+    max-width: 700px;
+    margin: auto;
   }
-
-  header{width:100%;max-width:980px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
-  h1{margin:0;color:#c0392b;font-size:26px;text-shadow:0 1px 0 #fff}
-  .top-controls{display:flex;gap:8px;align-items:center}
-  .btn{background:var(--accent); color:white; padding:8px 12px; border-radius:12px; border:none; font-weight:700; cursor:pointer; box-shadow:0 6px 14px rgba(0,0,0,0.12)}
-  .btn.secondary{background:#e74c3c}
-  #scoreRound{font-weight:700;color:#223; font-size:14px}
-
-  #question{font-size:20px;margin:10px 0 8px;color:#223;min-height:48px;text-align:center;max-width:920px}
-
-  main{width:100%;max-width:920px;display:flex;flex-direction:column;align-items:center;gap:12px}
-  #puzzle { display:grid; grid-template-columns: repeat(3,160px); gap:12px; justify-content:center; }
-  #grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; width:100%; max-width:880px; justify-items:center; padding:6px; }
-
-  .answer-box{
-    width:140px; height:140px; border-radius:14px; background:#fff; border:4px solid var(--accent);
-    display:flex; align-items:center; justify-content:center; box-shadow:0 10px 24px rgba(0,0,0,0.12);
-    cursor:pointer; transition:transform .12s, box-shadow .12s; -webkit-tap-highlight-color:transparent;
+  .answer-box {
+    background: #fff;
+    border: 3px solid #ccc;
+    border-radius: 15px;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform .2s;
   }
-  .answer-box img{ width:120px; height:120px; object-fit:contain; border-radius:10px; pointer-events:none; display:block; }
-  .answer-box:active{ transform:scale(.98) }
-  .answer-box.correct{ border-color:var(--good); box-shadow:0 18px 34px rgba(39,174,96,0.14); animation:bounce .6s; }
-  .answer-box.wrong{ border-color:var(--bad); box-shadow:0 18px 34px rgba(231,76,60,0.14); animation:shake .45s; }
-
-  @keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}60%{transform:translateY(-7px)}}
-  @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-6px)}100%{transform:translateX(0)}}
-
-  #message{min-height:28px;color:#223;font-weight:700;margin-top:6px;text-align:center}
-  .hintPulse{ box-shadow:0 0 22px 8px rgba(241,196,15,0.18); border-color:#f1c40f !important; }
-  #confetti-canvas{ position:fixed; left:0; top:0; width:100%; height:100%; pointer-events:none; z-index:9999; display:none; }
-
-  @media (max-width:560px){
-    #puzzle { grid-template-columns: repeat(2,120px); gap:10px; }
-    .answer-box{ width:110px; height:110px }
-    .answer-box img{ width:94px; height:94px }
+  .answer-box:hover { transform: scale(1.1); }
+  .answer-box img {
+    width: 100px; height: 100px; object-fit: contain;
   }
-
-  footer{margin-top:8px;font-size:13px;color:#334;opacity:.9}
+  #puzzle-container {
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+  }
+  #puzzle-container img {
+    width: 100px; height: 100px;
+  }
+  #message { font-size:1.3em; margin-top:15px; min-height: 1.5em; }
+  #score { margin: 10px; font-weight: bold; }
+  #controls { margin: 15px; }
+  button {
+    margin: 5px; padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 10px;
+    border: none;
+    background: #ff9900;
+    color: #fff; cursor: pointer;
+  }
+  button:hover { background: #e68a00; }
 </style>
 </head>
 <body>
-  <header>
-    <div style="display:flex;align-items:center;gap:12px">
-      <h1>Kids Logic Game</h1>
-      <div id="scoreRound">Round: 0 / 100</div>
-    </div>
+<h1>Fun Kids Game</h1>
+<div id="score">Score: 0</div>
+<div id="question"></div>
+<div id="game-area"></div>
+<div id="message"></div>
+<div id="controls">
+  <button onclick="newGame()">New Game</button>
+  <button onclick="exitGame()">Exit Game</button>
+</div>
 
-    <div class="top-controls">
-      <button id="new-game" class="btn">New Game</button>
-      <button id="exit-game" class="btn secondary">Exit Game</button>
-      <div id="score" style="margin-left:6px;font-weight:700;color:#223">Score: 0</div>
-    </div>
-  </header>
-
-  <div id="question">Loading…</div>
-
-  <main>
-    <div id="puzzle" aria-hidden="true"></div>
-    <div id="grid" role="list"></div>
-    <div id="message" aria-live="polite"></div>
-  </main>
-
-  <footer>Warmup: first 2 rounds each; then a random mix. Enjoy!</footer>
-
-  <!-- confetti canvas -->
-  <canvas id="confetti-canvas"></canvas>
-
-  <!-- sounds -->
-  <audio id="success-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-  <audio id="buzz-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<!-- Sounds -->
+<audio id="success-sound" src="https://cdn.pixabay.com/download/audio/2021/09/01/audio_d90b40f19e.mp3?filename=success-1-6297.mp3"></audio>
+<audio id="buzz-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_fa2f61cb34.mp3?filename=error-126627.mp3"></audio>
 
 <script>
-/* ---------------------------
-   Utilities & assets (inline SVGs -> data URIs)
-   --------------------------- */
-function svgDataURI(svgText){
-  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgText);
+// === Cartoon image set ===
+const items = [
+  { name:"apple", src:"https://img.icons8.com/emoji/96/apple.png" },
+  { name:"banana", src:"https://img.icons8.com/emoji/96/banana.png" },
+  { name:"dog", src:"https://img.icons8.com/emoji/96/dog.png" },
+  { name:"cat", src:"https://img.icons8.com/emoji/96/cat.png" },
+  { name:"flower", src:"https://img.icons8.com/emoji/96/hibiscus.png" },
+  { name:"star", src:"https://img.icons8.com/emoji/96/star.png" },
+  { name:"grapes", src:"https://img.icons8.com/emoji/96/grapes.png" },
+  { name:"cherry", src:"https://img.icons8.com/emoji/96/cherries.png" },
+  { name:"car", src:"https://img.icons8.com/emoji/96/red-car.png" },
+  { name:"ball", src:"https://img.icons8.com/emoji/96/soccer-ball.png" }
+];
+
+let score=0, correctAnswer="", gameCount=0, currentMode="";
+
+const questionDisplay=document.getElementById("question");
+const gameArea=document.getElementById("game-area");
+const messageDisplay=document.getElementById("message");
+const scoreDisplay=document.getElementById("score");
+
+// speak helper
+function speak(text){
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=1.1;
+  speechSynthesis.speak(u);
 }
 
-const SVG = {
-  apple: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-    <defs><filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12"/></filter></defs>
-    <g filter="url(#s)"><path d="M62 23c6-6 14-6 22-3-1 8-3 16-9 23-7 8-18 12-28 11-10-1-18-6-24-14-5-7-6-15-2-22 7-4 13-6 20-5 1-3 4-7 9-8 6-1 10 3 12 8z" fill="#e03b3b"/>
-    <path d="M55 16c3 1 5 3 5 6" fill="none" stroke="#4caf50" stroke-width="3" stroke-linecap="round"/></g>
-  </svg>`,
-  banana: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 80'><path d="M12,58 C34,8 106,6 126,58 C100,70 46,72 12,58Z" fill="#ffd648" stroke="#f4c542" stroke-width="2"/></svg>`,
-  orange: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx="50" cy="50" r="30" fill="#f39c12"/><path d="M50 20 L50 80 M20 50 L80 50" stroke="#f8c471" stroke-width="2"/></svg>`,
-  grapes: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill="#8e44ad"><circle cx="40" cy="28" r="9"/><circle cx="53" cy="24" r="9"/><circle cx="66" cy="30" r="9"/><circle cx="47" cy="40" r="9"/><circle cx="60" cy="44" r="9"/><circle cx="50" cy="54" r="9"/></g><rect x="48" y="8" width="4" height="18" fill="#2c3e50"/></svg>`,
-  strawberry:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d="M50 18c-12 0-24 10-24 21 0 18 24 40 24 40s24-22 24-40c0-11-12-21-24-21z" fill="#e74c3c"/><path d="M36 12c6-6 18-6 24 0" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/><g fill="#fff"><circle cx="42" cy="42" r="1.8"/><circle cx="50" cy="36" r="1.8"/><circle cx="58" cy="44" r="1.8"/></g></svg>`,
-  dog: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x="18" y="36" width="64" height="34" rx="8" fill="#cfa07a"/><circle cx="34" cy="50" r="6" fill="#fff"/><circle cx="66" cy="50" r="6" fill="#fff"/><circle cx="34" cy="50" r="2.4" fill="#000"/><circle cx="66" cy="50" r="2.4" fill="#000"/><rect x="44" y="60" width="12" height="6" rx="2" fill="#7b4f36"/></svg>`,
-  cat: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx="50" cy="48" r="28" fill="#9aa6af"/><polygon points="30,30 42,18 46,34" fill="#9aa6af"/><polygon points="70,30 58,18 54,34" fill="#9aa6af"/><circle cx="42" cy="50" r="4" fill="#fff"/><circle cx="58" cy="50" r="4" fill="#fff"/><circle cx="42" cy="50" r="1.8" fill="#000"/><circle cx="58" cy="50" r="1.8" fill="#000"/><path d="M40 64 Q50 72 60 64" stroke="#6b6b6b" stroke-width="2" fill="none"/></svg>`,
-  flower:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx="50" cy="40" r="11" fill="#f1c40f"/><circle cx="50" cy="18" r="12" fill="#ff6ea1"/><circle cx="70" cy="35" r="12" fill="#ff6ea1"/><circle cx="30" cy="35" r="12" fill="#ff6ea1"/><circle cx="36" cy="55" r="12" fill="#ff6ea1"/><circle cx="64" cy="55" r="12" fill="#ff6ea1"/><rect x="48" y="55" width="4" height="25" fill="#2ecc71"/></svg>`,
-  star:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points="50,12 61,40 92,40 66,58 76,88 50,70 24,88 34,58 8,40 39,40" fill="#f1c40f"/></svg>`,
-  car:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 80'><rect x="10" y="30" width="120" height="30" rx="8" fill="#3498db"/><rect x="34" y="12" width="72" height="30" rx="6" fill="#2c82d4"/><circle cx="34" cy="62" r="10" fill="#333"/><circle cx="106" cy="62" r="10" fill="#333"/></svg>`,
-  ball:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx="50" cy="50" r="30" fill="#e74c3c"/><path d="M20 50 a30 30 0 0 0 60 0" stroke="#fff" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="2" fill="#fff"/></svg>`,
-  tree:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x="46" y="60" width="8" height="20" fill="#8b5a2b"/><circle cx="50" cy="42" r="20" fill="#2ecc71"/><circle cx="36" cy="50" r="12" fill="#2ecc71"/><circle cx="64" cy="50" r="12" fill="#2ecc71"/></svg>`,
-  smile:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx="50" cy="50" r="30" fill="#ffd93b"/><circle cx="40" cy="45" r="4" fill="#3d3d3d"/><circle cx="60" cy="45" r="4" fill="#3d3d3d"/><path d="M38 60 Q50 72 62 60" stroke="#3d3d3d" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`
-};
+// shuffle helper
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
 
-const ITEMS = Object.keys(SVG).map(key => ({
-  id: key,
-  name: key,
-  src: svgDataURI(SVG[key]),
-  sound: (key === 'dog' ? 'https://actions.google.com/sounds/v1/animals/dog_bark.ogg' : (key === 'cat' ? 'https://actions.google.com/sounds/v1/animals/cat_meow.ogg' : ''))
-}));
-
-/* ---------------------------
-   Game state
-   --------------------------- */
-let score = 0;
-let correctId = null;
-let modeCounters = { select: 0, missing: 0, different: 0 };
-let accepting = true;
-let roundNumber = 0;
-const MAX_ROUNDS = 100;
-
-/* DOM refs */
-const questionEl = document.getElementById('question');
-const gridEl = document.getElementById('grid');
-const puzzleEl = document.getElementById('puzzle');
-const messageEl = document.getElementById('message');
-const scoreEl = document.getElementById('score');
-const scoreRoundEl = document.getElementById('scoreRound');
-const successSnd = document.getElementById('success-sound');
-const buzzSnd = document.getElementById('buzz-sound');
-const newBtn = document.getElementById('new-game');
-const exitBtn = document.getElementById('exit-game');
-const confettiCanvas = document.getElementById('confetti-canvas');
-
-/* ---------------------------
-   Helpers
-   --------------------------- */
-function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-function speak(text){ if('speechSynthesis' in window){ try{ const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; u.rate=0.95; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);}catch(e){} } }
-function showHint(id){
-  setTimeout(()=>{
-    const img = document.querySelector(`img[data-id="${id}"]`);
-    if(img && img.parentElement){
-      const box = img.parentElement;
-      box.classList.add('hintPulse');
-      setTimeout(()=>box.classList.remove('hintPulse'),1500);
-    }
-  }, 120);
-}
-
-/* ---------------------------
-   Confetti (simple canvas-based)
-   --------------------------- */
-function launchConfetti(){
-  const canvas = confettiCanvas;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
-  canvas.style.width = window.innerWidth + 'px';
-  canvas.style.height = window.innerHeight + 'px';
-  ctx.scale(dpr, dpr);
-  canvas.style.display = 'block';
-
-  const colors = ['#ff5c5c','#ffd166','#6ee7b7','#7ecbff','#b992ff'];
-  const particles = [];
-  const count = 60;
-  for(let i=0;i<count;i++){
-    particles.push({
-      x: window.innerWidth * 0.5 + (Math.random()-0.5)*200,
-      y: window.innerHeight * 0.35 + (Math.random()-0.5)*80,
-      vx: (Math.random()-0.5) * 6,
-      vy: - (4 + Math.random()*8),
-      size: 6 + Math.random()*8,
-      color: colors[Math.floor(Math.random()*colors.length)],
-      rot: Math.random()*360,
-      vr: (Math.random()-0.5)*10,
-      life: 0,
-      ttl: 80 + Math.random()*40
-    });
-  }
-
-  let raf;
-  function step(){
-    ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);
-    particles.forEach(p=>{
-      p.vy += 0.15; // gravity
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.vr;
-      p.life++;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot * Math.PI / 180);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
-      ctx.restore();
-    });
-    if(particles.some(p=>p.life < p.ttl)){
-      raf = requestAnimationFrame(step);
-    } else {
-      ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);
-      canvas.style.display = 'none';
-      cancelAnimationFrame(raf);
-    }
-  }
-  step();
-}
-
-/* ---------------------------
-   Mode decision & rounds
-   --------------------------- */
-function pickMode(){
-  if(modeCounters.select < 2) return 'select';
-  if(modeCounters.missing < 2) return 'missing';
-  if(modeCounters.different < 2) return 'different';
-  const modes = ['select','select','missing','different'];
-  return modes[Math.floor(Math.random()*modes.length)];
-}
-
-function newRound(){
-  if(roundNumber >= MAX_ROUNDS){
-    // finished
-    questionEl.textContent = 'Congratulations! All rounds completed!';
-    messageEl.textContent = 'Great job!';
-    speak('Congratulations! You finished all rounds!');
-    return;
-  }
-
-  accepting = true;
-  gridEl.innerHTML = '';
-  puzzleEl.innerHTML = '';
-  messageEl.textContent = '';
-  roundNumber++;
-  scoreRoundEl.textContent = `Round: ${roundNumber} / ${MAX_ROUNDS}`;
-
-  const mode = pickMode();
-  if(mode === 'select'){ modeCounters.select++; generateSelect(); }
-  else if(mode === 'missing'){ modeCounters.missing++; generateMissing(); }
-  else { modeCounters.different++; generateDifferent(); }
-}
-
-/* ---------------------------
-   SELECT MODE
-   --------------------------- */
-function generateSelect(){
-  const correct = ITEMS[Math.floor(Math.random()*ITEMS.length)];
-  correctId = correct.id;
-  questionEl.textContent = `Find the ${correct.name}!`;
-  speak(questionEl.textContent);
-
-  let options = [correct];
-  while(options.length < 6){
-    const it = ITEMS[Math.floor(Math.random()*ITEMS.length)];
-    if(!options.find(o=>o.id === it.id)) options.push(it);
-  }
-  shuffle(options);
-
-  options.forEach(opt => {
-    const box = document.createElement('div'); box.className = 'answer-box';
-    const img = document.createElement('img'); img.src = opt.src; img.alt = opt.name; img.dataset.id = opt.id;
-    box.appendChild(img);
-    box.addEventListener('click', ()=> onSelect(opt.id, opt.sound, box));
-    gridEl.appendChild(box);
-  });
-
-  if(modeCounters.select <= 2) showHint(correctId);
-}
-
-/* ---------------------------
-   MISSING PIECE MODE
-   --------------------------- */
-function generateMissing(){
-  const seq = shuffle(ITEMS.slice()).slice(0,6);
-  const missingIndex = Math.floor(Math.random()*seq.length);
-  correctId = seq[missingIndex].id;
-
-  questionEl.textContent = 'Find the missing piece!';
-  speak('Find the missing piece!');
-
-  puzzleEl.innerHTML = '';
-  seq.forEach((it, idx) => {
-    const shell = document.createElement('div'); shell.className = 'answer-box';
-    if(idx !== missingIndex){
-      const img = document.createElement('img'); img.src = it.src; img.alt = it.name;
-      shell.appendChild(img);
-    } else {
-      shell.style.background = 'linear-gradient(180deg,#fff,#f3f3f3)';
-      shell.dataset.missing = 'true';
-    }
-    puzzleEl.appendChild(shell);
-  });
-
-  let options = [seq[missingIndex]];
-  while(options.length < 3){
-    const it = ITEMS[Math.floor(Math.random()*ITEMS.length)];
-    if(!options.find(o=>o.id===it.id)) options.push(it);
-  }
-  shuffle(options);
-
-  gridEl.innerHTML = '';
-  options.forEach(opt => {
-    const box = document.createElement('div'); box.className = 'answer-box';
-    const img = document.createElement('img'); img.src = opt.src; img.alt = opt.name; img.dataset.id = opt.id;
-    box.appendChild(img);
-    box.addEventListener('click', ()=> onSelectMissing(opt.id, opt.sound, box));
-    gridEl.appendChild(box);
-  });
-
-  if(modeCounters.missing <= 2) showHint(correctId);
-}
-
-function onSelectMissing(selectedId, soundURL, boxEl){
-  if(!accepting) return;
-  accepting = false;
-  document.querySelectorAll('.answer-box').forEach(b=>b.classList.remove('hintPulse'));
-
-  if(selectedId === correctId){
-    successSnd.currentTime = 0; successSnd.play();
-    if(soundURL) try{ new Audio(soundURL).play(); }catch(e){}
-    messageEl.textContent = '✅ Correct!';
-    // Put image into missing slot
-    const missingSlot = Array.from(puzzleEl.children).find(ch => ch.dataset && ch.dataset.missing === 'true');
-    if(missingSlot){
-      const item = ITEMS.find(it => it.id === selectedId);
-      missingSlot.innerHTML = '';
-      const img = document.createElement('img'); img.src = item.src; img.alt = item.name;
-      missingSlot.appendChild(img);
-      missingSlot.classList.add('correct');
-    }
-    boxEl.classList.add('correct');
-    score++; scoreEl.textContent = 'Score: ' + score;
-    // speak item name as well
-    speak(itemSpeakName(selectedId));
-    // confetti
-    launchConfetti();
-    setTimeout(()=> { accepting = true; newRound(); }, 1100);
-  } else {
-    buzzSnd.currentTime = 0; buzzSnd.play();
-    boxEl.classList.add('wrong');
-    messageEl.textContent = '❌ Try again!';
-    speak('Try again!');
-    setTimeout(()=> { boxEl.classList.remove('wrong'); accepting = true; messageEl.textContent = ''; }, 900);
-  }
-}
-
-/* ---------------------------
-   FIND DIFFERENT MODE (only one correct)
-   --------------------------- */
-function generateDifferent(){
-  // pick base and different (ensure distinct)
-  const base = ITEMS[Math.floor(Math.random()*ITEMS.length)];
-  let different;
-  do { different = ITEMS[Math.floor(Math.random()*ITEMS.length)]; } while(different.id === base.id);
-  correctId = different.id;
-
-  questionEl.textContent = 'Find the different item!';
-  speak(questionEl.textContent);
-
-  const arr = [different, base, base, base, base, base];
-  shuffle(arr);
-
-  arr.forEach(opt => {
-    const box = document.createElement('div'); box.className='answer-box';
-    const img = document.createElement('img'); img.src = opt.src; img.alt = opt.name; img.dataset.id = opt.id;
-    box.appendChild(img);
-    box.addEventListener('click', ()=> onSelect(opt.id, opt.sound, box));
-    gridEl.appendChild(box);
-  });
-
-  if(modeCounters.different <= 2) showHint(correctId);
-}
-
-/* ---------------------------
-   Generic select handler (select & different)
-   --------------------------- */
-function onSelect(selectedId, soundURL, boxEl){
-  if(!accepting) return;
-  accepting = false;
-  document.querySelectorAll('.answer-box').forEach(b=>b.classList.remove('hintPulse'));
-
-  if(selectedId === correctId){
-    successSnd.currentTime = 0; successSnd.play();
-    if(soundURL) try{ new Audio(soundURL).play(); }catch(e){}
-    boxEl.classList.add('correct');
-    messageEl.textContent = '✅ Correct!';
-    // speak item name
-    speak(itemSpeakName(selectedId));
-    // confetti
-    launchConfetti();
-    score++; scoreEl.textContent = 'Score: ' + score;
-    setTimeout(()=> { accepting = true; newRound(); }, 1000);
-  } else {
-    buzzSnd.currentTime = 0; buzzSnd.play();
-    boxEl.classList.add('wrong');
-    messageEl.textContent = '❌ Try again!';
-    speak('Try again!');
-    setTimeout(()=> { boxEl.classList.remove('wrong'); accepting = true; messageEl.textContent = ''; }, 900);
-  }
-}
-
-/* ---------------------------
-   Helpers: name for speaking (capitalized)
-   --------------------------- */
-function itemSpeakName(id){
-  const it = ITEMS.find(x=>x.id === id);
-  if(!it) return '';
-  // capitalize
-  return it.name.charAt(0).toUpperCase() + it.name.slice(1) + '!';
-}
-
-/* ---------------------------
-   Controls: New Game, Exit
-   --------------------------- */
-function resetGame(){
-  score = 0;
-  modeCounters = { select:0, missing:0, different:0 };
-  roundNumber = 0;
-  scoreEl.textContent = 'Score: 0';
-  scoreRoundEl.textContent = `Round: 0 / ${MAX_ROUNDS}`;
-  messageEl.textContent = '';
-  // cancel any speech
-  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+// new game
+function newGame(){
+  score=0; gameCount=0;
+  scoreDisplay.textContent="Score: 0";
   newRound();
 }
-
-newBtn.addEventListener('click', resetGame);
-exitBtn.addEventListener('click', ()=> { window.location.href = 'index.html'; });
-
-/* Preload inline images (instant) and start */
-function preload(){
-  ITEMS.forEach(it => { const i = new Image(); i.src = it.src; });
+function exitGame(){
+  window.location.href="index.html";
 }
-preload();
-resetGame();
 
+// main round
+function newRound(){
+  gameCount++;
+  gameArea.innerHTML="";
+  messageDisplay.textContent="";
+  
+  if(gameCount%3===1) generateSelect();
+  else if(gameCount%3===2) generateMissing();
+  else generateDifferent();
+}
+
+// === Select Mode ===
+function generateSelect(){
+  currentMode="select";
+  const item=items[Math.floor(Math.random()*items.length)];
+  correctAnswer=item.src;
+  questionDisplay.textContent="Find the "+item.name+"!";
+  speak(questionDisplay.textContent);
+  let options=[item];
+  while(options.length<6){
+    const it=items[Math.floor(Math.random()*items.length)];
+    if(!options.includes(it)) options.push(it);
+  }
+  shuffle(options);
+  options.forEach(opt=>{
+    const box=document.createElement("div"); box.className="answer-box";
+    const img=document.createElement("img"); img.src=opt.src;
+    box.appendChild(img);
+    box.onclick=()=>checkAnswer(opt.src, box, item);
+    gameArea.appendChild(box);
+  });
+}
+
+// === Missing Piece ===
+function generateMissing(){
+  currentMode="missing";
+  const item=items[Math.floor(Math.random()*items.length)];
+  correctAnswer=item.src;
+  questionDisplay.textContent="Find the missing "+item.name+"!";
+  speak(questionDisplay.textContent);
+  
+  // Puzzle container
+  const puzzle=document.createElement("div");
+  puzzle.id="puzzle-container";
+  const placeholder=document.createElement("div");
+  placeholder.style.width="100px"; placeholder.style.height="100px";
+  placeholder.style.border="2px dashed #aaa";
+  puzzle.appendChild(placeholder);
+  gameArea.appendChild(puzzle);
+  
+  // Options
+  let options=[item];
+  while(options.length<3){
+    const it=items[Math.floor(Math.random()*items.length)];
+    if(!options.includes(it)) options.push(it);
+  }
+  shuffle(options);
+  options.forEach(opt=>{
+    const box=document.createElement("div"); box.className="answer-box";
+    const img=document.createElement("img"); img.src=opt.src;
+    box.appendChild(img);
+    box.onclick=()=>{
+      if(opt.src===correctAnswer){
+        placeholder.innerHTML="<img src='"+opt.src+"' width='100' height='100'>";
+        checkAnswer(opt.src, box, item);
+      } else {
+        checkAnswer(opt.src, box, item);
+      }
+    };
+    gameArea.appendChild(box);
+  });
+}
+
+// === Find Different ===
+function generateDifferent(){
+  currentMode="different";
+  const same=items[Math.floor(Math.random()*items.length)];
+  let different; do{ different=items[Math.floor(Math.random()*items.length)]; }while(different===same);
+  correctAnswer=different.src;
+  questionDisplay.textContent="Find the different item!";
+  speak(questionDisplay.textContent);
+  
+  let options=[different];
+  for(let i=0;i<5;i++) options.push(same);
+  shuffle(options);
+  options.forEach(opt=>{
+    const box=document.createElement("div"); box.className="answer-box";
+    const img=document.createElement("img"); img.src=opt.src;
+    box.appendChild(img);
+    box.onclick=()=>checkAnswer(opt.src, box, different);
+    gameArea.appendChild(box);
+  });
+}
+
+// === Check Answer ===
+function checkAnswer(src, box, item){
+  if(src===correctAnswer){
+    messageDisplay.textContent="✅ Correct!";
+    document.getElementById("success-sound").play();
+    score++; scoreDisplay.textContent="Score: "+score;
+    speak("Correct!");
+    setTimeout(newRound,1200);
+  } else {
+    messageDisplay.textContent="❌ Try again!";
+    document.getElementById("buzz-sound").play();
+    speak("Try again!");
+  }
+}
+
+// start game
+newGame();
 </script>
 </body>
 </html>
