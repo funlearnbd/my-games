@@ -1,128 +1,225 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>Kids Logic — Fixed Missing & Different + Tutorial</title>
 <style>
-  :root{
-    --accent:#ff6b6b; --good:#22c55e; --bg1:#fff1f2; --bg2:#dbeafe;
-  }
-  html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial}
-  body{
-    background: linear-gradient(135deg,var(--bg1) 0%, #fef3c7 40%, var(--bg2) 100%);
-    display:flex;align-items:center;justify-content:center;padding:12px;
-  }
+  :root{
+    --accent:#ff6b6b; --good:#22c55e; --bg1:#fff1f2; --bg2:#dbeafe;
+  }
+  html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial}
+  body{
+    background: linear-gradient(135deg,var(--bg1) 0%, #fef3c7 40%, var(--bg2) 100%);
+    display:flex;align-items:center;justify-content:center;padding:12px;
+    animation: background-animation 15s ease infinite;
+  }
 
-  .app {
-    width:100%;max-width:820px;background:rgba(255,255,255,0.95);
-    border-radius:18px;box-shadow:0 20px 50px rgba(5,10,20,0.12);
-    padding:16px;box-sizing:border-box;min-height:86vh;display:flex;flex-direction:column;
-    gap:12px;
-  }
+  @keyframes background-animation {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
 
-  .top {display:flex;justify-content:space-between;align-items:center}
-  .title{font-weight:800;color:var(--accent);font-size:1.4rem;margin:0}
-  .controls{display:flex;gap:8px;align-items:center}
-  button {cursor:pointer;border:0;padding:8px 12px;border-radius:10px;font-weight:700}
-  .btn-primary{background:#06b6d4;color:white}
-  .btn-exit{background:#ef4444;color:white}
-  .btn-ghost{background:transparent;border:2px solid rgba(0,0,0,0.06)}
-  .meta{color:#0f172a;font-weight:700}
+  .app {
+    width:100%;max-width:820px;background:rgba(255,255,255,0.95);
+    border-radius:18px;box-shadow:0 20px 50px rgba(5,10,20,0.12);
+    padding:16px;box-sizing:border-box;min-height:86vh;display:flex;flex-direction:column;
+    gap:12px;
+  }
 
-  .instructions{font-size:1.05rem;color:#0f172a;font-weight:700;margin:6px 0}
-  .board{flex:1;display:flex;flex-direction:column;gap:12px;align-items:center;overflow:auto;padding-bottom:8px}
+  .top {display:flex;justify-content:space-between;align-items:center}
+  .title{font-weight:800;color:var(--accent);font-size:1.4rem;margin:0}
+  .controls{display:flex;gap:8px;align-items:center}
+  button {cursor:pointer;border:0;padding:8px 12px;border-radius:10px;font-weight:700}
+  .btn-primary{background:#06b6d4;color:white}
+  .btn-exit{background:#ef4444;color:white}
+  .btn-ghost{background:transparent;border:2px solid rgba(0,0,0,0.06)}
+  .meta{color:#0f172a;font-weight:700}
 
-  .grid{width:100%;display:grid;gap:12px;align-items:stretch}
-  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
-  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
-  .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+  .instructions{font-size:1.05rem;color:#0f172a;font-weight:700;margin:6px 0}
+  .board{flex:1;display:flex;flex-direction:column;gap:12px;align-items:center;overflow:auto;padding-bottom:8px}
 
-  .slot{
-    background:#fff7ed;border-radius:14px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
-    font-size:clamp(36px,9vw,64px);user-select:none;position:relative;border:2px solid rgba(15,23,42,0.03);
-    transition:transform .14s ease,box-shadow .14s ease;
-  }
-  .slot:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(10,20,60,0.06)}
-  .slot.blank{background:linear-gradient(90deg,#f3f4f6,#e2e8f0);color:#475569;cursor:default}
-  .slot.correct{animation:correct-glow .9s ease both}
-  @keyframes correct-glow{
-    0%{transform:scale(1);box-shadow:0 0 0 rgba(255,223,93,0)}
-    50%{transform:scale(1.15);box-shadow:0 0 20px 12px rgba(255,223,93,0.85)}
-    100%{transform:scale(1);box-shadow:0 0 0 rgba(255,223,93,0)}
-  }
-  .slot.wrong{animation:shake .45s ease both}
-  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .grid{width:100%;display:grid;gap:12px;align-items:stretch}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-4{grid-template-columns:repeat(4,1fr)}
 
-  /* glow tutorial highlight */
-  .glow{box-shadow:0 0 26px 8px rgba(99,102,241,0.35);transform:scale(1.06) !important}
+  .slot{
+    background:#fff7ed;border-radius:14px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(36px,9vw,64px);user-select:none;position:relative;border:2px solid rgba(15,23,42,0.03);
+    transition:transform .14s ease,box-shadow .14s ease;
+  }
+  .slot:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(10,20,60,0.06)}
+  .slot.blank{background:linear-gradient(90deg,#f3f4f6,#e2e8f0);color:#475569;cursor:default}
+  .slot.correct{animation:correct-glow .9s ease both}
+  @keyframes correct-glow{
+    0%{transform:scale(1);box-shadow:0 0 0 rgba(255,223,93,0)}
+    50%{transform:scale(1.15);box-shadow:0 0 20px 12px rgba(255,223,93,0.85)}
+    100%{transform:scale(1);box-shadow:0 0 0 rgba(255,223,93,0)}
+  }
+  .slot.wrong{animation:shake .45s ease both}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 
-  .options{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-  .option{background:#fffaf0;border-radius:12px;padding:10px 14px;font-size:clamp(28px,6vw,48px);cursor:pointer;min-width:82px;display:flex;align-items:center;justify-content:center;transition:transform .12s}
-  .option:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(10,20,60,0.06)}
+  /* glow tutorial highlight */
+  .glow{box-shadow:0 0 26px 8px rgba(99,102,241,0.35);transform:scale(1.06) !important}
 
-  .star{position:absolute;font-size:18px;pointer-events:none;opacity:0;transform:translate(-50%,-50%) scale(.6)}
-  .star.animate{animation:star-burst 900ms ease-out forwards}
-  @keyframes star-burst{0%{opacity:1;transform:translate(-50%,-50%) scale(.6)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1.6)}}
+  .options{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .option{background:#fffaf0;border-radius:12px;padding:10px 14px;font-size:clamp(28px,6vw,48px);cursor:pointer;min-width:82px;display:flex;align-items:center;justify-content:center;transition:transform .12s}
+  .option:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(10,20,60,0.06)}
 
-  .footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
-  .score{font-weight:900;color:#0f172a}
+  .star{position:absolute;font-size:18px;pointer-events:none;opacity:0;transform:translate(-50%,-50%) scale(.6)}
+  .star.animate{animation:star-burst 900ms ease-out forwards}
+  @keyframes star-burst{0%{opacity:1;transform:translate(-50%,-50%) scale(.6)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1.6)}}
 
-  @media (max-width:480px){
-    .grid.cols-4{grid-template-columns:repeat(2,1fr)}
-  }
+  .footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+  .score{font-weight:900;color:#0f172a}
+
+  @media (max-width:480px){
+    .grid.cols-4{grid-template-columns:repeat(2,1fr)}
+  }
+
+  /* --- Splash Screen Styles --- */
+  .splash-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 90%;
+  }
+
+  .splash-screen h1 {
+    font-size: clamp(2rem, 8vw, 4rem);
+    color: #ff6b6b;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    animation: title-pop 0.8s ease-out;
+  }
+
+  @keyframes title-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .splash-screen p {
+    font-size: 1.2rem;
+    color: #334155;
+    font-weight: 500;
+    margin: 0;
+  }
+  #start-game-btn {
+    padding: 20px 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #38a169, #1e7d4d);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.4s;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 12px 6px rgba(46, 204, 113, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(46, 204, 113, 0.6); }
+  }
+  #start-game-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(46, 204, 113, 0.5);
+  }
+  #start-game-btn:active {
+    transform: scale(0.98);
+  }
+  /* loading spinner for voice message */
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border-left-color: #ff6b6b;
+    animation: spin 1s linear infinite;
+    margin-top: 10px;
+    display: none;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <div class="top">
-      <div>
-        <div class="title">Fun Logic Adventure 🌟</div>
-        <div class="meta"><span id="levelLabel">Level 1</span></div>
-      </div>
-      <div class="controls">
-        <button id="restartBtn" class="btn-ghost">Restart</button>
-        <button id="exitBtn" class="btn-exit">Exit</button>
-      </div>
-    </div>
+  <!-- Splash Screen -->
+  <div class="splash-screen" id="splashScreen">
+    <h1>Fun Logic Adventure 🌈</h1>
+    <p>Welcome! Tap the button to begin your puzzle adventure.</p>
+    <button id="start-game-btn">Start Game</button>
+    <div class="spinner" id="audio-loading-spinner"></div>
+    <audio id="welcome-audio" preload="auto"></audio>
+  </div>
 
-    <div class="board" id="board">
-      <div class="instructions" id="instructions">Press Start to play</div>
+  <!-- Game Board (hidden by default) -->
+  <div class="app" id="gameBoard" style="display: none;">
+    <div class="top">
+      <div>
+        <div class="title">Fun Logic Adventure 🌟</div>
+        <div class="meta"><span id="levelLabel">Level 1</span></div>
+      </div>
+      <div class="controls">
+        <button id="restartBtn" class="btn-ghost">Restart</button>
+        <button id="exitBtn" class="btn-exit">Exit</button>
+      </div>
+    </div>
 
-      <div style="display:flex;gap:8px;width:100%;align-items:center;">
-        <button id="startBtn" class="btn-primary" style="background:#06b6d4;color:white;border-radius:10px;padding:10px 14px">Start</button>
-        <div style="flex:1"></div>
-        <div class="score">Score: <span id="score">0</span></div>
-      </div>
-      <!-- dynamic grid and options appear here -->
-    </div>
+    <div class="board" id="board">
+      <div class="instructions" id="instructions">Press Start to play</div>
 
-    <div class="footer">
-      <div style="font-size:0.95rem;color:#475569">Mode rotates: Find → Different → Missing</div>
-      <div style="font-size:0.9rem;color:#334155">Tip: Listen and tap the right emoji</div>
-    </div>
-  </div>
+      <div style="display:flex;gap:8px;width:100%;align-items:center;">
+        <button id="startBtn" class="btn-primary" style="background:#06b6d4;color:white;border-radius:10px;padding:10px 14px; display: none;">Start</button>
+        <div style="flex:1"></div>
+        <div class="score">Score: <span id="score">0</span></div>
+      </div>
+      <!-- dynamic grid and options appear here -->
+    </div>
 
-  <!-- gentle music, plays after Start (gesture) -->
-  <audio id="bgAudio" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2a9b9d347d.mp3?filename=kid-music-110271.mp3"></audio>
+    <div class="footer">
+      <div style="font-size:0.95rem;color:#475569">Mode rotates: Find → Different → Missing</div>
+      <div style="font-size:0.9rem;color:#334155">Tip: Listen and tap the right emoji</div>
+    </div>
+  </div>
+
+  <!-- gentle music, plays after Start (gesture) -->
+  <audio id="bgAudio" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2a9b9d347d.mp3?filename=kid-music-110271.mp3"></audio>
 
 <script>
 /* ====== Data & state ====== */
 const ALL = [
-  '🐕','🐈','🐘','🦒','🦁','🐼','🐻','🐰','🐨','🐯',
-  '🍎','🍌','🍉','🍇','🍓','🍍','🥭','🍒','🍑','🍊',
-  '🚗','🚌','🚑','🚒','🚜','🚲','✈️','🚀','🚁','🚤',
-  '⚽','🎈','🧸','🎸','🌸','🌞','🌈','🐬','🦋','🐢'
+  '🐕','🐈','🐘','🦒','🦁','🐼','🐻','🐰','🐨','🐯',
+  '🍎','🍌','🍉','🍇','🍓','🍍','🥭','🍒','🍑','🍊',
+  '🚗','🚌','🚑','🚒','🚜','🚲','✈️','🚀','🚁','🚤',
+  '⚽','🎈','🧸','🎸','🌸','🌞','🌈','🐬','🦋','🐢'
 ];
 const POS = ['Hooray!','Great job!','Well done!','Excellent!','You are amazing!'];
 const board = document.getElementById('board');
 const instructionsEl = document.getElementById('instructions');
 const levelLabel = document.getElementById('levelLabel');
 const scoreEl = document.getElementById('score');
-const startBtn = document.getElementById('startBtn');
 const restartBtn = document.getElementById('restartBtn');
 const exitBtn = document.getElementById('exitBtn');
 const bgAudio = document.getElementById('bgAudio');
+
+const splashScreen = document.getElementById('splashScreen');
+const gameBoard = document.getElementById('gameBoard');
+const startGameBtn = document.getElementById('start-game-btn');
+const audioLoadingSpinner = document.getElementById('audio-loading-spinner');
+const welcomeAudio = document.getElementById('welcome-audio');
 
 let level = 1;
 let score = 0;
@@ -132,241 +229,361 @@ let tutorialShown = { findDifferent:false, findMissing:false, findTarget:false }
 
 /* deterministic levels: easy -> medium -> hard for each mode, repeat */
 const LEVEL_SEQUENCE = [
-  { mode:'findTarget', size:4 }, { mode:'findTarget', size:5 }, { mode:'findTarget', size:6 },
-  { mode:'findDifferent', size:4 }, { mode:'findDifferent', size:5 }, { mode:'findDifferent', size:6 },
-  { mode:'findMissing', size:4 }, { mode:'findMissing', size:5 }, { mode:'findMissing', size:6 },
-  // repeat or add more levels
-  { mode:'findTarget', size:6 }, { mode:'findDifferent', size:6 }, { mode:'findMissing', size:6 },
-  { mode:'findTarget', size:7 }, { mode:'findDifferent', size:7 }, { mode:'findMissing', size:7 }
+  { mode:'findTarget', size:4 }, { mode:'findTarget', size:5 }, { mode:'findTarget', size:6 },
+  { mode:'findDifferent', size:4 }, { mode:'findDifferent', size:5 }, { mode:'findDifferent', size:6 },
+  { mode:'findMissing', size:4 }, { mode:'findMissing', size:5 }, { mode:'findMissing', size:6 },
+  // repeat or add more levels
+  { mode:'findTarget', size:6 }, { mode:'findDifferent', size:6 }, { mode:'findMissing', size:6 },
+  { mode:'findTarget', size:7 }, { mode:'findDifferent', size:7 }, { mode:'findMissing', size:7 }
 ];
 let seqIndex = 0;
 
 /* Utils */
 function shuffle(arr){
-  const a = arr.slice();
-  for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
+  const a = arr.slice();
+  for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
 }
 function speak(text, opts={rate:0.85,pitch:1.2}) {
-  try{
-    if('speechSynthesis' in window){
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang='en-US'; u.rate = opts.rate; u.pitch = opts.pitch;
-      window.speechSynthesis.speak(u);
-    }
-  }catch(e){ console.warn('TTS fail',e) }
+  try{
+    if('speechSynthesis' in window){
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang='en-US'; u.rate = opts.rate; u.pitch = opts.pitch;
+      window.speechSynthesis.speak(u);
+    }
+  }catch(e){ console.warn('TTS fail',e) }
 }
 function colsClass(n){ if(n<=2) return 'cols-2'; if(n<=6) return 'cols-3'; return 'cols-4' }
 function clearBoardBelowInstructions(){ while(instructionsEl.nextSibling) instructionsEl.nextSibling.remove(); }
 
 /* star burst */
 function starBurst(el){
-  for(let i=0;i<6;i++){
-    const s = document.createElement('div');
-    s.className='star'; s.textContent='⭐';
-    s.style.left='50%'; s.style.top='50%';
-    const tx=(Math.random()*160-80)+'px', ty=(Math.random()*140-70)+'px';
-    s.style.setProperty('--tx',tx); s.style.setProperty('--ty',ty);
-    el.appendChild(s);
-    requestAnimationFrame(()=> s.classList.add('animate'));
-    setTimeout(()=> s.remove(),950);
-  }
+  for(let i=0;i<6;i++){
+    const s = document.createElement('div');
+    s.className='star'; s.textContent='⭐';
+    s.style.left='50%'; s.style.top='50%';
+    const tx=(Math.random()*160-80)+'px', ty=(Math.random()*140-70)+'px';
+    s.style.setProperty('--tx',tx); s.style.setProperty('--ty',ty);
+    el.appendChild(s);
+    requestAnimationFrame(()=> s.classList.add('animate'));
+    setTimeout(()=> s.remove(),950);
+  }
 }
 
 /* Glow helper for tutorial (flash element for a few times) */
 async function flashElements(els, times=2, interval=450){
-  for(let t=0;t<times;t++){
-    els.forEach(e=> e.classList.add('glow'));
-    await new Promise(r=> setTimeout(r, interval));
-    els.forEach(e=> e.classList.remove('glow'));
-    await new Promise(r=> setTimeout(r, 140));
-  }
+  for(let t=0;t<times;t++){
+    els.forEach(e=> e.classList.add('glow'));
+    await new Promise(r=> setTimeout(r, interval));
+    els.forEach(e=> e.classList.remove('glow'));
+    await new Promise(r=> setTimeout(r, 140));
+  }
 }
 
-/* ===== Mode renderers and logic ===== */
+/* ====== Mode renderers and logic ====== */
 
 function renderGrid(emojis, clickable=true, correct=null){
-  clearBoardBelowInstructions();
-  const grid = document.createElement('div');
-  grid.className = 'grid ' + colsClass(emojis.length);
-  emojis.forEach((em, idx)=>{
-    const s = document.createElement('div');
-    s.className='slot';
-    s.textContent = em;
-    if(clickable && em!=='❓'){
-      s.onclick = ()=> {
-        if(isWaiting) return;
-        if(correct !== null && em === correct){
-          isWaiting = true;
-          s.classList.add('correct'); starBurst(s);
-          speak(POS[Math.floor(Math.random()*POS.length)], {rate:0.95,pitch:1.3});
-          score += 10; scoreEl.textContent = score;
-          setTimeout(()=> { isWaiting=false; nextLevel(); }, 1200);
-        } else {
-          s.classList.add('wrong'); speak('Try again', {rate:0.95,pitch:1.05});
-          setTimeout(()=> s.classList.remove('wrong'), 700);
-        }
-      };
-    }
-    grid.appendChild(s);
-  });
-  board.appendChild(grid);
+  clearBoardBelowInstructions();
+  const grid = document.createElement('div');
+  grid.className = 'grid ' + colsClass(emojis.length);
+  emojis.forEach((em, idx)=>{
+    const s = document.createElement('div');
+    s.className='slot';
+    s.textContent = em;
+    if(clickable && em!=='❓'){
+      s.onclick = ()=> {
+        if(isWaiting) return;
+        if(correct !== null && em === correct){
+          isWaiting = true;
+          s.classList.add('correct'); starBurst(s);
+          speak(POS[Math.floor(Math.random()*POS.length)], {rate:0.95,pitch:1.3});
+          score += 10; scoreEl.textContent = score;
+          setTimeout(()=> { isWaiting=false; nextLevel(); }, 1200);
+        } else {
+          s.classList.add('wrong'); speak('Try again', {rate:0.95,pitch:1.05});
+          setTimeout(()=> s.classList.remove('wrong'), 700);
+        }
+      };
+    }
+    grid.appendChild(s);
+  });
+  board.appendChild(grid);
 }
 
 function renderOptions(opts, correct){
-  // remove previous options
-  const prev = board.querySelector('.options'); if(prev) prev.remove();
-  const wrap = document.createElement('div'); wrap.className='options';
-  opts.forEach(o=>{
-    const d = document.createElement('div'); d.className='option'; d.textContent=o;
-    d.onclick = ()=> {
-      if(isWaiting) return;
-      if(o === correct){
-        // fill blank
-        const blanks = board.querySelectorAll('.slot.blank');
-        if(blanks.length) {
-          const blank = blanks[0];
-          blank.textContent = o; blank.classList.add('correct'); starBurst(blank);
-        }
-        isWaiting = true;
-        speak(POS[Math.floor(Math.random()*POS.length)], {rate:0.95,pitch:1.3});
-        score += 10; scoreEl.textContent = score;
-        setTimeout(()=> { isWaiting=false; nextLevel(); }, 1200);
-      } else {
-        d.animate([{transform:'translateY(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateY(0)'}],{duration:450});
-        speak('Try again', {rate:0.95,pitch:1.05});
-      }
-    };
-    wrap.appendChild(d);
-  });
-  board.appendChild(wrap);
+  // remove previous options
+  const prev = board.querySelector('.options'); if(prev) prev.remove();
+  const wrap = document.createElement('div'); wrap.className='options';
+  opts.forEach(o=>{
+    const d = document.createElement('div'); d.className='option'; d.textContent=o;
+    d.onclick = ()=> {
+      if(isWaiting) return;
+      if(o === correct){
+        // fill blank
+        const blanks = board.querySelectorAll('.slot.blank');
+        if(blanks.length) {
+          const blank = blanks[0];
+          blank.textContent = o; blank.classList.add('correct'); starBurst(blank);
+        }
+        isWaiting = true;
+        speak(POS[Math.floor(Math.random()*POS.length)], {rate:0.95,pitch:1.3});
+        score += 10; scoreEl.textContent = score;
+        setTimeout(()=> { isWaiting=false; nextLevel(); }, 1200);
+      } else {
+        d.animate([{transform:'translateY(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateY(0)'}],{duration:450});
+        speak('Try again', {rate:0.95,pitch:1.05});
+      }
+    };
+    wrap.appendChild(d);
+  });
+  board.appendChild(wrap);
 }
 
 /* ----- Specific mode setups ----- */
 
 async function setupFindTarget(size){
-  const pool = shuffle(ALL).slice(0, size);
-  const target = pool[Math.floor(Math.random()*pool.length)];
-  instructionsEl.textContent = `Find the ${target}`;
-  speak(`Find the ${target}`, {rate:0.82,pitch:1.25});
-  renderGrid(pool, true, target);
+  const pool = shuffle(ALL).slice(0, size);
+  const target = pool[Math.floor(Math.random()*pool.length)];
+  instructionsEl.textContent = `Find the ${target}`;
+  speak(`Find the ${target}`, {rate:0.82,pitch:1.25});
+  renderGrid(pool, true, target);
 
-  // show a short tutorial first time
-  if(!tutorialShown.findTarget){
-    tutorialShown.findTarget = true;
-    // flash target slot quickly
-    await new Promise(r=>setTimeout(r,550));
-    const slots = Array.from(board.querySelectorAll('.slot'));
-    const targetSlots = slots.filter(s => s.textContent===target);
-    if(targetSlots.length){
-      await flashElements(targetSlots.slice(0,1), 3, 430);
-    }
-  }
+  // show a short tutorial first time
+  if(!tutorialShown.findTarget){
+    tutorialShown.findTarget = true;
+    // flash target slot quickly
+    await new Promise(r=>setTimeout(r,550));
+    const slots = Array.from(board.querySelectorAll('.slot'));
+    const targetSlots = slots.filter(s => s.textContent===target);
+    if(targetSlots.length){
+      await flashElements(targetSlots.slice(0,1), 3, 430);
+    }
+  }
 }
 
 async function setupFindDifferent(size){
-  // pick repeat and a different
-  const pool = shuffle(ALL);
-  const repeat = pool[0];
-  const different = pool.find(e=> e!==repeat);
-  const arr = new Array(size-1).fill(repeat).concat([different]);
-  const placed = shuffle(arr);
+  // pick repeat and a different
+  const pool = shuffle(ALL);
+  const repeat = pool[0];
+  const different = pool.find(e=> e!==repeat);
+  const arr = new Array(size-1).fill(repeat).concat([different]);
+  const placed = shuffle(arr);
 
-  instructionsEl.textContent = 'Find the different item';
-  speak('Find the different item', {rate:0.82,pitch:1.25});
-  renderGrid(placed, true, different);
+  instructionsEl.textContent = 'Find the different item';
+  speak('Find the different item', {rate:0.82,pitch:1.25});
+  renderGrid(placed, true, different);
 
-  if(!tutorialShown.findDifferent){
-    tutorialShown.findDifferent = true;
-    await new Promise(r=>setTimeout(r,600));
-    const slots = Array.from(board.querySelectorAll('.slot'));
-    // find indices
-    const sameSlots = slots.filter(s => s.textContent === repeat);
-    const diffSlot = slots.find(s => s.textContent === different);
-    // flash same ones then flash diff one brightly
-    await flashElements(sameSlots.slice(0, Math.min(4, sameSlots.length)), 2, 380);
-    await new Promise(r=>setTimeout(r,200));
-    if(diffSlot) await flashElements([diffSlot], 4, 400);
-  }
+  if(!tutorialShown.findDifferent){
+    tutorialShown.findDifferent = true;
+    await new Promise(r=>setTimeout(r,600));
+    const slots = Array.from(board.querySelectorAll('.slot'));
+    // find indices
+    const sameSlots = slots.filter(s => s.textContent === repeat);
+    const diffSlot = slots.find(s => s.textContent === different);
+    // flash same ones then flash diff one brightly
+    await flashElements(sameSlots.slice(0, Math.min(4, sameSlots.length)), 2, 380);
+    await new Promise(r=>setTimeout(r,200));
+    if(diffSlot) await flashElements([diffSlot], 4, 400);
+  }
 }
 
 async function setupFindMissing(totalSlots){
-  // choose distinct emojis
-  const pool = shuffle(ALL).slice(0, totalSlots);
-  // pick missing index
-  const missingIndex = Math.floor(Math.random()*totalSlots);
-  const missingEmoji = pool[missingIndex];
-  // prepare display with blank
-  const display = pool.slice(); display[missingIndex] = '❓';
+  // choose distinct emojis
+  const pool = shuffle(ALL).slice(0, totalSlots);
+  // pick missing index
+  const missingIndex = Math.floor(Math.random()*totalSlots);
+  const missingEmoji = pool[missingIndex];
+  // prepare display with blank
+  const display = pool.slice(); display[missingIndex] = '❓';
 
-  instructionsEl.textContent = 'Which emoji is missing?';
-  speak('Which emoji is missing? Choose the right one to fill the blank!', {rate:0.82,pitch:1.28});
-  renderGrid(display, false, null); // slots not clickable in missing mode
+  instructionsEl.textContent = 'Which emoji is missing?';
+  speak('Which emoji is missing? Choose the right one to fill the blank!', {rate:0.82,pitch:1.28});
+  renderGrid(display, false, null); // slots not clickable in missing mode
 
-  // Options must include: missingEmoji + two emojis that ARE visible in the grid (so exactly one correct)
-  const visible = pool.filter((_,i)=>i!==missingIndex);
-  const twoVisible = shuffle(visible).slice(0,2);
-  const options = shuffle([missingEmoji, ...twoVisible]);
-  renderOptions(options, missingEmoji);
+  // Options must include: missingEmoji + two emojis that ARE visible in the grid (so exactly one correct)
+  const visible = pool.filter((_,i)=>i!==missingIndex);
+  const twoVisible = shuffle(visible).slice(0,2);
+  const options = shuffle([missingEmoji, ...twoVisible]);
+  renderOptions(options, missingEmoji);
 
-  if(!tutorialShown.findMissing){
-    tutorialShown.findMissing = true;
-    // tutorial: highlight blank then highlight options and show missing
-    await new Promise(r=>setTimeout(r,600));
-    const blank = board.querySelector('.slot.blank');
-    if(blank) await flashElements([blank], 3, 420);
-    // then highlight the correct option
-    const optionEls = Array.from(board.querySelectorAll('.option'));
-    const correctOpt = optionEls.find(o => o.textContent === missingEmoji);
-    const visibleOptEls = optionEls.filter(o => twoVisible.includes(o.textContent));
-    // flash visible ones (grey)
-    await flashElements(visibleOptEls.slice(0,2), 2, 300);
-    await new Promise(r=>setTimeout(r,180));
-    if(correctOpt) await flashElements([correctOpt], 3, 420);
-  }
+  if(!tutorialShown.findMissing){
+    tutorialShown.findMissing = true;
+    // tutorial: highlight blank then highlight options and show missing
+    await new Promise(r=>setTimeout(r,600));
+    const blank = board.querySelector('.slot.blank');
+    if(blank) await flashElements([blank], 3, 420);
+    // then highlight the correct option
+    const optionEls = Array.from(board.querySelectorAll('.option'));
+    const correctOpt = optionEls.find(o => o.textContent === missingEmoji);
+    const visibleOptEls = optionEls.filter(o => twoVisible.includes(o.textContent));
+    // flash visible ones (grey)
+    await flashElements(visibleOptEls.slice(0,2), 2, 300);
+    await new Promise(r=>setTimeout(r,180));
+    if(correctOpt) await flashElements([correctOpt], 3, 420);
+  }
 }
 
 /* ===== Next level controller (deterministic) ===== */
 function nextLevel(){
-  clearBoardBelowInstructions();
-  const cur = LEVEL_SEQUENCE[seqIndex % LEVEL_SEQUENCE.length];
-  levelLabel.textContent = `Level ${seqIndex + 1}`;
-  // decide grid size and mode
-  if(cur.mode === 'findTarget') setupFindTarget(cur.size);
-  else if(cur.mode === 'findDifferent') setupFindDifferent(cur.size);
-  else if(cur.mode === 'findMissing') setupFindMissing(cur.size);
-  // advance indexes / level counters
-  seqIndex++;
+  clearBoardBelowInstructions();
+  const cur = LEVEL_SEQUENCE[seqIndex % LEVEL_SEQUENCE.length];
+  levelLabel.textContent = `Level ${seqIndex + 1}`;
+  // decide grid size and mode
+  if(cur.mode === 'findTarget') setupFindTarget(cur.size);
+  else if(cur.mode === 'findDifferent') setupFindDifferent(cur.size);
+  else if(cur.mode === 'findMissing') setupFindMissing(cur.size);
+  // advance indexes / level counters
+  seqIndex++;
 }
 
+/* --- TTS & Audio Helpers --- */
+function base64ToArrayBuffer(base64) {
+  const binaryString = window.atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+function pcmToWav(pcmData, sampleRate) {
+  const numChannels = 1;
+  const sampleSize = 16;
+  const numFrames = pcmData.length;
+  const byteRate = sampleRate * numChannels * (sampleSize / 8);
+  const blockAlign = numChannels * (sampleSize / 8);
+  const subChunk2Size = numFrames * numChannels * (sampleSize / 8);
+  const chunkSize = 36 + subChunk2Size;
+
+  const buffer = new ArrayBuffer(chunkSize + 8);
+  const view = new DataView(buffer);
+
+  // RIFF identifier
+  view.setUint32(0, 0x52494646, true);
+  // file size
+  view.setUint32(4, chunkSize, true);
+  // WAVE identifier
+  view.setUint32(8, 0x57415645, true);
+  // fmt chunk
+  view.setUint32(12, 0x666d7420, true);
+  // sub-chunk size
+  view.setUint32(16, 16, true);
+  // audio format (1 = PCM)
+  view.setUint16(20, 1, true);
+  // number of channels
+  view.setUint16(22, numChannels, true);
+  // sample rate
+  view.setUint32(24, sampleRate, true);
+  // byte rate
+  view.setUint32(28, byteRate, true);
+  // block align
+  view.setUint16(32, blockAlign, true);
+  // bits per sample
+  view.setUint16(34, sampleSize, true);
+  // data chunk
+  view.setUint32(36, 0x64617461, true);
+  // data size
+  view.setUint32(40, subChunk2Size, true);
+
+  // write the PCM data
+  let offset = 44;
+  for (let i = 0; i < numFrames; i++) {
+    view.setInt16(offset, pcmData[i], true);
+    offset += 2;
+  }
+
+  return new Blob([view], { type: 'audio/wav' });
+}
+
+async function fetchAndPlayWelcomeAudio() {
+  audioLoadingSpinner.style.display = 'block';
+  try {
+    const payload = {
+      contents: [{
+        parts: [{ text: "Welcome to Logic Puzzle! Tap the shiny button to start the game." }]
+      }],
+      generationConfig: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: "Puck" }
+          }
+        }
+      },
+      model: "gemini-2.5-flash-preview-tts"
+    };
+    const apiKey = "";
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    const part = result?.candidates?.[0]?.content?.parts?.[0];
+    const audioData = part?.inlineData?.data;
+    const mimeType = part?.inlineData?.mimeType;
+
+    if (audioData && mimeType && mimeType.startsWith("audio/")) {
+      const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+      const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000;
+      const pcmData = base64ToArrayBuffer(audioData);
+      const pcm16 = new Int16Array(pcmData);
+      const wavBlob = pcmToWav(pcm16, sampleRate);
+      const audioUrl = URL.createObjectURL(wavBlob);
+      welcomeAudio.src = audioUrl;
+      welcomeAudio.play().catch(e => console.warn("Audio playback failed:", e));
+    } else {
+      console.error("Failed to get valid audio data from API.");
+      speak("Welcome to Logic Puzzle! Tap the shiny button to start the game.", { rate: 0.85, pitch: 1.2 });
+    }
+  } catch (e) {
+    console.error("Error fetching audio:", e);
+    speak("Welcome to Logic Puzzle! Tap the shiny button to start the game.", { rate: 0.85, pitch: 1.2 });
+  } finally {
+    audioLoadingSpinner.style.display = 'none';
+  }
+}
+
+
 /* ===== Controls & initialization ===== */
-startBtn.addEventListener('click', ()=>{
-  try{ bgAudio.currentTime = 0; bgAudio.play().catch(()=>{}); }catch(e){}
-  level = 1; score = 0; seqIndex = 0; scoreEl.textContent = score;
-  tutorialShown = { findDifferent:false, findMissing:false, findTarget:false };
-  speak('Let’s play! I will speak slowly and clearly — listen carefully!', {rate:0.8,pitch:1.35});
-  setTimeout(()=> nextLevel(), 700);
+startGameBtn.addEventListener('click', ()=>{
+  splashScreen.style.display = 'none';
+  gameBoard.style.display = 'flex';
+  try{ bgAudio.currentTime = 0; bgAudio.play().catch(()=>{}); }catch(e){}
+  level = 1; score = 0; seqIndex = 0; scoreEl.textContent = score;
+  tutorialShown = { findDifferent:false, findMissing:false, findTarget:false };
+  speak('Let’s play! I will speak slowly and clearly — listen carefully!', {rate:0.8,pitch:1.35});
+  setTimeout(()=> nextLevel(), 700);
 });
 
 restartBtn.addEventListener('click', ()=>{
-  window.speechSynthesis.cancel();
-  try{ bgAudio.pause(); bgAudio.currentTime = 0; }catch(e){}
-  level = 1; score = 0; seqIndex = 0; scoreEl.textContent = score;
-  tutorialShown = { findDifferent:false, findMissing:false, findTarget:false };
-  instructionsEl.textContent = 'Restarting…';
-  setTimeout(()=> { speak('Restarting!'); nextLevel(); }, 500);
+  window.speechSynthesis.cancel();
+  try{ bgAudio.pause(); bgAudio.currentTime = 0; }catch(e){}
+  level = 1; score = 0; seqIndex = 0; scoreEl.textContent = score;
+  tutorialShown = { findDifferent:false, findMissing:false, findTarget:false };
+  instructionsEl.textContent = 'Restarting…';
+  setTimeout(()=> { speak('Restarting!'); nextLevel(); }, 500);
 });
 
 exitBtn.addEventListener('click', ()=>{
-  try{ bgAudio.pause(); }catch(e){}
-  window.location.href = 'index.html';
+  try{ bgAudio.pause(); }catch(e){}
+  window.location.href = 'index.html';
 });
 
 /* init */
-instructionsEl.textContent = 'Tap Start to play!';
-levelLabel.textContent = 'Level 1';
-scoreEl.textContent = '0';
+window.onload = () => {
+  splashScreen.style.display = 'flex';
+  gameBoard.style.display = 'none';
+  instructionsEl.textContent = 'Tap Start to play!';
+  levelLabel.textContent = 'Level 1';
+  scoreEl.textContent = '0';
+  fetchAndPlayWelcomeAudio();
+};
+
 </script>
 </body>
 </html>
