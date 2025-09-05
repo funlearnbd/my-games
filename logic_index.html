@@ -3,337 +3,217 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Logic Adventure</title>
+<title>Kids Logic Game</title>
 <style>
-body {
-    margin: 0;
-    padding: 0;
+  body {
     font-family: 'Comic Sans MS', cursive, sans-serif;
+    margin: 0; padding: 0;
     background: linear-gradient(135deg, #ffe6f0 0%, #b3e5fc 50%, #c8e6c9 100%);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
-}
-.container {
-    background: rgba(255, 245, 157, 0.95);
-    border-radius: 25px;
-    padding: 15px;
-    width: 95%;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .container {
     max-width: 600px;
-    min-height: 90vh;
+    width: 95%;
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    padding: 15px;
+    margin: 20px 0;
     text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    position: relative;
-}
-h1 {
-    font-size: 2rem;
-    color: #d81b60;
-    margin: 5px 0;
-}
-.instructions {
-    font-size: 1.4rem;
-    margin: 10px 0;
-    color: #d81b60;
-}
-.emoji-grid {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+  h1 { font-size: 2rem; color: #d81b60; margin: 5px 0; }
+  .instructions { font-size: 1.3rem; color: #0288d1; margin: 10px 0; }
+  .emoji-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 12px;
-    margin: 15px 0;
-}
-.emoji-item {
-    background: #fff3e0;
-    border-radius: 15px;
+    gap: 10px;
+    justify-items: center;
+  }
+  .emoji-item {
+    width: 90px; height: 90px;
+    border: 3px solid #333;
+    border-radius: 12px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
-    border: 2px solid #333;
-    aspect-ratio: 1/1;
-    position: relative;
-}
-.emoji-item.correct {
-    animation: glow 1s ease-out;
-}
-.emoji-item.incorrect {
-    animation: shake 0.5s ease;
-}
-@keyframes glow {
-    0% { box-shadow: 0 0 0px #ffd700; transform: scale(1); }
-    50% { box-shadow: 0 0 15px #ffd700; transform: scale(1.2); }
-    100% { box-shadow: 0 0 0px #ffd700; transform: scale(1); }
-}
-@keyframes shake {
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .emoji-item img { max-width: 80%; max-height: 80%; }
+  .emoji-item.correct { animation: glow 1s ease-out; }
+  .emoji-item.incorrect { animation: shake 0.5s ease-out; }
+  @keyframes glow {
+    0%,100% { box-shadow: 0 0 0px #ff0; transform: scale(1); }
+    50% { box-shadow: 0 0 20px 5px #ff0; transform: scale(1.2); }
+  }
+  @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-8px); }
     75% { transform: translateX(8px); }
-}
-.start-btn, .exit-btn {
-    background: linear-gradient(45deg,#ff4081,#ff80ab);
-    color: white;
+  }
+  .start-btn, .exit-btn { 
+    background: #ff4081; color: #fff; border: none; border-radius: 12px; 
+    padding: 12px 20px; font-size: 1.2rem; cursor: pointer; margin: 5px; 
     font-weight: bold;
-    padding: 12px 25px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-size: 1.3rem;
-    margin: 10px;
-    box-shadow: 0 0 20px rgba(255,64,129,0.6);
-    animation: shine 2s infinite alternate;
-}
-@keyframes shine {
-    0% { box-shadow: 0 0 10px rgba(255,64,129,0.5); }
-    100% { box-shadow: 0 0 25px rgba(255,64,129,1); }
-}
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.level-display {
-    color: #0288d1;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin: 5px 0;
-}
-.progress-bar-container {
-    width: 100%;
-    height: 15px;
-    background: #ddd;
-    border-radius: 8px;
-    margin: 10px 0;
-}
-.progress-bar {
-    height: 100%;
-    background: #4caf50;
-    width: 0%;
-    border-radius: 8px;
-    transition: width 0.5s ease;
-}
-.missing-placeholder {
-    background: #e0e0e0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    cursor: default;
-}
-.options-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin: 10px 0;
-}
+  }
+  .start-btn:hover, .exit-btn:hover { background: #e91e63; }
+  .progress-bar-container {
+    width: 90%; height: 15px; background: #ccc; border-radius: 8px; margin: 10px auto;
+  }
+  .progress-bar { width: 0%; height: 100%; background: #76ff03; border-radius: 8px; transition: width 0.5s; }
+  /* Tutorial overlay */
+  .tutorial {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center;
+    z-index: 1000; flex-direction: column; color:#fff; font-size:1.5rem; text-align:center;
+    padding: 20px; box-sizing:border-box;
+  }
+  .tutorial button { margin-top: 20px; padding: 10px 20px; font-size:1.2rem; cursor:pointer; border-radius:10px; border:none; background:#ff4081; color:white; }
 </style>
 </head>
 <body>
 <div class="container" id="game-container">
-    <h1>🌟 Fun Logic Adventure 🌟</h1>
-    <p class="instructions">Tap Start to Begin!</p>
-    <button class="start-btn" id="start-btn">Start Game</button>
+  <h1>Fun Logic Game 🌟</h1>
+  <p class="instructions">Press Start to begin!</p>
+  <button class="start-btn" id="start-btn">Start Game</button>
+  <button class="exit-btn" onclick="exitGame()">Exit</button>
+  <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
 </div>
 
 <audio id="bg-music" loop preload="auto">
-    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-const gameContainer = document.getElementById('game-container');
 const startBtn = document.getElementById('start-btn');
+const gameContainer = document.getElementById('game-container');
+const progressBar = document.getElementById('progress-bar');
 const bgMusic = document.getElementById('bg-music');
-const totalLevels = 30; // you can increase to 100+
-let level = 1;
-let score = 0;
 
-const feedback = ['Super job! 🌟','Wow, awesome!','You’re a star!','Fantastic!','Yay, you did it!'];
-
-// Images for kids: animals, fruits, vehicles
-const items = [
-    {name:'Dog', img:'https://i.postimg.cc/dV2ydWvT/dog.png'},
-    {name:'Cat', img:'https://i.postimg.cc/NjJc45n1/cat.png'},
-    {name:'Cow', img:'https://i.postimg.cc/HsC3sC3M/cow.png'},
-    {name:'Apple', img:'https://i.postimg.cc/QCwS3TCZ/apple.png'},
-    {name:'Banana', img:'https://i.postimg.cc/qM5bWpSH/banana.png'},
-    {name:'Car', img:'https://i.postimg.cc/FH7wLkmx/car.png'},
-    {name:'Bus', img:'https://i.postimg.cc/2yQ6chP2/bus.png'},
-    {name:'Plane', img:'https://i.postimg.cc/4x0rjPqk/plane.png'}
+const images = [
+  {name:'Dog', url:'https://cdn.pixabay.com/photo/2017/09/25/13/12/dog-2785074_1280.png'},
+  {name:'Cat', url:'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_1280.jpg'},
+  {name:'Cow', url:'https://cdn.pixabay.com/photo/2014/11/04/14/35/cow-516165_1280.jpg'},
+  {name:'Apple', url:'https://cdn.pixabay.com/photo/2016/09/24/15/35/apple-1694160_1280.jpg'},
+  {name:'Banana', url:'https://cdn.pixabay.com/photo/2016/03/05/19/02/bananas-1232842_1280.jpg'},
+  {name:'Car', url:'https://cdn.pixabay.com/photo/2013/07/13/10/44/car-159282_1280.png'},
+  {name:'Bus', url:'https://cdn.pixabay.com/photo/2013/07/13/10/44/bus-159278_1280.png'},
+  {name:'Plane', url:'https://cdn.pixabay.com/photo/2013/07/12/17/01/airplane-153249_1280.png'}
 ];
 
-// Utility: shuffle array
-function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
+const feedback = ['Great job! 🌟', 'Awesome!', 'Excellent!', 'You’re amazing!', 'Fantastic!'];
+let level = 0;
+const maxLevels = 10;
 
-// Speech function
-function speak(text, rate=0.9){
-    const synth = window.speechSynthesis;
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = rate;
-    utter.pitch = 1.2;
-    synth.speak(utter);
+function speak(text) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.7 + level*0.01;
+  utter.pitch = 1.2;
+  speechSynthesis.speak(utter);
 }
 
-// Start game
-startBtn.onclick = () => {
-    bgMusic.volume = 0.1;
-    bgMusic.play();
-    level = 1;
-    score = 0;
-    loadLevel();
-};
+function shuffle(array){ return array.sort(()=>Math.random()-0.5); }
+function exitGame(){ bgMusic.pause(); window.location.href='index.html'; }
 
-// Exit
-function exitGame(){bgMusic.pause();window.location.href='index.html';}
-
-// Load level
-function loadLevel(){
-    gameContainer.innerHTML = `
-    <div class="top-bar">
-        <h1>🌟 Fun Logic Adventure 🌟</h1>
-        <button class="exit-btn" onclick="exitGame()">Exit</button>
-    </div>
-    <p class="level-display">Level: ${level}</p>
-    <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
-    `;
-
-    const progressBar = document.getElementById('progress-bar');
-    progressBar.style.width = `${(level/totalLevels)*100}%`;
-
-    // Determine level type
-    let type;
-    if(level%3===1) type='findTarget';
-    else if(level%3===2) type='findDifferent';
-    else type='findMissing';
-
-    if(type==='findTarget'){
-        loadFindTarget();
-    }else if(type==='findDifferent'){
-        loadFindDifferent();
-    }else{
-        loadFindMissing();
-    }
+function showTutorial(type, callback){
+  const overlay = document.createElement('div');
+  overlay.className='tutorial';
+  if(type==='findTarget') overlay.innerHTML = 'Look carefully!<br>Tap the image that matches the word.';
+  if(type==='findMissing') overlay.innerHTML = 'Here is a missing item!<br>Choose the correct image to fill the blank.';
+  if(type==='findDifferent') overlay.innerHTML = 'Spot the odd one out!<br>Tap the image that is different.';
+  const btn = document.createElement('button'); btn.innerText='Got it!'; 
+  btn.onclick=()=>{ document.body.removeChild(overlay); callback(); };
+  overlay.appendChild(btn);
+  document.body.appendChild(overlay);
 }
 
-// Find Target
-function loadFindTarget(){
-    const chosen = shuffle([...items]).slice(0,4);
-    const target = chosen[Math.floor(Math.random()*chosen.length)];
-    const instructions = document.createElement('p');
-    instructions.className='instructions';
-    instructions.innerText=`Find the ${target.name}!`;
-    gameContainer.appendChild(instructions);
-    speak(`Find the ${target.name}!`,0.8);
+function startGame(){
+  bgMusic.volume=0.1; bgMusic.play().catch(()=>{});
+  level = 0; progressBar.style.width='0%'; nextRound();
+}
 
-    const grid = document.createElement('div');
-    grid.className='emoji-grid';
-    chosen.forEach(it=>{
-        const div=document.createElement('div');
-        div.className='emoji-item';
-        div.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
-        div.onclick=()=>checkAnswer(div,it.name,target.name);
-        grid.appendChild(div);
+function nextRound(){
+  gameContainer.innerHTML = `<h1>Fun Logic Game 🌟</h1><button class="exit-btn" onclick="exitGame()">Exit</button>`;
+  level++;
+  if(level>maxLevels){ 
+    gameContainer.innerHTML += `<p class="instructions">You finished! 🎉</p><button class="start-btn" onclick="startGame()">Play Again</button>`;
+    speak('Congratulations, you won!');
+    progressBar.style.width='100%';
+    return;
+  }
+  progressBar.style.width = `${(level/maxLevels)*100}%`;
+  let type = level%3===1 ? 'findTarget' : (level%3===2 ? 'findMissing' : 'findDifferent');
+  if(level<=3){ showTutorial(type, ()=>runRound(type)); }
+  else runRound(type);
+}
+
+function runRound(type){
+  let chosen = shuffle([...images]).slice(0,4);
+  const grid = document.createElement('div'); grid.className='emoji-grid';
+  gameContainer.appendChild(grid);
+
+  if(type==='findTarget'){
+    let target = chosen[Math.floor(Math.random()*chosen.length)];
+    gameContainer.innerHTML += `<p class="instructions">Find the ${target.name}!</p>`;
+    speak(`Find the ${target.name}!`);
+    chosen.forEach(img=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
+      div.onclick=()=>checkAnswer(div,img.name,target.name);
+      grid.appendChild(div);
     });
-    gameContainer.appendChild(grid);
-}
 
-// Find Different
-function loadFindDifferent(){
-    const chosen = shuffle([...items]).slice(0,4);
-    const same = chosen[0].name;
-    for(let i=1;i<chosen.length;i++) chosen[i].name=same; // make same
-    const different = shuffle(items.filter(i=>i.name!==same))[0];
-    const diffIndex = Math.floor(Math.random()*chosen.length);
-    chosen[diffIndex] = different;
-
-    const instructions = document.createElement('p');
-    instructions.className='instructions';
-    instructions.innerText='Find the different one!';
-    gameContainer.appendChild(instructions);
-    speak('Find the different one!',0.8);
-
-    const grid = document.createElement('div');
-    grid.className='emoji-grid';
-    chosen.forEach(it=>{
-        const div=document.createElement('div');
-        div.className='emoji-item';
-        div.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
-        div.onclick=()=>checkAnswer(div,it.name,different.name);
-        grid.appendChild(div);
+  } else if(type==='findMissing'){
+    let blankIndex = 3;
+    let missing = chosen[blankIndex];
+    let options = shuffle([missing,...shuffle(images.filter(i=>!chosen.includes(i))).slice(0,2)]);
+    chosen[blankIndex]={name:'?',url:''};
+    gameContainer.innerHTML += `<p class="instructions">Find the missing item!</p>`;
+    speak('Find the missing item!');
+    chosen.forEach(img=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=img.url?`<img src="${img.url}" alt="${img.name}">`:'❓';
+      grid.appendChild(div);
     });
-    gameContainer.appendChild(grid);
-}
-
-// Find Missing
-function loadFindMissing(){
-    const chosen = shuffle([...items]).slice(0,5);
-    const missing = shuffle([...items].filter(i=>!chosen.includes(i)))[0];
-    const gridItems=[...chosen,{name:'?',img:''}];
-
-    const instructions = document.createElement('p');
-    instructions.className='instructions';
-    instructions.innerText='Find the missing item!';
-    gameContainer.appendChild(instructions);
-    speak('Find the missing item!',0.8);
-
-    const grid = document.createElement('div');
-    grid.className='emoji-grid';
-    gridItems.forEach((it,index)=>{
-        const div=document.createElement('div');
-        div.className='emoji-item';
-        if(it.name==='?') div.classList.add('missing-placeholder');
-        div.innerHTML=it.name==='?'?'❓':`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
-        grid.appendChild(div);
+    const optionGrid = document.createElement('div'); optionGrid.className='emoji-grid';
+    options.forEach(img=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
+      div.onclick=()=>{
+        checkAnswer(div,img.name,missing.name);
+        grid.children[blankIndex].innerHTML=`<img src="${missing.url}" alt="${missing.name}">`;
+      };
+      optionGrid.appendChild(div);
     });
-    gameContainer.appendChild(grid);
+    gameContainer.appendChild(optionGrid);
 
-    const options=[missing, ...shuffle(chosen).slice(0,2)];
-    shuffle(options);
-    const optionsGrid=document.createElement('div');
-    optionsGrid.className='options-grid';
-    options.forEach(it=>{
-        const div=document.createElement('div');
-        div.className='emoji-item';
-        div.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
-        div.onclick=()=>{
-            // Fill missing
-            const placeholder=document.querySelector('.missing-placeholder');
-            placeholder.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
-            checkAnswer(div,it.name,missing.name);
-        };
-        optionsGrid.appendChild(div);
+  } else if(type==='findDifferent'){
+    let same = chosen[0];
+    chosen = [same,same,same,same];
+    let diffIndex = Math.floor(Math.random()*chosen.length);
+    let diff = shuffle(images.filter(i=>i.name!==same.name))[0];
+    chosen[diffIndex]=diff;
+    gameContainer.innerHTML += `<p class="instructions">Find the different item!</p>`;
+    speak('Find the different item!');
+    chosen.forEach(img=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
+      div.onclick=()=>checkAnswer(div,img.name,diff.name);
+      grid.appendChild(div);
     });
-    gameContainer.appendChild(optionsGrid);
+  }
 }
 
-// Check Answer
-function checkAnswer(div, selected, correct){
-    if(selected===correct){
-        div.classList.add('correct');
-        score+=10;
-        speak(feedback[Math.floor(Math.random()*feedback.length)],0.9+(level/totalLevels));
-        setTimeout(()=>{
-            if(level<totalLevels){
-                level++;
-                loadLevel();
-            }else{
-                gameContainer.innerHTML=`
-                <div class="top-bar">
-                    <h1>Game Over! 🎉</h1>
-                    <button class="exit-btn" onclick="exitGame()">Exit</button>
-                </div>
-                <p class="instructions">Congratulations! Your score: ${score}</p>
-                <button class="start-btn" onclick="startBtn.click()">Play Again</button>`;
-                speak('Congratulations! You won!',1.0);
-            }
-        },1000);
-    }else{
-        div.classList.add('incorrect');
-        speak('Oops, try again!',0.9);
-        setTimeout(()=>div.classList.remove('incorrect'),800);
-    }
+function checkAnswer(div,answer,correct){
+  if(answer===correct){ div.classList.add('correct'); speak(feedback[Math.floor(Math.random()*feedback.length)]); setTimeout(nextRound,800);}
+  else { div.classList.add('incorrect'); speak('Oops, try again!'); setTimeout(()=>div.classList.remove('incorrect'),800);}
 }
+
+startBtn.onclick=startGame;
 </script>
 </body>
 </html>
