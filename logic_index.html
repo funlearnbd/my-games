@@ -1,209 +1,719 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Logic Game</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kids Logic — Local Images</title>
 <style>
-  body {
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    margin: 0; padding: 0;
-    background: linear-gradient(135deg, #ffe6f0 0%, #b3e5fc 50%, #c8e6c9 100%);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
+  :root{
+    --accent:#ff6b6b; --bg1:#fff7ed;
+    --dark:#1f2937;
   }
-  .container {
-    max-width: 600px;
-    width: 95%;
-    background: rgba(255,255,255,0.95);
-    border-radius: 20px;
-    padding: 15px;
-    margin: 20px 0;
-    text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;}
+  body{
+    background: linear-gradient(135deg,#ffe6f0 0%, #dbeafe 45%, #d1fae5 100%);
+    display:flex;align-items:center;justify-content:center;padding:12px;
   }
-  h1 { font-size: 2rem; color: #d81b60; margin: 5px 0; }
-  .instructions { font-size: 1.3rem; color: #0288d1; margin: 10px 0; }
-  .emoji-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 10px;
-    justify-items: center;
-    margin-top: 10px;
+
+  .container{
+    width:100%;max-width:880px;background:rgba(255,255,255,0.98);border-radius:16px;
+    box-shadow:0 20px 60px rgba(10,20,40,0.12);padding:16px;box-sizing:border-box;
   }
-  .emoji-item {
-    width: 90px; height: 90px;
-    border: 3px solid #333;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s, box-shadow 0.3s;
-    background: #fff;
+
+  .header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .title{font-size:1.4rem;font-weight:800;color:var(--accent);margin:0}
+  .controls{display:flex;gap:10px}
+  button{cursor:pointer;border:0;padding:8px 12px;border-radius:10px;font-weight:800}
+  .btn-primary{background:#06b6d4;color:#fff}
+  .btn-exit{background:#ef4444;color:#fff}
+
+  .meta{margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .instructions{font-weight:800;color:#0f172a;font-size:1.05rem;margin:10px 0}
+
+  /* progress */
+  .progress-wrap{width:100%;height:14px;background:#eef2ff;border-radius:999px;overflow:hidden;border:1px solid rgba(2,6,23,0.04)}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#60a5fa,#7c3aed);transition:width 600ms ease}
+
+  /* content */
+  #content { margin-top:12px; min-height:300px; display:flex;flex-direction:column;gap:12px; align-items:center;}
+
+  .grid { width:100%; display:grid; gap:12px; align-items:stretch }
+  .cols-2{ grid-template-columns: repeat(2, 1fr) }
+  .cols-3{ grid-template-columns: repeat(3, 1fr) }
+  .cols-4{ grid-template-columns: repeat(4, 1fr) }
+
+  .slot{
+    background:#fff;border-radius:12px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+    border:3px solid var(--dark); font-size: clamp(28px,7vw,56px); position:relative; overflow:hidden;
   }
-  .emoji-item img { max-width: 80%; max-height: 80%; object-fit: contain; }
-  .emoji-item.correct { animation: glow 1s ease-out; }
-  .emoji-item.incorrect { animation: shake 0.5s ease-out; }
-  @keyframes glow {0%,100%{box-shadow:0 0 0px #ff0;transform:scale(1);}50%{box-shadow:0 0 20px 5px #ff0;transform:scale(1.2);}}
-  @keyframes shake {0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
-  .start-btn, .exit-btn { background: #ff4081; color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-size: 1.2rem; cursor: pointer; margin: 5px; font-weight: bold;}
-  .start-btn:hover, .exit-btn:hover { background: #e91e63; }
-  .progress-bar-container { width: 90%; height: 15px; background: #ccc; border-radius: 8px; margin: 10px auto; }
-  .progress-bar { width: 0%; height: 100%; background: #76ff03; border-radius: 8px; transition: width 0.5s; }
-  .tutorial {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center;
-    z-index: 1000; flex-direction: column; color:#fff; font-size:1.5rem; text-align:center; padding: 20px;
+  .slot img{ max-width:84%; max-height:84%; object-fit:contain; display:block }
+  .slot.blank{ background:linear-gradient(90deg,#f3f4f6,#e2e8f0); color:#475569; font-size:clamp(28px,6vw,48px) }
+  .slot.correct{ animation:correct-glow .9s ease both }
+  @keyframes correct-glow{0%{transform:scale(1)}50%{transform:scale(1.12);box-shadow:0 0 22px 10px rgba(255,223,93,0.85)}100%{transform:scale(1)}}
+  .slot.wrong{ animation:shake .45s ease both }
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+  .options { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; width:100% }
+  .option{ min-width:92px; border-radius:12px; padding:8px; background:#fffaf0; border:3px solid var(--dark);
+    display:flex;align-items:center;justify-content:center; cursor:pointer; font-size:clamp(22px,6vw,42px)}
+  .option img{ max-width:78%; max-height:78%; object-fit:contain; display:block }
+
+  /* loading overlay */
+  #loadingOverlay { position:fixed; inset:0; display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,0.45); color:white; z-index:9999; font-size:1.2rem; flex-direction:column; gap:8px; }
+  #loadingBar{ width:260px; height:10px; background:#2222; border-radius:8px; overflow:hidden; }
+  #loadingBarFill{height:100%; width:0%; background:linear-gradient(90deg,#60a5fa,#7c3aed); transition:width 250ms linear}
+  /* tutorial overlay */
+  .tutorial { position:fixed; inset:0; display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6); z-index:9998; color:white; flex-direction:column; gap:12px; padding:20px; box-sizing:border-box; }
+  .tutorial-btn{ background:#ff4081;color:#fff;padding:10px 16px;border-radius:10px;border:0;font-weight:800; cursor:pointer }
+  @media (max-width:520px){
+    .slot{ font-size:40px }
   }
-  .tutorial button { margin-top: 20px; padding: 10px 20px; font-size:1.2rem; cursor:pointer; border-radius:10px; border:none; background:#ff4081; color:white; }
 </style>
 </head>
 <body>
-<div class="container" id="game-container">
-  <h1>Fun Logic Game 🌟</h1>
-  <p class="instructions">Press Start to begin!</p>
-  <button class="start-btn" id="start-btn">Start Game</button>
-  <button class="exit-btn" onclick="exitGame()">Exit</button>
-  <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
-</div>
+  <div class="container" id="app">
+    <div class="header">
+      <div>
+        <div class="title">Fun Logic — Local Images</div>
+        <div style="font-size:0.95rem;color:#334155">Place PNG files in the <code>image/</code> folder (e.g. <code>image/dog.png</code>)</div>
+      </div>
+      <div class="controls">
+        <button id="restartBtn" class="btn-primary">Restart</button>
+        <button id="exitBtn" class="btn-exit">Exit</button>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div class="instructions" id="instructions">Press Start to detect images and play</div>
+      <div style="min-width:240px">
+        <div class="progress-wrap" style="margin-top:8px">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="content">
+      <div style="display:flex;gap:12px;align-items:center">
+        <button id="startBtn" class="btn-primary">Start</button>
+        <div style="flex:1"></div>
+        <div style="font-weight:800">Score: <span id="score">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- loading overlay -->
+  <div id="loadingOverlay" style="display:none">
+    <div>Detecting images in <strong>image/</strong> ...</div>
+    <div id="loadingBar"><div id="loadingBarFill"></div></div>
+    <div style="font-size:0.95rem;opacity:0.9">If you don't have images yet, the game will still show labeled boxes.</div>
+  </div>
 
 <script>
-const startBtn = document.getElementById('start-btn');
-const gameContainer = document.getElementById('game-container');
-const progressBar = document.getElementById('progress-bar');
+/*
+  Robust single-file fix:
+  - Detect available PNGs in image/ by trying a set of likely names and numeric files.
+  - Show loading overlay while probing.
+  - Render content into #content (not replacing header) to avoid accidental removal.
+  - Ensure grid slots ALWAYS render (even if an image is missing) so user never sees an empty page.
+*/
 
-// 🔹 Load local images manually (make sure these exist in /image/)
-const images = [
-  {name:'Dog', url:'image/dog.png'},
-  {name:'Cat', url:'image/cat.png'},
-  {name:'Cow', url:'image/cow.png'},
-  {name:'Apple', url:'image/apple.png'},
-  {name:'Banana', url:'image/banana.png'},
-  {name:'Car', url:'image/car.png'},
-  {name:'Bus', url:'image/bus.png'},
-  {name:'Plane', url:'image/plane.png'}
+const likelyNames = [
+  'dog','cat','cow','apple','banana','car','bus','plane','train','truck','motorcycle','scooter',
+  'horse','sheep','pig','lion','elephant','giraffe','dolphin','whale','fish','turtle','butterfly',
+  'flower','strawberry','grapes','orange','lemon','kiwi','pineapple','balloon','teddy','guitar','sun',
+  'star','rocket','ambulance','firetruck','police','helicopter','boat'
 ];
 
-const feedback = ['Great job! 🌟', 'Awesome!', 'Excellent!', 'You’re amazing!', 'Fantastic!'];
-let level = 0;
-const maxLevels = 10;
+// UI elements
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const exitBtn = document.getElementById('exitBtn');
+const content = document.getElementById('content');
+const instructionsEl = document.getElementById('instructions');
+const progressFill = document.getElementById('progressFill');
+const loadingOverlay = document.getElementById('loadingOverlay');
+const loadingBarFill = document.getElementById('loadingBarFill');
+const scoreEl = document.getElementById('score');
 
-function speak(text) {
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 0.8;
-  utter.pitch = 1.2;
-  speechSynthesis.speak(utter);
+let availableImages = []; // {name, url}
+let score = 0;
+let seqIndex = 0;
+const TOTAL_LEVELS = 100; // large number; adjust as you need
+
+const feedback = ['Great job!', 'Well done!', 'Excellent!', 'You are doing great!', 'Awesome!'];
+
+/* --- helper: probe a single image URL using Image() load event --- */
+function probeImage(url, timeoutMs = 3500) {
+  return new Promise(resolve => {
+    const img = new Image();
+    let done = false;
+    const onDone = ok => { if (!done){ done = true; resolve(ok); } };
+    const timer = setTimeout(()=> onDone(false), timeoutMs);
+    img.onload = ()=> { clearTimeout(timer); onDone(true); };
+    img.onerror = ()=> { clearTimeout(timer); onDone(false); };
+    img.src = url;
+  });
 }
 
-function shuffle(array){ return array.sort(()=>Math.random()-0.5); }
-function exitGame(){ window.location.href='index.html'; }
+/* --- detect images: try likelyNames and numeric files in parallel --- */
+async function detectLocalImages() {
+  // show loading overlay
+  loadingOverlay.style.display = 'flex';
+  instructionsEl.textContent = 'Detecting images in image/ ...';
 
-function showTutorial(type, callback){
-  const overlay = document.createElement('div');
-  overlay.className='tutorial';
-  if(type==='findTarget') overlay.innerHTML = 'Look carefully!<br>Tap the picture that matches the word.';
-  if(type==='findMissing') overlay.innerHTML = 'One picture is missing!<br>Choose the correct one to fill the blank.';
-  if(type==='findDifferent') overlay.innerHTML = 'Spot the odd one out!<br>Tap the picture that is different.';
-  const btn = document.createElement('button'); btn.innerText='Got it!'; 
-  btn.onclick=()=>{ document.body.removeChild(overlay); callback(); };
-  overlay.appendChild(btn);
-  document.body.appendChild(overlay);
+  const candidates = [];
+
+  // first, names as png
+  for (const n of likelyNames) candidates.push({name:n, url:`image/${n}.png`});
+
+  // also try numeric names 1..30
+  for (let i=1;i<=30;i++) candidates.push({name:`${i}`, url:`image/${i}.png`});
+
+  // send probe promises in parallel but cap concurrency by mapping batches
+  const promises = candidates.map(c => probeImage(c.url).then(ok => ok ? c : null));
+  // We'll process results but update loading progress as results come back
+  const results = [];
+  let completed = 0;
+  function updateProgress() {
+    completed++; const pct = Math.round((completed / promises.length) * 100);
+    loadingBarFill.style.width = pct + '%';
+  }
+
+  // Use Promise.all with individual .then to update progress as they resolve
+  const wrapped = promises.map(p => p.then(r => { updateProgress(); return r; }));
+  const settled = await Promise.all(wrapped);
+  for (const r of settled) if (r) results.push(r);
+
+  loadingOverlay.style.display = 'none';
+
+  // remove duplicates, prefer readable names
+  const uniq = [];
+  const seen = new Set();
+  for (const r of results) {
+    const key = r.url;
+    if (!seen.has(key)) { uniq.push(r); seen.add(key); }
+  }
+  return uniq;
 }
 
-function startGame(){
-  level = 0; progressBar.style.width='0%'; nextRound();
+/* --- fallback: if no images found, create labelled placeholders from likelyNames first items --- */
+function ensureFallbackImages(found) {
+  if (found.length > 0) return found;
+  // fallback to labelled data (no external images)
+  const fallback = [
+    {name:'Dog', url:null},
+    {name:'Cat', url:null},
+    {name:'Apple', url:null},
+    {name:'Banana', url:null},
+    {name:'Car', url:null},
+    {name:'Bus', url:null},
+    {name:'Plane', url:null},
+    {name:'Cow', url:null}
+  ];
+  return fallback;
 }
 
-function nextRound(){
-  gameContainer.innerHTML = `<h1>Fun Logic Game 🌟</h1><button class="exit-btn" onclick="exitGame()">Exit</button>`;
-  level++;
-  if(level>maxLevels){ 
-    gameContainer.innerHTML += `<p class="instructions">You finished! 🎉</p><button class="start-btn" onclick="startGame()">Play Again</button>`;
-    speak('Congratulations, you won!');
-    progressBar.style.width='100%';
+/* --- Utility: pick N random available images --- */
+function pickRandomImages(n) {
+  if (availableImages.length === 0) return []; 
+  const arr = availableImages.slice();
+  // shuffle
+  for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr.slice(0, n);
+}
+
+/* --- voice helper --- */
+function speak(text, rate = 0.88, pitch = 1.15) {
+  try {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US'; u.rate = rate; u.pitch = pitch;
+      window.speechSynthesis.speak(u);
+    }
+  } catch (e){ console.warn('TTS failed', e); }
+}
+
+/* --- star burst effect inside a slot --- */
+function starBurst(slotEl) {
+  for (let i=0;i<6;i++){
+    const s = document.createElement('div');
+    s.textContent = '⭐';
+    s.style.position = 'absolute';
+    s.style.left = '50%'; s.style.top = '50%';
+    s.style.transform = 'translate(-50%,-50%) scale(.6)';
+    s.style.fontSize = '18px'; s.style.pointerEvents = 'none';
+    const tx = (Math.random()*160 - 80) + 'px';
+    const ty = (Math.random()*140 - 70) + 'px';
+    s.style.setProperty('--tx', tx);
+    s.style.setProperty('--ty', ty);
+    s.style.transition = 'transform 900ms ease-out, opacity 900ms';
+    slotEl.appendChild(s);
+    // animate
+    requestAnimationFrame(()=> {
+      s.style.opacity = '0';
+      s.style.transform = `translate(calc(-50% + ${tx}), calc(-50% + ${ty})) scale(1.6)`;
+    });
+    setTimeout(()=> s.remove(), 950);
+  }
+}
+
+/* --- UI: build header remains static; content area we will manage --- */
+function renderStaticHeader() {
+  // header already present in HTML; ensure content area reset
+  content.innerHTML = `
+    <div style="display:flex;gap:12px;align-items:center;width:100%;">
+      <button id="startGameBtn" class="btn-primary">Start</button>
+      <div style="flex:1"></div>
+      <div style="font-weight:800">Score: <span id="scoreVal">0</span></div>
+    </div>
+  `;
+  // re-wire start button inside content
+  const startGameBtn = document.getElementById('startGameBtn');
+  startGameBtn.addEventListener('click', startGame);
+}
+
+/* --- global game state --- */
+let sequenceIndex = 0; // current level index
+let levelsCount = TOTAL_LEVELS;
+
+/* deterministic sequence generator (easy -> medium -> hard) */
+function makeLevelSequence(total) {
+  const seq = [];
+  const modeCycle = ['findTarget','findDifferent','findMissing','findPair'];
+  // ramp size gradually
+  let size = 3;
+  while (seq.length < total) {
+    for (const mode of modeCycle) {
+      seq.push({mode, size});
+      if (seq.length >= total) break;
+    }
+    if (size < 6) size++;
+    else size = Math.min(size + 1, 10);
+  }
+  return seq;
+}
+const LEVEL_SEQ = makeLevelSequence(levelsCount);
+
+/* --- load/start game pipeline --- */
+async function startGame() {
+  // disable UI start to prevent double-tap
+  document.getElementById('startGameBtn')?.setAttribute('disabled', 'disabled');
+
+  // detect images once
+  loadingOverlay.style.display = 'flex';
+  // probe local image files
+  let found = await detectLocalImages(); // returns array of {name,url}
+  availableImages = found.map(f => ({ name: prettifyName(f.name), url: f.url }));
+  if (availableImages.length === 0) {
+    // fallback to named placeholders if none found
+    availableImages = ensureFallbackImages([]);
+  }
+  loadingOverlay.style.display = 'none';
+
+  // update instructions and launch first round
+  score = 0; updateScore();
+  sequenceIndex = 0;
+  renderLevel(); // start first level
+}
+
+/* small helper to normalize name 'dog' -> 'Dog' or '1' -> 'Image 1' */
+function prettifyName(raw) {
+  if (!raw) return '';
+  const base = raw.replace(/^image\//,'').replace(/\.png$/i,'').replace(/[_-]/g,' ');
+  if (/^\d+$/.test(base)) return 'Image ' + base;
+  return base.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+/* --- UI helpers --- */
+function updateProgressUI() {
+  const pct = Math.round(((sequenceIndex) / (levelsCount - 1)) * 100);
+  progressFill.style.width = pct + '%';
+  // update header instructions
+  const cur = LEVEL_SEQ[sequenceIndex] || {mode:'', size:0};
+  instructionsEl.textContent = `Level ${sequenceIndex+1} • Mode: ${cur.mode} • Size: ${cur.size}`;
+}
+
+function updateScore() { document.getElementById('scoreVal').textContent = score; }
+
+/* --- render a level --- */
+async function renderLevel() {
+  // clear content area except top controls by re-rendering the static header first
+  renderStaticHeader();
+  updateProgressUI();
+
+  // pick current level config
+  const cfg = LEVEL_SEQ[sequenceIndex];
+  if (!cfg) {
+    instructionsEl.textContent = 'No more levels';
     return;
   }
-  progressBar.style.width = `${(level/maxLevels)*100}%`;
-  let type = level%3===1 ? 'findTarget' : (level%3===2 ? 'findMissing' : 'findDifferent');
-  if(level<=3){ showTutorial(type, ()=>runRound(type)); }
-  else runRound(type);
+
+  const mode = cfg.mode;
+  const size = Math.max(3, cfg.size || 4);
+
+  // tutorial for first 3 overall rounds (only once per mode)
+  if (sequenceIndex < 3) {
+    await showTutorialForMode(mode);
+  }
+
+  if (mode === 'findTarget') {
+    await runFindTarget(size);
+  } else if (mode === 'findDifferent') {
+    await runFindDifferent(size);
+  } else if (mode === 'findMissing') {
+    await runFindMissing(size);
+  } else if (mode === 'findPair') {
+    await runFindPair(size);
+  }
+
+  // update progress UI
+  updateProgressUI();
 }
 
-function runRound(type){
-  const grid = document.createElement('div'); grid.className='emoji-grid';
-  gameContainer.appendChild(grid);
+/* --- tutorial overlay (glow simulation) --- */
+function showTutorialForMode(mode) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'tutorial';
+    let msg = '';
+    if (mode === 'findTarget') msg = 'Tap the picture that matches the spoken word.';
+    else if (mode === 'findDifferent') msg = 'One picture is different from the others — tap it!';
+    else if (mode === 'findMissing') msg = 'One picture is missing — choose the right one to fill the blank.';
+    else msg = 'Tap the right pictures.';
+    overlay.innerHTML = `<div style="font-size:1.2rem;max-width:720px">${msg}</div>`;
+    const btn = document.createElement('button');
+    btn.className = 'tutorial-btn';
+    btn.textContent = 'Got it!';
+    btn.onclick = () => { document.body.removeChild(overlay); resolve(); };
+    overlay.appendChild(btn);
+    document.body.appendChild(overlay);
+    // speak the hint
+    speak(msg, 0.85, 1.2);
+  });
+}
 
-  if(type==='findTarget'){
-    let chosen = shuffle([...images]).slice(0,4);
-    let target = chosen[Math.floor(Math.random()*chosen.length)];
-    gameContainer.innerHTML += `<p class="instructions">Find the ${target.name}!</p>`;
-    speak(`Find the ${target.name}!`);
-    chosen.forEach(img=>{
-      const div = document.createElement('div'); div.className='emoji-item';
-      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
-      div.onclick=()=>checkAnswer(div,img.name,target.name);
-      grid.appendChild(div);
-    });
+/* --- run modes implementations (all append into #content) --- */
+
+function makeGridElement(count) {
+  const grid = document.createElement('div');
+  grid.className = 'grid ' + (count <= 2 ? 'cols-2' : (count <= 6 ? 'cols-3' : 'cols-4'));
+  return grid;
+}
+
+/* Find Target: show N distinct images, one is the target (spoken) */
+async function runFindTarget(count) {
+  const chosen = pickRandomImages(count);
+  // ensure we have placeholders if images have null url (fallback)
+  const target = chosen[Math.floor(Math.random() * chosen.length)];
+  // speak
+  const instr = `Find the ${target.name}`;
+  speak(instr, getVoiceRate(), 1.2);
+
+  // build UI
+  const contentTop = document.createElement('div'); contentTop.className = 'content-top';
+  contentTop.innerHTML = `<p style="font-weight:800">${instr}</p>`;
+  content.appendChild(contentTop);
+
+  const grid = makeGridElement(chosen.length);
+  chosen.forEach(item => {
+    const slot = document.createElement('div'); slot.className = 'slot';
+    if (item.url) {
+      const img = document.createElement('img'); img.src = item.url; img.alt = item.name;
+      slot.appendChild(img);
+    } else {
+      slot.textContent = item.name;
+    }
+    slot.onclick = () => {
+      if (slot.dataset.locked) return;
+      if (item.name === target.name) {
+        slot.classList.add('correct'); slot.dataset.locked = '1';
+        starBurst(slot);
+        score += 10; updateScore();
+        speakRandomPositive();
+        setTimeout(advanceLevel, 900);
+      } else {
+        slot.classList.add('wrong');
+        speak('Try again!', 0.95, 1.0);
+        setTimeout(()=> slot.classList.remove('wrong'), 700);
+      }
+    };
+    grid.appendChild(slot);
+  });
+  content.appendChild(grid);
+}
+
+/* Find Different: all identical except one */
+async function runFindDifferent(count) {
+  // pick repeat item and different item
+  const pool = pickRandomImages(2); // at least two available
+  if (pool.length < 2) {
+    // fallback: pick same multiple with first two names
+    const fallback = availableImages.slice(0,2);
+    pool.push(...fallback);
   }
-  else if(type==='findMissing'){
-    let chosen = shuffle([...images]).slice(0,4);
-    let blankIndex = 3;
-    let missing = chosen[blankIndex];
-    chosen[blankIndex] = {name:'?',url:''};
-    gameContainer.innerHTML += `<p class="instructions">Find the missing item!</p>`;
-    speak('Find the missing item!');
-    chosen.forEach(img=>{
-      const div = document.createElement('div'); div.className='emoji-item';
-      div.innerHTML=img.url?`<img src="${img.url}" alt="${img.name}">`:'❓';
-      grid.appendChild(div);
-    });
-    const optionGrid = document.createElement('div'); optionGrid.className='emoji-grid';
-    let options = shuffle([missing,...shuffle(images.filter(i=>i.name!==missing.name)).slice(0,2)]);
-    options.forEach(img=>{
-      const div = document.createElement('div'); div.className='emoji-item';
-      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
-      div.onclick=()=>{
-        checkAnswer(div,img.name,missing.name);
-        grid.children[blankIndex].innerHTML=`<img src="${missing.url}" alt="${missing.name}">`;
-      };
-      optionGrid.appendChild(div);
-    });
-    gameContainer.appendChild(optionGrid);
+  const repeat = pool[0];
+  const different = pool.find(p => p.name !== repeat.name) || availableImages[1] || repeat;
+  // build array with count-1 repeat + 1 different
+  const arr = Array(count-1).fill(repeat).concat([different]);
+  // shuffle
+  for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+
+  const instr = 'Find the different item';
+  speak(instr, getVoiceRate(), 1.2);
+  const contentTop = document.createElement('div'); contentTop.className = 'content-top';
+  contentTop.innerHTML = `<p style="font-weight:800">${instr}</p>`;
+  content.appendChild(contentTop);
+
+  const grid = makeGridElement(arr.length);
+  arr.forEach(item => {
+    const slot = document.createElement('div'); slot.className = 'slot';
+    if (item.url) {
+      const img = document.createElement('img'); img.src = item.url; img.alt = item.name;
+      slot.appendChild(img);
+    } else {
+      slot.textContent = item.name;
+    }
+    slot.onclick = () => {
+      if (slot.dataset.locked) return;
+      if (item.name === different.name) {
+        slot.classList.add('correct'); slot.dataset.locked = '1'; starBurst(slot);
+        score += 10; updateScore(); speakRandomPositive();
+        setTimeout(advanceLevel, 900);
+      } else {
+        slot.classList.add('wrong');
+        speak('Try again!', 0.95);
+        setTimeout(()=> slot.classList.remove('wrong'), 700);
+      }
+    };
+    grid.appendChild(slot);
+  });
+  content.appendChild(grid);
+}
+
+/* Find Missing: show N slots with one blank, and 3 options (one correct, two visible) */
+async function runFindMissing(totalSlots) {
+  // pick distinct items
+  const pool = pickRandomImages(totalSlots);
+  // if not enough images, fill with available duplicates but always unique names if possible
+  if (pool.length < totalSlots) {
+    // reuse availableImages until we have totalSlots
+    const extended = [];
+    let i = 0;
+    while (extended.length < totalSlots) {
+      extended.push(availableImages[i % availableImages.length]);
+      i++;
+    }
+    pool.splice(0, pool.length, ...extended);
   }
-  else if(type==='findDifferent'){
-    let same = shuffle([...images]).slice(0,1)[0];
-    let chosen = [same,same,same,same];
-    let diffIndex = Math.floor(Math.random()*chosen.length);
-    let diff = shuffle(images.filter(i=>i.name!==same.name))[0];
-    chosen[diffIndex] = diff;
-    gameContainer.innerHTML += `<p class="instructions">Find the different item!</p>`;
-    speak('Find the different item!');
-    chosen.forEach(img=>{
-      const div = document.createElement('div'); div.className='emoji-item';
-      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
-      div.onclick=()=>checkAnswer(div,img.name,diff.name);
-      grid.appendChild(div);
-    });
+  // choose missing index
+  const missingIndex = Math.floor(Math.random() * totalSlots);
+  const missingItem = pool[missingIndex];
+
+  // display grid with blank at missingIndex
+  const instr = 'Which image is missing?';
+  speak(instr, getVoiceRate(), 1.2);
+  const contentTop = document.createElement('div'); contentTop.className = 'content-top';
+  contentTop.innerHTML = `<p style="font-weight:800">${instr}</p>`;
+  content.appendChild(contentTop);
+
+  const display = pool.slice();
+  display[missingIndex] = {name:'?', url:null};
+  const grid = makeGridElement(display.length);
+  display.forEach((item, idx) => {
+    const slot = document.createElement('div'); slot.className = 'slot';
+    if (item.name === '?') {
+      slot.classList.add('blank'); slot.textContent = '❓';
+    } else if (item.url) {
+      const img = document.createElement('img'); img.src = item.url; img.alt = item.name;
+      slot.appendChild(img);
+    } else {
+      slot.textContent = item.name;
+    }
+    grid.appendChild(slot);
+  });
+  content.appendChild(grid);
+
+  // options: include missingItem + two visible items
+  const visible = pool.filter((_,i)=>i !== missingIndex);
+  const twoVisible = shuffle(visible).slice(0,2);
+  const options = shuffle([missingItem, ...twoVisible]);
+  const optsWrap = document.createElement('div'); optsWrap.className = 'options';
+  options.forEach(opt => {
+    const o = document.createElement('div'); o.className = 'option';
+    if (opt.url) { const img = document.createElement('img'); img.src = opt.url; img.alt = opt.name; o.appendChild(img); }
+    else o.textContent = opt.name;
+    o.onclick = () => {
+      if (o.dataset.locked) return;
+      if (opt.name === missingItem.name) {
+        // fill the blank visually
+        const blankSlot = grid.children[missingIndex];
+        blankSlot.classList.remove('blank'); blankSlot.innerHTML = '';
+        if (missingItem.url) {
+          const img = document.createElement('img'); img.src = missingItem.url; img.alt = missingItem.name; blankSlot.appendChild(img);
+        } else {
+          blankSlot.textContent = missingItem.name;
+        }
+        blankSlot.classList.add('correct');
+        starBurst(blankSlot);
+        o.dataset.locked = '1';
+        score += 10; updateScore(); speakRandomPositive();
+        setTimeout(advanceLevel, 900);
+      } else {
+        o.classList.add('wrong');
+        speak('Try again', 0.95);
+        setTimeout(()=> o.classList.remove('wrong'), 600);
+      }
+    };
+    optsWrap.appendChild(o);
+  });
+  content.appendChild(optsWrap);
+}
+
+/* Find Pair: one item appears twice, others unique; tap either of the pair */
+async function runFindPair(count) {
+  // pick (count - 1) unique, then duplicate one
+  const unique = pickRandomImages(Math.max(2, count - 1));
+  if (unique.length < Math.max(2, count - 1)) {
+    // fallback: repeat available images
+    while (unique.length < Math.max(2, count - 1)) unique.push(availableImages[0]);
+  }
+  const pairItem = unique[0];
+  const arr = unique.concat([pairItem]); // one duplicate
+  // shuffle
+  for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+
+  const instr = 'Find the pair (the image that appears twice)';
+  speak(instr, getVoiceRate(), 1.2);
+  const contentTop = document.createElement('div'); contentTop.className = 'content-top';
+  contentTop.innerHTML = `<p style="font-weight:800">${instr}</p>`;
+  content.appendChild(contentTop);
+
+  const grid = makeGridElement(arr.length);
+  arr.forEach(item => {
+    const slot = document.createElement('div'); slot.className = 'slot';
+    if (item.url) {
+      const img = document.createElement('img'); img.src = item.url; img.alt = item.name; slot.appendChild(img);
+    } else slot.textContent = item.name;
+    slot.onclick = () => {
+      if (slot.dataset.locked) return;
+      if (item.name === pairItem.name) {
+        // mark all pair slots as correct
+        const slots = Array.from(grid.children);
+        slots.filter(s => {
+          const img = s.querySelector('img');
+          if (!img) return s.textContent.trim() === pairItem.name;
+          return img.alt === pairItem.name;
+        }).forEach(s => { s.classList.add('correct'); starBurst(s); s.dataset.locked = '1'; });
+        score += 10; updateScore(); speakRandomPositive();
+        setTimeout(advanceLevel, 900);
+      } else {
+        slot.classList.add('wrong'); speak('Try again', 0.95);
+        setTimeout(()=> slot.classList.remove('wrong'), 700);
+      }
+    };
+    grid.appendChild(slot);
+  });
+  content.appendChild(grid);
+}
+
+/* --- advance to next level --- */
+function advanceLevel() {
+  sequenceIndex = Math.min(sequenceIndex + 1, LEVEL_SEQ.length - 1);
+  // clear content (but keep header) and render next
+  // remove the top start row so content is re-rendered by renderLevel
+  // (we simply call renderLevel which will re-render content area)
+  // But we must clear content first (renderStaticHeader will do)
+  renderLevel();
+}
+
+/* --- helper: random positive voice --- */
+function speakRandomPositive() {
+  const p = feedback[Math.floor(Math.random() * feedback.length)];
+  speak(p, getVoiceRate(), 1.25);
+}
+
+/* --- voice rate scaling --- */
+function getVoiceRate() {
+  // slower early, faster later
+  const t = Math.min(1, sequenceIndex / Math.max(1, LEVEL_SEQ.length - 1));
+  return 0.78 + t * 0.45; // 0.78 .. 1.23
+}
+
+/* --- startup: attach static listeners --- */
+document.getElementById('restartBtn').addEventListener('click', () => {
+  window.speechSynthesis.cancel();
+  sequenceIndex = 0;
+  score = 0; updateScore();
+  renderStaticHeader();
+});
+document.getElementById('exitBtn').addEventListener('click', () => {
+  window.location.href = 'index.html';
+});
+startBtn.addEventListener('click', async () => {
+  // On first click: detect available images and then start the game
+  // If detection already done, simply start
+  if (availableImages.length === 0) {
+    // detect and then start
+    const found = await detectLocalImages();
+    availableImages = found.map(f => ({name: prettifyName(f.name), url: f.url}));
+    if (availableImages.length === 0) {
+      // fallback placeholders
+      availableImages = [
+        {name:'Dog', url:null},{name:'Cat', url:null},{name:'Apple', url:null},
+        {name:'Banana', url:null},{name:'Car', url:null},{name:'Bus', url:null},
+        {name:'Plane', url:null},{name:'Cow', url:null}
+      ];
+    }
+  }
+  // init sequence and render first level
+  score = 0; updateScore(); sequenceIndex = 0;
+  renderLevel();
+});
+
+// expose a small debug helper to console
+window._availableImages = () => availableImages;
+
+function renderStaticHeader(){
+  // re-create top controls row in content so start remains usable after levels
+  content.innerHTML = `
+    <div style="display:flex;gap:12px;align-items:center;width:100%;">
+      <button id="startGameBtn" class="btn-primary">Start</button>
+      <div style="flex:1"></div>
+      <div style="font-weight:800">Score: <span id="scoreVal">${score}</span></div>
+    </div>
+  `;
+  const startGameBtn = document.getElementById('startGameBtn');
+  if (startGameBtn) startGameBtn.addEventListener('click', startGame);
+  // refresh score reference
+  document.getElementById('scoreVal').textContent = score;
+}
+
+function startGame() {
+  // ensure detection done
+  if (availableImages.length === 0) {
+    // run detection first then start
+    (async ()=> {
+      loadingOverlay.style.display = 'flex';
+      const found = await detectLocalImages();
+      availableImages = found.map(f => ({name: prettifyName(f.name), url: f.url}));
+      if (availableImages.length === 0) availableImages = ensureFallbackImages([]);
+      loadingOverlay.style.display = 'none';
+      sequenceIndex = 0; score = 0; updateScore();
+      renderLevel();
+    })();
+  } else {
+    sequenceIndex = 0; score = 0; updateScore();
+    renderLevel();
   }
 }
 
-function checkAnswer(div,answer,correct){
-  if(answer===correct){ 
-    div.classList.add('correct'); 
-    speak(feedback[Math.floor(Math.random()*feedback.length)]); 
-    setTimeout(nextRound,800);
-  }
-  else { 
-    div.classList.add('incorrect'); 
-    speak('Oops, try again!'); 
-    setTimeout(()=>div.classList.remove('incorrect'),800);
-  }
-}
+/* init UI */
+renderStaticHeader();
+progressFill.style.width = '0%';
+updateScore();
 
-startBtn.onclick=startGame;
 </script>
 </body>
 </html>
