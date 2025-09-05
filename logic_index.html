@@ -79,7 +79,7 @@ const gameContainer = document.getElementById('game-container');
 const startBtn = document.getElementById('start-btn');
 const bgMusic = document.getElementById('bg-music');
 
-const imageList = ['apple','ball','banana','car','cat','cherry','dog','fish','flower','kiwi'];
+const imageList = ['apple','ball','banana','car','cat','cherry','dog','fish','flower','rainbow']; // kiwi removed
 let images = {};
 let level = 1;
 const maxLevels = 20;
@@ -155,15 +155,14 @@ function generateTargetRound(){
 
 // Generate grid for findMissing
 function generateMissingRound(){
-  const chosen = shuffleArray([...imageList]).slice(0,6);
-  currentTarget = chosen[5];
-  const grid = chosen.slice(0,5);
-  renderMissingGrid(grid, currentTarget);
+  const chosen = shuffleArray([...imageList]).slice(0,5); // 5 images visible
+  currentTarget = pickTarget(); // correct missing
+  renderMissingGrid(chosen, currentTarget);
 }
 
 // Generate grid for findDifferent
 function generateDifferentRound(){
-  const chosen = shuffleArray([...imageList]).slice(0,5);
+  const chosen = shuffleArray([...imageList]).slice(0,4);
   const common = chosen[0];
   for(let i=1;i<chosen.length;i++) chosen[i]=common;
   const diffIndex = Math.floor(Math.random()*chosen.length);
@@ -216,6 +215,7 @@ function renderMissingGrid(arr, missing){
     div.appendChild(img);
     grid.appendChild(div);
   });
+
   const blankDiv = document.createElement('div'); blankDiv.className='emoji-item';
   blankDiv.style.background='#ccc'; grid.appendChild(blankDiv);
   gameContainer.appendChild(grid);
