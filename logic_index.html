@@ -1,307 +1,521 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Kids Logic Game</title>
-  <style>
-    body {
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #ffe6f0 0%, #b3e5fc 50%, #c8e6c9 100%);
-      overflow: hidden;
-    }
-    .container {
-      background: rgba(255, 245, 157, 0.9);
-      border-radius: 25px;
-      padding: 15px;
-      width: 100%;
-      max-width: 500px;
-      min-height: 100vh;
-      text-align: center;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      box-sizing: border-box;
-    }
-    h1 {
-      margin: 10px 0;
-      color: #d81b60;
-      font-size: 2rem;
-    }
-    .emoji-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-      gap: 12px;
-      margin: 20px 10px;
-    }
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin: 20px 10px;
-    }
-    .emoji-item {
-      font-size: 4rem;
-      background: #fff3e0;
-      border-radius: 15px;
-      cursor: pointer;
-      padding: 12px;
-      transition: transform 0.2s, background-color 0.2s;
-      aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .emoji-item:hover {
-      transform: scale(1.25);
-      background-color: #ffd54f;
-    }
-    .emoji-item.correct {
-      animation: sparkle 1s ease-out;
-    }
-    .emoji-item.incorrect {
-      animation: shake 0.5s ease-out;
-    }
-    @keyframes sparkle {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 #ffd700; }
-      50% { transform: scale(1.3); box-shadow: 0 0 15px 8px rgba(255,215,0,0.7); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-8px); }
-      75% { transform: translateX(8px); }
-    }
-    .exit-btn, .start-btn {
-      background: #ff4081;
-      color: white;
-      font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2rem;
-      margin: 10px;
-    }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 10px;
-    }
-    .level-display {
-      color: #0288d1;
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-    .instructions {
-      font-size: 1.4rem;
-      color: #d81b60;
-      margin: 10px 0;
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Kids Logic Game — Fixed Missing & Different</title>
+<style>
+  :root{
+    --accent: #ff6b6b;
+    --good: #22c55e;
+    --bg1: #ffe6f0;
+    --bg2: #b3e5fc;
+    --bg3: #c8e6c9;
+  }
+  html,body{height:100%;margin:0}
+  body{
+    font-family: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+    background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 50%, var(--bg3) 100%) !important;
+    display:flex;align-items:center;justify-content:center;
+    padding:12px;
+  }
+
+  .app {
+    width:100%;
+    max-width:720px;
+    background: rgba(255,255,255,0.95);
+    border-radius:20px;
+    box-shadow: 0 20px 50px rgba(10,20,40,0.12);
+    padding:16px;
+    box-sizing:border-box;
+    min-height:80vh;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    overflow:hidden;
+  }
+
+  .top {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .title { font-weight:800; color:var(--accent); font-size:1.4rem; margin:0 }
+  .controls { display:flex; gap:8px; align-items:center }
+  .exit-btn {
+    background:#ef4444;color:#fff;border:none;padding:8px 12px;border-radius:10px;font-weight:700;
+    cursor:pointer;
+  }
+  .restart-btn {
+    background:#0ea5e9;color:#fff;border:none;padding:8px 12px;border-radius:10px;font-weight:700;
+    cursor:pointer;
+  }
+
+  .meta { display:flex; gap:12px; align-items:center; color:#334155; font-weight:700 }
+  .instructions { font-size:1.05rem; color:#0f172a; font-weight:700; margin:6px 0 }
+
+  .board {
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    align-items:center;
+    justify-content:flex-start;
+    flex:1;
+    overflow:auto;
+    padding-bottom:8px;
+  }
+
+  .grid {
+    width:100%;
+    display:grid;
+    gap:12px;
+  }
+  /* responsive grid columns */
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .slot {
+    background: #fff7ed;
+    border-radius:14px;
+    aspect-ratio: 1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: clamp(36px, 8vw, 56px);
+    cursor:pointer;
+    user-select:none;
+    position:relative;
+    border: 2px solid rgba(16,24,40,0.04);
+    transition: transform .14s ease, box-shadow .14s ease;
+  }
+  .slot:hover { transform: translateY(-6px); box-shadow: 0 8px 30px rgba(10,20,60,0.06); }
+
+  .slot.blank {
+    background: linear-gradient(90deg,#f3f4f6,#e2e8f0);
+    color:#475569;
+    font-size: clamp(28px,7vw,48px);
+    cursor: default;
+  }
+
+  /* correct shine */
+  .slot.correct {
+    animation: correct-glow .9s ease both;
+  }
+  @keyframes correct-glow {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,223,93,0.0); }
+    50% { transform: scale(1.15); box-shadow: 0 0 20px 12px rgba(255,223,93,0.85); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,223,93,0); }
+  }
+
+  /* wrong shake */
+  .slot.wrong { animation: shake .45s ease both; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+
+  /* star burst (absolute inside slot) */
+  .star {
+    position:absolute;
+    font-size:18px;
+    pointer-events:none;
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.6);
+  }
+  .star.animate {
+    animation: star-burst 900ms ease-out forwards;
+  }
+  @keyframes star-burst {
+    0% { opacity:1; transform: translate(-50%,-50%) scale(.6); }
+    100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(1.6); }
+  }
+
+  .options {
+    width:100%;
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  .option {
+    min-width:82px;
+    border-radius:12px;
+    background:#fffaf0;
+    border:2px solid rgba(15,23,42,0.03);
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: clamp(28px, 6vw, 46px);
+    cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .option:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(10,20,60,0.06); }
+
+  .footer { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:8px }
+  .score { font-weight:800; color:#0f172a }
+
+  /* small screens adjust */
+  @media (max-width:420px){
+    .app{ padding:10px; min-height:100vh }
+    .grid.cols-3{ grid-template-columns: repeat(3,1fr) }
+    .grid.cols-4{ grid-template-columns: repeat(2,1fr) }
+  }
+</style>
 </head>
 <body>
-  <div class="container" id="game-container">
-    <div class="top-bar">
-      <h1>Fun Logic Adventure 🌟</h1>
-      <button onclick="exitGame()" class="exit-btn">Exit</button>
+  <div class="app" id="app">
+    <div class="top">
+      <div>
+        <div class="title">Fun Logic Adventure 🌟</div>
+        <div class="meta"><span id="levelLabel">Level 1</span></div>
+      </div>
+      <div class="controls">
+        <button class="restart-btn" id="restartBtn">Restart</button>
+        <button class="exit-btn" id="exitBtn">Exit</button>
+      </div>
     </div>
-    <p class="level-display">Level: <span id="level">1</span></p>
-    <p class="instructions">Tap start to play!</p>
-    <button class="start-btn" id="start-btn">Start Game</button>
+
+    <div class="board" id="board">
+      <div class="instructions" id="instructions">Tap Start to Play</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button id="startBtn" style="padding:10px 16px;border-radius:12px;background:#06b6d4;border:none;color:white;font-weight:800;cursor:pointer">Start</button>
+        <div style="flex:1"></div>
+        <div class="score">Score: <span id="score">0</span></div>
+      </div>
+      <!-- grid and options injected here -->
+    </div>
+
   </div>
 
-  <audio id="bg-music" loop preload="auto">
-    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
-  </audio>
+<script>
+/* ====== Data & State ====== */
+const ALL_EMOJIS = [
+  // animals (full animals, not face-only)
+  '🐕','🐈','🐘','🦒','🦁','🐼','🐻','🐰','🐨','🐯',
+  // fruits & food
+  '🍎','🍌','🍉','🍇','🍓','🍍','🥭','🍒','🍑','🍊',
+  // vehicles
+  '🚗','🚌','🚑','🚒','🚜','🚲','✈️','🚀','🚁','🚤',
+  // misc
+  '⚽','🎈','🧸','🎸','🌸','🌞','🌈','🐬','🦋','🐢'
+];
 
-  <script>
-    const gameContainer = document.getElementById('game-container');
-    const startBtn = document.getElementById('start-btn');
-    const bgMusic = document.getElementById('bg-music');
-    const levelDisplay = document.getElementById('level');
+const POS_FEEDBACK = ['Great job!', 'Well done!', 'Excellent!', 'You are doing great!', 'Fantastic!'];
 
-    const allEmojis = [
-      '😺','🐶','🐰','🦒','🦁','🐘','🦋','🐝','🦄','🐢',
-      '🍎','🍊','🍇','🍓','🍉','🍍','🍒','🥕','🥦','🍰',
-      '🚗','🚒','✈️','🚀','🚲','🛵','🚁','🛸','🚤','🎈'
-    ];
+const MODES = ['findTarget','findDifferent','findMissing']; // rotate
 
-    const feedback = ['Super job! 🌟','Wow, awesome!','You’re a star!','Fantastic!','Yay, you did it!'];
-    const levelTypes = [
-      { type: 'findTarget', prompt: 'Find the' },
-      { type: 'findMissing', prompt: 'Which one is missing?' },
-      { type: 'findDifferent', prompt: 'Find the different item!' }
-    ];
+let level = 1;
+let score = 0;
+let modeIndex = 0;
+let isWaiting = false;
 
-    let currentTarget = '';
-    let level = 1;
-    let score = 0;
-    const maxLevels = 6;
+/* DOM */
+const board = document.getElementById('board');
+const instructionsEl = document.getElementById('instructions');
+const levelLabel = document.getElementById('levelLabel');
+const scoreEl = document.getElementById('score');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const exitBtn = document.getElementById('exitBtn');
 
-    function speak(text) {
-      const synth = window.speechSynthesis;
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.7;
-      utter.pitch = 1.1;
-      synth.speak(utter);
+/* audio/music (optional) */
+const bgAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_2a9b9d347d.mp3?filename=kid-music-110271.mp3');
+bgAudio.loop = true;
+bgAudio.volume = 0.18;
+
+/* speech helper */
+function speak(text, rate=0.82) {
+  try {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = rate;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
     }
+  } catch(e){ console.warn('TTS failed', e); }
+}
 
-    function shuffle(arr) {
-      return arr.sort(() => Math.random() - 0.5);
+/* util shuffle (pure copy) */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* choose grid columns based on count */
+function colsClass(count) {
+  if (count <= 2) return 'cols-2';
+  if (count <= 6) return 'cols-3';
+  return 'cols-4';
+}
+
+/* add star burst on element */
+function starBurst(el) {
+  // create 6 stars positioned randomly
+  for (let i=0;i<6;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.textContent = '⭐';
+    // center
+    s.style.left = '50%';
+    s.style.top = '50%';
+    // random target translation
+    const tx = (Math.random()*160 - 80) + 'px';
+    const ty = (Math.random()*140 - 70) + 'px';
+    s.style.setProperty('--tx', tx);
+    s.style.setProperty('--ty', ty);
+    el.appendChild(s);
+    // animate
+    requestAnimationFrame(()=> s.classList.add('animate'));
+    setTimeout(()=> s.remove(), 950);
+  }
+}
+
+/* mark correct + feedback */
+function onCorrect(slotEl) {
+  slotEl.classList.add('correct');
+  starBurst(slotEl);
+  const p = POS_FEEDBACK[Math.floor(Math.random()*POS_FEEDBACK.length)];
+  speak(p, 0.9);
+  score += 10;
+  scoreEl.textContent = score;
+}
+
+/* mark wrong */
+function onWrong(slotEl) {
+  slotEl.classList.add('wrong');
+  speak('Try again', 0.95);
+  setTimeout(()=> slotEl.classList.remove('wrong'), 650);
+}
+
+/* ===== Mode: Find Target =====
+   show N unique emojis, target among them (child taps target)
+*/
+function setupFindTarget(count=6) {
+  const pool = shuffle(ALL_EMOJIS);
+  const chosen = pool.slice(0,count);
+  const target = chosen[Math.floor(Math.random()*chosen.length)];
+
+  instructionsEl.textContent = `Find the ${target}`;
+  speak(`Find the ${target}`, 0.85);
+
+  renderGrid(chosen, target);
+}
+
+/* ===== Mode: Find Different =====
+   grid of count items where all are the same except one different.
+*/
+function setupFindDifferent(count=6) {
+  // pick one repeat item and one different item
+  const pool = shuffle(ALL_EMOJIS);
+  const repeat = pool[0];
+  let diff = pool.find(e => e !== repeat);
+  // Build array: count-1 repeat, 1 diff
+  const arr = new Array(count-1).fill(repeat).concat([diff]);
+  const placed = shuffle(arr);
+
+  instructionsEl.textContent = `Find the different item`;
+  speak('Find the different item', 0.85);
+
+  renderGrid(placed, diff);
+}
+
+/* ===== Mode: Find Missing =====
+   Show 6 slots with one blank (❓) at a random position.
+   Below, display 3 options: 1 correct missing, 2 distractors that are already visible in grid (so only one fills blank).
+*/
+function setupFindMissing(totalSlots = 6) {
+  // choose totalSlots distinct emojis
+  const pool = shuffle(ALL_EMOJIS);
+  const chosen = pool.slice(0, totalSlots); // e.g. 6 unique
+  // pick index to be missing
+  const missingIndex = Math.floor(Math.random()*totalSlots);
+  const missingEmoji = chosen[missingIndex];
+
+  // display grid with blank at missingIndex
+  const display = chosen.slice(); // copy
+  display[missingIndex] = '❓';
+
+  instructionsEl.textContent = `Which emoji is missing?`;
+  speak('Which emoji is missing?', 0.88);
+
+  // Render grid
+  renderGrid(display, null, true); // correct not provided (we'll handle via options)
+
+  // Build options: include missingEmoji + two picks that ARE visible in grid (not missing)
+  const visiblePool = chosen.filter((_, idx) => idx !== missingIndex);
+  // ensure at least two visible items exist (they do)
+  const optionVisible = shuffle(visiblePool).slice(0,2);
+  const options = shuffle([missingEmoji, ...optionVisible]);
+  renderOptions(options, missingEmoji);
+}
+
+/* ===== Render grid helper =====
+   emojis: array of emojis (strings). If correct is provided, each slot is clickable and check compares to 'correct'.
+   blankMode: if true, grid contains ❓ and shouldn't be clickable for that cell. We still pass correct via other mechanism.
+*/
+function renderGrid(emojis, correct=null, blankMode=false) {
+  // clear old content (remove previous grid/options)
+  // We preserve top header and instruction; remove everything after instruction
+  // Remove all children in board after the instruction text element
+  while (instructionsEl.nextSibling) instructionsEl.nextSibling.remove();
+
+  const grid = document.createElement('div');
+  grid.className = 'grid ' + colsClass(emojis.length);
+
+  emojis.forEach((em, idx) => {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    slot.textContent = em;
+    // if blankMode and item is ❓, mark blank
+    if (blankMode && em === '❓') {
+      slot.classList.add('blank');
+      // not clickable
+    } else {
+      // clickable slots for findTarget and findDifferent
+      slot.onclick = () => {
+        if (isWaiting) return;
+        // for findMissing, clicks on grid items are treated as wrong (options are below)
+        if (blankMode) {
+          // clicking visible items -> not expected; treat as wrong
+          onWrong(slot);
+          return;
+        }
+        // otherwise compare emoji string
+        if (correct !== null && em === correct) {
+          isWaiting = true;
+          onCorrect(slot);
+          setTimeout(()=> { isWaiting = false; nextRound(); }, 1400);
+        } else {
+          onWrong(slot);
+        }
+      };
     }
+    grid.appendChild(slot);
+  });
 
-    function startGame() {
-      bgMusic.volume = 0.15;
-      bgMusic.play().catch(err => console.log('Audio play failed:', err));
-      level = 1;
-      score = 0;
-      levelDisplay.textContent = level;
-      nextRound();
-    }
+  board.appendChild(grid);
+  // remove any previous options area
+  const existingOptions = document.querySelector('.options');
+  if (existingOptions) existingOptions.remove();
+}
 
-    function getEmojisForLevel() {
-      const emojiCounts = [4, 4, 5, 5, 6, 6];
-      return shuffle([...allEmojis]).slice(0, emojiCounts[level - 1]);
-    }
+/* render option buttons (used for missing mode) */
+function renderOptions(optionsArray, correctEmoji) {
+  // remove if exists
+  const existing = document.querySelector('.options');
+  if (existing) existing.remove();
 
-    function nextRound() {
-      gameContainer.innerHTML = `
-        <div class="top-bar">
-          <h1>Fun Logic Adventure 🌟</h1>
-          <button onclick="exitGame()" class="exit-btn">Exit</button>
-        </div>
-        <p class="level-display">Level: ${level}</p>
-      `;
+  const wrap = document.createElement('div');
+  wrap.className = 'options';
 
-      const currentLevelType = levelTypes[level % levelTypes.length];
-      let chosen = getEmojisForLevel();
-      let instructionText = '';
-      let correctAnswer = '';
-
-      if (currentLevelType.type === 'findTarget') {
-        currentTarget = chosen[Math.floor(Math.random() * chosen.length)];
-        instructionText = `${currentLevelType.prompt} ${currentTarget}`;
-        correctAnswer = currentTarget;
-
-        showInstruction(instructionText);
-        showEmojiGrid(chosen, correctAnswer);
-
-      } else if (currentLevelType.type === 'findMissing') {
-        // 5 emojis shown + 1 missing
-        chosen = shuffle([...allEmojis]).slice(0, 6);
-        correctAnswer = chosen.pop(); // last is missing
-        currentTarget = correctAnswer;
-
-        showInstruction(currentLevelType.prompt);
-
-        // Grid with ❓ slot
-        const grid = document.createElement('div');
-        grid.className = 'emoji-grid';
-        chosen.forEach(e => {
-          const div = document.createElement('div');
-          div.className = 'emoji-item';
-          div.innerText = e;
-          grid.appendChild(div);
-        });
-        const missingDiv = document.createElement('div');
-        missingDiv.className = 'emoji-item';
-        missingDiv.innerText = '❓';
-        missingDiv.style.background = '#e0e0e0';
-        grid.appendChild(missingDiv);
-        gameContainer.appendChild(grid);
-
-        // Options to pick the missing one
-        const options = [correctAnswer, ...shuffle(allEmojis.filter(e => e !== correctAnswer)).slice(0, 2)];
-        shuffle(options);
-
-        const optionsGrid = document.createElement('div');
-        optionsGrid.className = 'options-grid';
-        options.forEach(e => {
-          const div = document.createElement('div');
-          div.className = 'emoji-item';
-          div.innerText = e;
-          div.onclick = () => checkAnswer(div, e, correctAnswer);
-          optionsGrid.appendChild(div);
-        });
-        gameContainer.appendChild(optionsGrid);
-
-      } else if (currentLevelType.type === 'findDifferent') {
-        const baseEmoji = chosen[0];
-        const gridEmojis = Array(chosen.length).fill(baseEmoji);
-        correctAnswer = chosen[1]; // different one
-        const diffIndex = Math.floor(Math.random() * gridEmojis.length);
-        gridEmojis[diffIndex] = correctAnswer;
-        currentTarget = correctAnswer;
-
-        showInstruction(currentLevelType.prompt);
-        showEmojiGrid(gridEmojis, correctAnswer);
-      }
-    }
-
-    function showInstruction(text) {
-      const instructions = document.createElement('p');
-      instructions.className = 'instructions';
-      instructions.innerText = text;
-      gameContainer.appendChild(instructions);
-      speak(text);
-    }
-
-    function showEmojiGrid(emojis, correctAnswer) {
-      const grid = document.createElement('div');
-      grid.className = 'emoji-grid';
-      emojis.forEach(e => {
-        const div = document.createElement('div');
-        div.className = 'emoji-item';
-        div.innerText = e;
-        div.onclick = () => checkAnswer(div, e, correctAnswer);
-        grid.appendChild(div);
-      });
-      gameContainer.appendChild(grid);
-    }
-
-    function checkAnswer(div, emoji, correctAnswer) {
-      if (emoji === correctAnswer) {
-        div.classList.add('correct');
-        score += 10;
-        const say = feedback[Math.floor(Math.random() * feedback.length)];
-        speak(say);
-        setTimeout(() => {
-          if (level < maxLevels) {
-            level++;
-            levelDisplay.textContent = level;
-            nextRound();
-          } else {
-            gameContainer.innerHTML = `
-              <div class="top-bar">
-                <h1>Game Over! 🎉</h1>
-                <button onclick="exitGame()" class="exit-btn">Exit</button>
-              </div>
-              <p class="instructions">You won! Your score: ${score}</p>
-              <button class="start-btn" onclick="startGame()">Play Again</button>
-            `;
-            speak('Congratulations, you won!');
+  optionsArray.forEach(opt => {
+    const o = document.createElement('div');
+    o.className = 'option';
+    o.textContent = opt;
+    o.onclick = () => {
+      if (isWaiting) return;
+      if (opt === correctEmoji) {
+        // find the blank slot and fill it visually
+        const gridSlots = document.querySelectorAll('.grid .slot');
+        for (const s of gridSlots) {
+          if (s.textContent === '❓') {
+            s.textContent = opt;
+            s.classList.add('correct');
+            starBurst(s);
+            break;
           }
-        }, 1500);
+        }
+        isWaiting = true;
+        const positive = POS_FEEDBACK[Math.floor(Math.random()*POS_FEEDBACK.length)];
+        speak(positive, 0.95);
+        score += 10; scoreEl.textContent = score;
+        setTimeout(()=> { isWaiting = false; nextRound(); }, 1400);
       } else {
-        div.classList.add('incorrect');
-        speak('Oops, try again!');
-        setTimeout(() => div.classList.remove('incorrect'), 800);
+        // wrong: animate the selected option and speak
+        o.animate([{ transform: 'translateY(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateY(0)' }], { duration: 450 });
+        speak('Try again', 0.95);
       }
-    }
+    };
+    wrap.appendChild(o);
+  });
 
-    function exitGame() {
-      bgMusic.pause();
-      window.location.href = 'index.html';
-    }
+  board.appendChild(wrap);
+}
 
-    startBtn.onclick = startGame;
-  </script>
+/* ===== Next round logic: cycles modes, increments level */
+function nextRound() {
+  // clear possible leftovers: remove old grid/options but keep header and instructions
+  while (instructionsEl.nextSibling) instructionsEl.nextSibling.remove();
+
+  // choose mode by rotation
+  const mode = MODES[modeIndex % MODES.length];
+  modeIndex++;
+
+  // pick size varying by level (you can modify this map)
+  const sizes = [4,4,5,5,6,6];
+  const size = sizes[(level-1) % sizes.length] || 6;
+  levelLabel.textContent = `Level ${level}`;
+
+  // start specific mode
+  if (mode === 'findTarget') {
+    // choose 'size' unique emojis
+    const arr = shuffle(ALL_EMOJIS).slice(0,size);
+    // ensure at least one target present
+    const target = arr[Math.floor(Math.random()*arr.length)];
+    instructionsEl.textContent = `Find the ${target}`;
+    speak(`Find the ${target}`, 0.85);
+    renderGrid(arr, target, false);
+  } else if (mode === 'findDifferent') {
+    // pick a repeat emoji and a different emoji
+    const pool = shuffle(ALL_EMOJIS);
+    const repeat = pool[0];
+    let diff = pool.find(e => e !== repeat);
+    // build arr with count-1 repeat and one diff
+    const arr = new Array(size-1).fill(repeat).concat([diff]);
+    const placed = shuffle(arr);
+    instructionsEl.textContent = `Find the different item`;
+    speak('Find the different item', 0.85);
+    renderGrid(placed, diff, false);
+  } else if (mode === 'findMissing') {
+    // 6 slots where one blank (use 'size' but ensure at least 4..8)
+    const totalSlots = Math.max(4, Math.min(8, size));
+    setupFindMissing(totalSlots);
+  }
+  // increment level for next time (you can also control when to increment)
+  level = level < 999 ? level + 1 : 1;
+}
+
+/* ===== Button handlers etc ===== */
+startBtn.addEventListener('click', () => {
+  // start soft music after gesture
+  try { bgAudio.currentTime = 0; bgAudio.play().catch(()=>{}); } catch(e){}
+  level = 1; score = 0; scoreEl.textContent = score; modeIndex = 0;
+  nextRound();
+});
+
+restartBtn.addEventListener('click', () => {
+  window.speechSynthesis.cancel();
+  bgAudio.pause();
+  level = 1; score = 0; scoreEl.textContent = score; modeIndex = 0;
+  nextRound();
+});
+
+exitBtn.addEventListener('click', () => {
+  bgAudio.pause();
+  window.location.href = 'index.html';
+});
+
+/* initialize UI text */
+instructionsEl.textContent = 'Tap Start to play!';
+levelLabel.textContent = 'Level 1';
+scoreEl.textContent = '0';
+</script>
 </body>
 </html>
