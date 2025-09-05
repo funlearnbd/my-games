@@ -151,10 +151,25 @@ function nextRound(){
     }
 }
 
+let lastTarget = ''; // global variable to remember last target
+
+function getNewTarget(chosen){
+    let newTarget = shuffle(chosen)[0];
+    if(chosen.length > 1){
+        while(newTarget === lastTarget){
+            newTarget = shuffle(chosen)[0];
+        }
+    }
+    lastTarget = newTarget;
+    return newTarget;
+}
+
+
+    
 function renderTarget(){
     gameContainer.innerHTML=`<h1>Level ${level}</h1>`;
     const chosen=shuffle(imageList).slice(0,4);
-    currentTarget=chosen[0];
+    currentTarget=shuffle(chosen)[0];
     const instructions=document.createElement('p'); instructions.className='instructions';
     instructions.innerText=`Find the ${currentTarget}`;
     gameContainer.appendChild(instructions);
