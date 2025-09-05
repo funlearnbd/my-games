@@ -1,99 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Logic Game</title>
-<style>
-  body {
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    margin: 0; padding: 0;
-    height: 100vh; width: 100vw;
-    display: flex; justify-content: center; align-items: center;
-    background: linear-gradient(135deg, #ffe6f0 0%, #b3e5fc 50%, #c8e6c9 100%);
-    overflow: hidden;
-  }
-  .container {
-    background: rgba(255, 245, 157, 0.95);
-    border-radius: 25px;
-    padding: 10px;
-    width: 95%;
-    max-width: 500px;
-    min-height: 100vh;
-    text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    box-sizing: border-box;
-  }
-  h1 { margin: 10px 0; color: #d81b60; font-size: 2rem; }
-  .start-btn {
-    background: linear-gradient(45deg,#ff4081,#ff80ab);
-    color: #fff;
-    font-weight: bold;
-    padding: 20px 40px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 2rem;
-    margin: 20px 0;
-    box-shadow: 0 0 20px #ff4081, 0 0 40px #ff80ab;
-    animation: shine 1.5s infinite alternate;
-  }
-  @keyframes shine {
-    from { box-shadow: 0 0 20px #ff4081,0 0 40px #ff80ab; }
-    to { box-shadow: 0 0 40px #ff4081,0 0 80px #ff80ab; }
-  }
-  .emoji-grid, .options-grid {
-    display: grid;
-    gap: 10px;
-    margin: 20px auto;
-  }
-  .emoji-grid { grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); }
-  .options-grid { grid-template-columns: repeat(3, 1fr); }
-  .emoji-item {
-    background: #fff;
-    border: 2px solid #444;
-    border-radius: 15px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s, box-shadow 0.3s;
-    max-width: 80px; max-height: 80px;
-  }
-  .emoji-item img {
-    width: 70px; height: 70px; object-fit: contain;
-  }
-  .emoji-item:hover { transform: scale(1.2); box-shadow: 0 0 15px #ff0; }
-  .emoji-item.correct { animation: glow 1s ease-in-out; }
-  @keyframes glow {
-    0% { box-shadow: 0 0 0 #ffd700; }
-    50% { box-shadow: 0 0 15px 8px rgba(255,215,0,0.7); }
-    100% { box-shadow: 0 0 0 transparent; }
-  }
-  .exit-btn {
-    background: #ff4081; color:white; font-weight:bold;
-    padding: 10px 15px; border-radius:12px; border:none;
-    cursor:pointer; font-size:1rem;
-  }
-  .top-bar { display:flex; justify-content: space-between; align-items:center; padding:5px 10px; }
-  .level-display { color:#0288d1; font-weight:bold; }
-  .instructions { font-size:1.3rem; color:#d81b60; margin:10px 0; }
-</style>
-</head>
-<body>
-<div class="container" id="game-container">
-  <div class="top-bar">
-    <h1>Fun Logic Adventure 🌟</h1>
-    <button onclick="exitGame()" class="exit-btn">Exit</button>
-  </div>
-  <p class="instructions">Tap start to play!</p>
-  <button class="start-btn" id="start-btn">Start Game</button>
-</div>
-
-<audio id="bg-music" loop preload="auto">
-  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
-</audio>
-
 <script>
 const gameContainer = document.getElementById('game-container');
 const startBtn = document.getElementById('start-btn');
@@ -101,161 +5,173 @@ const bgMusic = document.getElementById('bg-music');
 const imageList = ['apple','ball','banana','car','cat','cherry','dog','fish','flower','kiwi','orange','pinapple','rabbit','rainbow','star','strawberry','syn','teddy','train'];
 const feedback = ['Yay! 🌟', 'Awesome!', 'Great Job!', 'Excellent!', 'You are amazing!'];
 let level = 1;
-let maxLevels = 10; // can scale to 100+
+let maxLevels = 10;
 let currentTarget = '';
 
-function speak(text, rate=0.8) {
-  const synth = window.speechSynthesis;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = rate; // slower for young kids
-  utter.pitch = 1.2;
-  synth.speak(utter);
+// Preload images and wait until all loaded
+function preloadImages(callback) {
+    let loaded = 0;
+    imageList.forEach(name => {
+        const img = new Image();
+        img.src = `image/${name}.png?v=${Date.now()}`;
+        img.onload = () => { 
+            loaded++; 
+            if(loaded===imageList.length) callback(); 
+        };
+        img.onerror = () => { console.warn(`Image not found: ${name}.png`); loaded++; if(loaded===imageList.length) callback(); };
+    });
 }
 
-function shuffle(arr) {
-  return arr.sort(()=>Math.random()-0.5);
+// Voice helper returns promise
+function speak(text, rate=0.8){
+    return new Promise((resolve)=>{
+        const synth = window.speechSynthesis;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = rate; utter.pitch=1.2;
+        utter.onend = resolve;
+        synth.speak(utter);
+    });
 }
 
-function preloadImages() {
-  imageList.forEach(name => {
-    const img = new Image();
-    img.src = `image/${name}.png?v=${Date.now()}`; // cache-busting
-  });
-}
+function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
 
 function startGame() {
-  level = 1;
-  bgMusic.volume = 0.15;
-  bgMusic.play().catch(err=>console.log(err));
-  nextRound();
+    level=1;
+    bgMusic.volume=0.15;
+    bgMusic.play().catch(err=>console.log(err));
+    nextRound();
 }
 
-function nextRound() {
-  gameContainer.innerHTML = `
+function createInstructions(text){
+    const p=document.createElement('p'); p.className='instructions'; p.innerText=text; return p;
+}
+
+async function nextRound() {
+    gameContainer.innerHTML = `
     <div class="top-bar">
       <h1>Fun Logic Adventure 🌟</h1>
       <button onclick="exitGame()" class="exit-btn">Exit</button>
     </div>
     <p class="level-display">Level: ${level}</p>
-  `;
-  
-  const roundType = level%3; // 0=findTarget,1=findMissing,2=findDifferent
-  let chosen = shuffle([...imageList]).slice(0,6);
-  let instructionText='';
-  
-  if(roundType===0){ // Find target
-    currentTarget = chosen[Math.floor(Math.random()*chosen.length)];
-    instructionText = `Find the ${currentTarget}`;
-    speak(instructionText);
+    `;
     
-    const grid = document.createElement('div');
-    grid.className = 'emoji-grid';
-    chosen.forEach(name=>{
-      const div = document.createElement('div'); div.className='emoji-item';
-      const img = document.createElement('img');
-      img.src = `image/${name}.png?v=${Date.now()}`;
-      div.appendChild(img);
-      div.onclick = ()=>checkAnswer(div,name,currentTarget);
-      grid.appendChild(div);
-    });
-    gameContainer.appendChild(createInstructions(instructionText));
-    gameContainer.appendChild(grid);
-    
-  } else if(roundType===1){ // Find missing
-    currentTarget = chosen[5]; // missing
-    const question = [...chosen]; question[5]='blank';
-    instructionText = `Find the missing item`;
-    speak(instructionText);
-    
-    const grid = document.createElement('div'); grid.className='emoji-grid';
-    question.forEach(name=>{
-      const div = document.createElement('div'); div.className='emoji-item';
-      if(name==='blank'){
-        div.style.background='#e0e0e0'; div.innerHTML='?';
-      } else {
-        const img = document.createElement('img'); img.src=`image/${name}.png?v=${Date.now()}`;
-        div.appendChild(img);
-      }
-      grid.appendChild(div);
-    });
-    gameContainer.appendChild(createInstructions(instructionText));
-    gameContainer.appendChild(grid);
-    
-    // Options
-    const options = [currentTarget, ...shuffle([...imageList].filter(x=>x!==currentTarget)).slice(0,2)];
-    shuffle(options);
-    const optGrid = document.createElement('div'); optGrid.className='options-grid';
-    options.forEach(name=>{
-      const div=document.createElement('div'); div.className='emoji-item';
-      const img=document.createElement('img'); img.src=`image/${name}.png?v=${Date.now()}`;
-      div.appendChild(img);
-      div.onclick=()=>selectMissing(div,name,grid);
-      optGrid.appendChild(div);
-    });
-    gameContainer.appendChild(optGrid);
-    
-  } else { // Find different
-    const sameItem = chosen[0];
-    for(let i=0;i<chosen.length;i++) chosen[i]=sameItem;
-    const diffIndex=Math.floor(Math.random()*chosen.length);
-    currentTarget = shuffle([...imageList].filter(x=>x!==sameItem))[0];
-    chosen[diffIndex]=currentTarget;
-    instructionText='Find the different item';
-    speak(instructionText);
-    
-    const grid = document.createElement('div'); grid.className='emoji-grid';
-    chosen.forEach(name=>{
-      const div = document.createElement('div'); div.className='emoji-item';
-      const img=document.createElement('img'); img.src=`image/${name}.png?v=${Date.now()}`;
-      div.appendChild(img);
-      div.onclick=()=>checkAnswer(div,name,currentTarget);
-      grid.appendChild(div);
-    });
-    gameContainer.appendChild(createInstructions(instructionText));
-    gameContainer.appendChild(grid);
-  }
-}
+    const roundType = level%3;
+    let chosen = shuffle([...imageList]).slice(0,6);
+    let instructionText='';
 
-function createInstructions(text){
-  const p=document.createElement('p'); p.className='instructions'; p.innerText=text; return p;
+    if(roundType===0){ // Find target
+        currentTarget = chosen[Math.floor(Math.random()*chosen.length)];
+        instructionText = `Find the ${currentTarget}`;
+        gameContainer.appendChild(createInstructions(instructionText));
+        await speak(instructionText,0.8);
+        
+        const grid = document.createElement('div'); grid.className='emoji-grid';
+        chosen.forEach(name=>{
+            const div=document.createElement('div'); div.className='emoji-item';
+            const img=document.createElement('img'); img.src=`image/${name}.png?v=${Date.now()}`;
+            div.appendChild(img);
+            div.onclick=()=>checkAnswer(div,name,currentTarget);
+            grid.appendChild(div);
+        });
+        gameContainer.appendChild(grid);
+        
+    } else if(roundType===1){ // Find missing
+        currentTarget = chosen[5];
+        const question=[...chosen]; question[5]='blank';
+        instructionText='Find the missing item';
+        gameContainer.appendChild(createInstructions(instructionText));
+        await speak(instructionText,0.8);
+
+        const grid = document.createElement('div'); grid.className='emoji-grid';
+        question.forEach(name=>{
+            const div=document.createElement('div'); div.className='emoji-item';
+            if(name==='blank'){ div.innerHTML='?'; div.style.background='#e0e0e0'; }
+            else { const img=document.createElement('img'); img.src=`image/${name}.png?v=${Date.now()}`; div.appendChild(img);}
+            grid.appendChild(div);
+        });
+        gameContainer.appendChild(grid);
+
+        const options = [currentTarget,...shuffle([...imageList].filter(x=>x!==currentTarget)).slice(0,2)];
+        shuffle(options);
+        const optGrid=document.createElement('div'); optGrid.className='options-grid';
+        options.forEach(name=>{
+            const div=document.createElement('div'); div.className='emoji-item';
+            const img=document.createElement('img'); img.src=`image/${name}.png?v=${Date.now()}`;
+            div.appendChild(img);
+            div.onclick=()=>selectMissing(div,name,grid);
+            optGrid.appendChild(div);
+        });
+        gameContainer.appendChild(optGrid);
+        
+    } else { // Find different
+        const sameItem = chosen[0];
+        for(let i=0;i<chosen.length;i++) chosen[i]=sameItem;
+        const diffIndex = Math.floor(Math.random()*chosen.length);
+        currentTarget = shuffle([...imageList].filter(x=>x!==sameItem))[0];
+        chosen[diffIndex]=currentTarget;
+        instructionText='Find the different item';
+        gameContainer.appendChild(createInstructions(instructionText));
+        await speak(instructionText,0.8);
+
+        const grid = document.createElement('div'); grid.className='emoji-grid';
+        chosen.forEach(name=>{
+            const div=document.createElement('div'); div.className='emoji-item';
+            const img=document.createElement('img'); img.src=`image/${name}.png?v=${Date.now()}`;
+            div.appendChild(img);
+            div.onclick=()=>checkAnswer(div,name,currentTarget);
+            grid.appendChild(div);
+        });
+        gameContainer.appendChild(grid);
+    }
 }
 
 function checkAnswer(div,name,target){
-  if(name===target){
-    div.classList.add('correct'); speak(feedback[Math.floor(Math.random()*feedback.length)],0.9);
-    setTimeout(()=>{ nextLevel(); },1200);
-  } else {
-    div.style.border='2px solid red';
-    speak('Oops! Try again',0.9);
-    setTimeout(()=>{ div.style.border='2px solid #444'; },800);
-  }
+    if(name===target){
+        div.classList.add('correct');
+        addStarEffect(div);
+        speak(feedback[Math.floor(Math.random()*feedback.length)],0.9).then(()=>nextLevel());
+    } else {
+        div.style.border='2px solid red';
+        speak('Oops! Try again',0.9);
+        setTimeout(()=>{ div.style.border='2px solid #444'; },800);
+    }
 }
 
 function selectMissing(div,name,grid){
-  if(name===currentTarget){
-    const blankDiv = Array.from(grid.children).find(d=>d.innerHTML==='?');
-    blankDiv.innerHTML = `<img src="image/${name}.png?v=${Date.now()}" />`;
-    checkAnswer(blankDiv,name,currentTarget);
-  } else {
-    div.style.border='2px solid red';
-    speak('Oops! Try again',0.9);
-    setTimeout(()=>{ div.style.border='2px solid #444'; },800);
-  }
+    if(name===currentTarget){
+        const blankDiv = Array.from(grid.children).find(d=>d.innerHTML==='?');
+        blankDiv.innerHTML=`<img src="image/${name}.png?v=${Date.now()}" />`;
+        checkAnswer(blankDiv,name,currentTarget);
+    } else {
+        div.style.border='2px solid red';
+        speak('Oops! Try again',0.9);
+        setTimeout(()=>{ div.style.border='2px solid #444'; },800);
+    }
 }
 
 function nextLevel(){
-  level++; 
-  if(level>maxLevels){ 
-    gameContainer.innerHTML=`<h1>Game Over! 🎉</h1><p class="instructions">You completed all levels!</p>
-      <button class="start-btn" onclick="startGame()">Play Again</button>`;
-    speak('Congratulations! You completed all levels!');
-  } else { nextRound(); }
+    level++;
+    if(level>maxLevels){
+        gameContainer.innerHTML=`<h1>Game Over! 🎉</h1><p class="instructions">You completed all levels!</p>
+        <button class="start-btn" onclick="startGame()">Play Again</button>`;
+        speak('Congratulations! You completed all levels!');
+    } else nextRound();
 }
 
 function exitGame(){ bgMusic.pause(); window.location.href='index.html'; }
 
-preloadImages();
+// Star effect
+function addStarEffect(parent){
+    const star = document.createElement('div');
+    star.style.position='absolute'; star.style.width='40px'; star.style.height='40px';
+    star.style.background='url(https://i.imgur.com/9j2b0gF.png) no-repeat center/contain';
+    star.style.top='0'; star.style.left='0'; star.style.pointerEvents='none';
+    parent.style.position='relative';
+    parent.appendChild(star);
+    setTimeout(()=>parent.removeChild(star),1000);
+}
+
+// Preload all images first
+preloadImages(()=>{ startBtn.disabled=false; });
 startBtn.onclick=startGame;
 </script>
-</body>
-</html>
