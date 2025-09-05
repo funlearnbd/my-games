@@ -3,322 +3,597 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logic Game</title>
+    <title>Kids Logic Games</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: #eef2f8;
-            margin: 0;
-            padding: 0;
+            background-color: #f0f4f8;
+            color: #1e293b;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-        }
-        .game-container {
-            background: #fff;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 900px;
-            width: 95%;
             text-align: center;
-            transition: all 0.3s ease;
+            padding: 1rem;
         }
-        h1 {
-            margin-top: 0;
-            color: #2c3e50;
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            max-width: 90%;
+            width: 600px;
         }
-        #question {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin: 15px 0;
-            color: #34495e;
-            min-height: 2rem;
-        }
-        .grid {
+        .emoji-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-items: center;
         }
-        #puzzle-grid {
-            margin-bottom: 0;
+        .emoji-grid.grid-4 {
+            grid-template-columns: repeat(4, 1fr);
         }
-        #choices-grid {
-            margin-top: 10px;
+        .emoji-grid.grid-6 {
+            grid-template-columns: repeat(6, 1fr);
         }
-        .item {
-            background: #f8f9fa;
-            border: 2px solid #ced4da;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100px;
+        .emoji-item {
             font-size: 3rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-        .item:hover:not(.disabled) {
-            transform: scale(1.05);
-            border-color: #2980b9;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .item.correct {
-            border-color: #27ae60;
-            background-color: #e8f9f5;
-            animation: bounce 0.5s;
-        }
-        .item.incorrect {
-            border-color: #c0392b;
-            background-color: #ffe8e8;
-            animation: shake 0.5s;
-        }
-        .item.disabled {
-            cursor: default;
-            opacity: 0.7;
-        }
-        #message {
-            font-size: 1.3rem;
-            font-weight: bold;
-            margin-top: 10px;
-            min-height: 30px;
-        }
-        #score {
-            margin-top: 10px;
-            font-size: 1.1rem;
-            color: #2d3436;
-        }
-        .btns {
-            margin-top: 20px;
-        }
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 30px;
-            margin: 5px;
+            padding: 0.5rem;
             cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            border-radius: 0.75rem;
+            position: relative;
+        }
+        .emoji-item:hover {
+            transform: scale(1.1);
+        }
+        .emoji-item.correct {
+            animation: pulse-correct 0.5s ease-out;
+        }
+        .emoji-item.incorrect {
+            animation: shake 0.5s ease-out;
+        }
+        .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .instructions {
             font-size: 1rem;
-            font-weight: bold;
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease, background 0.2s ease;
+            color: #4b5563;
         }
-        button:hover {
-            transform: translateY(-2px);
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 100;
+            animation: fadeIn 0.3s ease-out;
+            text-align: center;
         }
-        #newGameBtn { background: #27ae60; }
-        #exitBtn { background: #e74c3c; }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .message-box button {
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .message-box button:hover {
+            background-color: #2563eb;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        /* New animations */
+        @keyframes pulse-correct {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+            50% { transform: scale(1.3); box-shadow: 0 0 0 15px rgba(52, 211, 153, 0); }
+            100% { transform: scale(1); }
         }
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+        .missing-placeholder {
+            width: 3rem;
+            height: 3rem;
+            border: 2px dashed #94a3b8;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .missing-placeholder:hover {
+            background-color: #e2e8f0;
+        }
+        .controls {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            z-index: 200;
+        }
+        #intro-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+        #start-button {
+            padding: 1rem 2rem;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 9999px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        #start-button:hover {
+            background-color: #1e40af;
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body>
-    <div class="game-container">
-        <h1>Logic Game</h1>
-        <div id="question"></div>
-        <div id="puzzle-grid" class="grid"></div>
-        <div id="choices-grid" class="grid"></div>
-        <div id="message"></div>
-        <div id="score">Score: 0</div>
-        <div class="btns">
-            <button id="newGameBtn">New Game</button>
-            <button id="exitBtn">Exit Game</button>
+<body class="bg-gray-100">
+
+    <div class="controls">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.81 5 3.54 5 6.71s-2.11 5.9-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+    </div>
+
+    <div id="game-container" class="container">
+        <!-- Intro screen will be shown initially -->
+        <div id="intro-screen">
+            <h1 class="text-3xl font-bold text-gray-800">Welcome to Logic Games!</h1>
+            <p class="text-gray-600 text-lg">Help the emojis find their match.</p>
+            <button id="start-button">Start Game</button>
         </div>
     </div>
 
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <p>Loading...</p>
+    </div>
+
     <script>
-        const items = [
-            { name: "Apple", emoji: "🍎" },
-            { name: "Banana", emoji: "🍌" },
-            { name: "Car", emoji: "🚗" },
-            { name: "Dog", emoji: "🐶" },
-            { name: "Cat", emoji: "🐱" },
-            { name: "Flower", emoji: "🌸" },
-            { name: "Ball", emoji: "⚽" },
-            { name: "Star", emoji: "⭐" },
-            { name: "Tree", emoji: "🌳" },
-            { name: "Fish", emoji: "🐟" },
-            { name: "Happy Face", emoji: "😊" },
-            { name: "Sad Face", emoji: "😢" },
-            { name: "Sun", emoji: "☀️" },
-            { name: "Moon", emoji: "🌙" },
-            { name: "Heart", emoji: "❤️" }
+        const gameContainer = document.getElementById('game-container');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const volumeSlider = document.getElementById('volume-slider');
+        const startButton = document.getElementById('start-button');
+        let currentLevel = 0;
+        let isWaitingForNextLevel = false;
+
+        const allEmojis = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍒', '🍑', '🍍', '🥭', '🥝', '🥑', '🍋', '🍊', '🍐', '🍏', '🫐', '🥥', '🍈', '🍅', '🍆'];
+        const positiveFeedback = ['Great job!', 'Excellent!', 'You are doing great!', 'Awesome!', 'Fantastic!'];
+        
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const gainNode = audioContext.createGain();
+        let backgroundMusicSource = null;
+
+        // TTS API configuration
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+        // Game progression data
+        const levels = [
+            { type: 'simple_find_it', size: 3 },
+            { type: 'simple_find_it', size: 4 },
+            { type: 'simple_find_it', size: 5 },
+            { type: 'find_one', size: 3 },
+            { type: 'find_one', size: 4 },
+            { type: 'find_different', size: 4 },
+            { type: 'find_different', size: 4 },
+            { type: 'find_one', size: 4 },
+            { type: 'find_one', size: 4 },
+            { type: 'find_missing', size: 8 },
+            { type: 'find_missing', size: 8 },
+            { type: 'find_different', size: 6 },
+            { type: 'find_different', size: 6 },
+            { type: 'find_one', size: 6 },
+            { type: 'find_one', size: 6 },
+            { type: 'find_missing', size: 15 },
+            { type: 'find_missing', size: 15 },
+            { type: 'find_different', size: 8 },
+            { type: 'find_different', size: 8 },
         ];
 
-        let score = 0;
-        let correctAnswer = null;
-        let gameActive = true;
-
-        const puzzleGrid = document.getElementById("puzzle-grid");
-        const choicesGrid = document.getElementById("choices-grid");
-        const questionEl = document.getElementById("question");
-        const messageEl = document.getElementById("message");
-        const scoreEl = document.getElementById("score");
-        const newGameBtn = document.getElementById("newGameBtn");
-        const exitBtn = document.getElementById("exitBtn");
-
-        function shuffle(arr) {
-            return arr.sort(() => Math.random() - 0.5);
-        }
-
-        function newRound() {
-            gameActive = true;
-            messageEl.textContent = "";
-            puzzleGrid.innerHTML = "";
-            choicesGrid.innerHTML = "";
-            const gameModes = ["find", "different", "missing"];
-            const mode = gameModes[Math.floor(Math.random() * gameModes.length)];
-
-            if (mode === "find") {
-                setupFind();
-                puzzleGrid.style.display = 'grid';
-                choicesGrid.style.display = 'none';
-            }
-            else if (mode === "different") {
-                setupDifferent();
-                puzzleGrid.style.display = 'grid';
-                choicesGrid.style.display = 'none';
-            }
-            else if (mode === "missing") {
-                setupMissing();
-                puzzleGrid.style.display = 'grid';
-                choicesGrid.style.display = 'grid';
-            }
-        }
-
-        function setupFind() {
-            const chosen = items[Math.floor(Math.random() * items.length)];
-            correctAnswer = chosen.name;
-            questionEl.textContent = `Find the ${chosen.name}!`;
-            const options = shuffle([chosen, ...shuffle(items).filter(item => item.name !== chosen.name).slice(0, 5)]);
-
-            options.forEach(opt => {
-                const div = document.createElement("div");
-                div.className = "item";
-                div.textContent = opt.emoji;
-                div.onclick = () => checkAnswer(opt.name, div);
-                puzzleGrid.appendChild(div);
-            });
-        }
-
-        function setupDifferent() {
-            const common = items[Math.floor(Math.random() * items.length)];
-            let diff;
-            do {
-                diff = items[Math.floor(Math.random() * items.length)];
-            } while (diff.name === common.name);
-            correctAnswer = diff.name;
-            questionEl.textContent = "Find the different item!";
-
-            let options = Array(5).fill(common).concat(diff);
-            options = shuffle(options);
-            
-            options.forEach(opt => {
-                const div = document.createElement("div");
-                div.className = "item";
-                div.textContent = opt.emoji;
-                div.onclick = () => checkAnswer(opt.name, div);
-                puzzleGrid.appendChild(div);
-            });
-        }
-
-        function setupMissing() {
-            // Select 3 unique items for the puzzle pattern and the answer
-            let selectedItems = shuffle(items).slice(0, 3);
-            const puzzleItemA = selectedItems[0];
-            const puzzleItemB = selectedItems[1];
-            const correctItem = selectedItems[2];
-
-            correctAnswer = correctItem.name;
-            questionEl.textContent = "Find the missing piece!";
-
-            // Display the puzzle pattern and blank box
-            puzzleGrid.innerHTML = '';
-            const puzzleSequence = [puzzleItemA, puzzleItemB, puzzleItemA, puzzleItemB];
-            
-            puzzleSequence.forEach(opt => {
-                const div = document.createElement("div");
-                div.className = "item disabled";
-                div.textContent = opt.emoji;
-                puzzleGrid.appendChild(div);
-            });
-            const placeholder = document.createElement("div");
-            placeholder.className = "item disabled";
-            placeholder.textContent = "?";
-            puzzleGrid.appendChild(placeholder);
-
-            // Create answer choices: the correct one and three incorrect ones
-            // Ensure incorrect choices are unique from the puzzle items and correct answer
-            let incorrectChoices = shuffle(items.filter(i => 
-                i.name !== puzzleItemA.name && i.name !== puzzleItemB.name && i.name !== correctItem.name
-            )).slice(0, 1);
-            
-            // Combine the correct item and incorrect choices for the answers grid
-            const answers = shuffle([correctItem, puzzleItemA, puzzleItemB, ...incorrectChoices]);
-            choicesGrid.innerHTML = '';
-
-            // Render the answer choices
-            answers.forEach(opt => {
-                const div = document.createElement("div");
-                div.className = "item";
-                div.textContent = opt.emoji;
-                div.onclick = () => {
-                    if (gameActive) {
-                        if (opt.name === correctAnswer) {
-                            placeholder.textContent = opt.emoji;
-                            placeholder.classList.add('correct');
+        // --- Audio Functions ---
+        async function playAudio(text, voiceName = 'Kore') {
+            loadingOverlay.classList.remove('hidden');
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: { prebuiltVoiceConfig: { voiceName } }
                         }
-                        checkAnswer(opt.name, div);
-                    }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
                 };
-                choicesGrid.appendChild(div);
-            });
-        }
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    console.error("API call failed with status:", response.status, response.statusText);
+                    const errorBody = await response.text();
+                    console.error("API response body:", errorBody);
+                    return;
+                }
 
-        function checkAnswer(ans, element) {
-            if (!gameActive) return;
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
 
-            if (ans === correctAnswer) {
-                gameActive = false;
-                messageEl.textContent = "✅ Correct!";
-                messageEl.style.color = "#27ae60";
-                score++;
-                scoreEl.textContent = "Score: " + score;
-                element.classList.add("correct");
-                setTimeout(newRound, 1500);
-            } else {
-                messageEl.textContent = "❌ Try again!";
-                messageEl.style.color = "#e74c3c";
-                element.classList.add("incorrect");
-                setTimeout(() => {
-                    element.classList.remove("incorrect");
-                    messageEl.textContent = "";
-                    messageEl.style.color = "";
-                }, 800);
+                if (!audioData) {
+                    console.error("Audio data not found in response.");
+                    return;
+                }
+
+                const pcmData = base64ToArrayBuffer(audioData);
+                const pcm16 = new Int16Array(pcmData);
+                const wavBlob = pcmToWav(pcm16, 16000); // Sample rate is 16kHz
+                const audioUrl = URL.createObjectURL(wavBlob);
+
+                const audio = new Audio(audioUrl);
+                audio.play();
+
+            } catch (error) {
+                console.error("Error playing audio:", error);
+            } finally {
+                loadingOverlay.classList.add('hidden');
             }
         }
 
-        newGameBtn.onclick = () => {
-            score = 0;
-            scoreEl.textContent = "Score: 0";
-            newRound();
+        async function playBackgroundMusic() {
+             const payload = {
+                contents: [{ parts: [{ text: "La la la la, la la la la. " }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    console.error("Background music API call failed with status:", response.status, response.statusText);
+                    const errorBody = await response.text();
+                    console.error("API response body:", errorBody);
+                    return;
+                }
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+
+                if (audioData) {
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, 16000);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    
+                    backgroundMusicSource = new Audio(audioUrl);
+                    backgroundMusicSource.loop = true;
+                    backgroundMusicSource.volume = volumeSlider.value;
+                    backgroundMusicSource.play();
+                }
+            } catch (error) {
+                console.error("Error playing background music:", error);
+            }
+        }
+        
+        volumeSlider.oninput = (e) => {
+            if (backgroundMusicSource) {
+                backgroundMusicSource.volume = e.target.value;
+            }
         };
 
-        exitBtn.onclick = () => {
-            window.location.href = "index.html";
+        const base64ToArrayBuffer = (base64) => {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
         };
 
-        window.onload = newRound;
+        const pcmToWav = (pcm16, sampleRate) => {
+            const numSamples = pcm16.length;
+            const buffer = new ArrayBuffer(44 + numSamples * 2);
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            const writeString = (str) => {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset++, str.charCodeAt(i));
+                }
+            };
+
+            // RIFF header
+            writeString('RIFF');
+            view.setUint32(offset, 36 + numSamples * 2, true); offset += 4;
+            writeString('WAVE');
+
+            // fmt chunk
+            writeString('fmt ');
+            view.setUint32(offset, 16, true); offset += 4;
+            view.setUint16(offset, 1, true); offset += 2; // Audio format (1 for PCM)
+            view.setUint16(offset, 1, true); offset += 2; // Number of channels
+            view.setUint32(offset, sampleRate, true); offset += 4; // Sample rate
+            view.setUint32(offset, sampleRate * 2, true); offset += 4; // Byte rate
+            view.setUint16(offset, 2, true); offset += 2; // Block align
+            view.setUint16(offset, 16, true); offset += 2; // Bits per sample
+
+            // data chunk
+            writeString('data');
+            view.setUint32(offset, numSamples * 2, true); offset += 4;
+            for (let i = 0; i < numSamples; i++) {
+                view.setInt16(offset, pcm16[i], true);
+                offset += 2;
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        };
+
+
+        // --- Game Logic ---
+        const generateGameHTML = (title, instructions, items, gridClass) => {
+            let html = `
+                <h1 class="title">${title}</h1>
+                <p class="instructions">${instructions}</p>
+                <div class="emoji-grid ${gridClass}">
+            `;
+            items.forEach((item, index) => {
+                const isPlaceholder = item === null;
+                if (isPlaceholder) {
+                    html += `<div id="item-${index}" class="emoji-item missing-placeholder" data-index="${index}">?</div>`;
+                } else {
+                    html += `<div id="item-${index}" class="emoji-item" data-index="${index}">${item}</div>`;
+                }
+            });
+            html += '</div>';
+            return html;
+        };
+
+        const generateLevelData = (levelType, size) => {
+            const emojis = shuffleArray([...allEmojis]);
+            let items = [];
+            let target, missingIndex;
+
+            switch (levelType) {
+                case 'simple_find_it':
+                    items = shuffleArray(emojis.slice(0, size));
+                    target = items[Math.floor(Math.random() * size)];
+                    return { items, target, type: 'simple_find_it' };
+                case 'find_one':
+                    target = emojis[0];
+                    items = new Array(size).fill(emojis[1]);
+                    items[Math.floor(Math.random() * size)] = target;
+                    return { items, target, type: 'find_one' };
+                case 'find_different':
+                    target = emojis[0];
+                    items = new Array(size).fill(emojis[1]);
+                    items[Math.floor(Math.random() * size)] = target;
+                    return { items, target, type: 'find_different' };
+                case 'find_missing':
+                    missingIndex = Math.floor(Math.random() * size);
+                    items = shuffleArray(emojis.slice(0, size + 1));
+                    target = items.splice(missingIndex, 1)[0];
+                    return { items, target, missingIndex, type: 'find_missing' };
+                default:
+                    return null;
+            }
+        };
+
+        const loadLevel = async () => {
+            isWaitingForNextLevel = false;
+            const levelConfig = levels[currentLevel];
+
+            if (!levelConfig) {
+                showMessage('You finished all the levels! Great job!', 'Play Again', () => {
+                    currentLevel = 0;
+                    startGame();
+                });
+                return;
+            }
+
+            const levelData = generateLevelData(levelConfig.type, levelConfig.size);
+            let instructionsText = '';
+            let gridClass = `grid-${Math.ceil(Math.sqrt(levelConfig.size + (levelConfig.type === 'find_missing' ? 1 : 0)))}`;
+            if (levelConfig.size > 9) gridClass = 'grid-4';
+            if (levelConfig.size > 12) gridClass = 'grid-5';
+            if (levelConfig.size > 16) gridClass = 'grid-6';
+
+            let displayItems = [...levelData.items];
+            if (levelData.type === 'find_missing') {
+                displayItems.splice(levelData.missingIndex, 0, null);
+            }
+
+            if (levelData.type === 'simple_find_it') {
+                instructionsText = `Tap on the ${levelData.target} emoji.`;
+            } else if (levelData.type === 'find_one') {
+                instructionsText = `Tap on the ${levelData.target} emoji.`;
+            } else if (levelData.type === 'find_different') {
+                instructionsText = 'Tap on the emoji that is different from the others.';
+            } else if (levelData.type === 'find_missing') {
+                instructionsText = 'Which emoji is missing from the pattern?';
+            }
+            
+            await playAudio(instructionsText);
+
+            gameContainer.innerHTML = generateGameHTML(
+                'Level ' + (currentLevel + 1),
+                instructionsText,
+                displayItems,
+                gridClass
+            );
+
+            if (levelData.type === 'find_missing') {
+                const placeholder = document.querySelector('.missing-placeholder');
+                placeholder.onclick = () => showMissingItems(levelData, gridClass);
+            } else {
+                document.querySelectorAll('.emoji-item').forEach(item => {
+                    item.onclick = (event) => checkAnswer(event, levelData);
+                });
+            }
+        };
+
+        const showMissingItems = (levelData, gridClass) => {
+            gameContainer.innerHTML = '';
+            const availableEmojis = allEmojis.filter(e => !levelData.items.includes(e));
+            const options = shuffleArray([
+                ...availableEmojis.slice(0, 3),
+                levelData.target
+            ]).slice(0, 4);
+
+            const optionsGridHTML = options.map(emoji => `
+                <div class="emoji-item text-4xl" data-emoji="${emoji}">${emoji}</div>
+            `).join('');
+
+            gameContainer.innerHTML = `
+                <h1 class="title">Choose the Missing Emoji!</h1>
+                <div class="emoji-grid ${gridClass}">${optionsGridHTML}</div>
+            `;
+            
+            document.querySelectorAll('.emoji-item').forEach(item => {
+                item.onclick = () => checkMissingAnswer(item.dataset.emoji, levelData);
+            });
+        };
+
+        const checkMissingAnswer = (selectedEmoji, levelData) => {
+            if (isWaitingForNextLevel) return;
+            if (selectedEmoji === levelData.target) {
+                const randomFeedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+                playAudio(randomFeedback);
+                isWaitingForNextLevel = true;
+                setTimeout(() => {
+                    showMessage('Correct!', 'Next Level', nextLevel);
+                }, 500);
+            } else {
+                playAudio('Try again.');
+                showMessage('Try again!', 'Keep Trying', () => {});
+            }
+        };
+
+        const checkAnswer = (event, levelData) => {
+            if (isWaitingForNextLevel) return;
+            const selectedItem = event.currentTarget;
+            let correct = false;
+
+            if (levelData.type === 'simple_find_it' || levelData.type === 'find_one') {
+                correct = selectedItem.textContent.trim() === levelData.target;
+            } else if (levelData.type === 'find_different') {
+                const allItems = Array.from(document.querySelectorAll('.emoji-item')).map(el => el.textContent.trim());
+                const counts = allItems.reduce((acc, val) => ({ ...acc, [val]: (acc[val] || 0) + 1 }), {});
+                const differentEmoji = Object.keys(counts).find(key => counts[key] === 1);
+                correct = selectedItem.textContent.trim() === differentEmoji;
+            }
+
+            if (correct) {
+                selectedItem.classList.add('correct');
+                const randomFeedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+                playAudio(randomFeedback);
+                isWaitingForNextLevel = true;
+                setTimeout(() => {
+                    showMessage('Correct!', 'Next Level', nextLevel);
+                }, 500);
+            } else {
+                selectedItem.classList.add('incorrect');
+                playAudio('Try again.');
+                setTimeout(() => {
+                    selectedItem.classList.remove('incorrect');
+                }, 500);
+            }
+        };
+
+        const nextLevel = () => {
+            currentLevel++;
+            loadLevel();
+        };
+
+        const showMessage = (message, buttonText, onButtonClick) => {
+            const existingMessageBox = document.querySelector('.message-box');
+            if (existingMessageBox) existingMessageBox.remove();
+            
+            const messageBox = document.createElement('div');
+            messageBox.className = 'message-box';
+            messageBox.innerHTML = `<p class="text-xl font-semibold">${message}</p><button id="message-button">${buttonText}</button>`;
+            document.body.appendChild(messageBox);
+            document.getElementById('message-button').onclick = () => {
+                messageBox.remove();
+                if (onButtonClick) onButtonClick();
+            };
+        };
+
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const startGame = () => {
+            document.getElementById('intro-screen').remove();
+            playBackgroundMusic();
+            loadLevel();
+        };
+
+        window.onload = () => {
+            startButton.onclick = startGame;
+        };
     </script>
 </body>
 </html>
