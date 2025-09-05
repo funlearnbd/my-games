@@ -39,6 +39,12 @@
       gap: 12px;
       margin: 20px 10px;
     }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 10px;
+    }
     .emoji-item {
       font-size: 4rem;
       background: #fff3e0;
@@ -174,7 +180,7 @@
       `;
 
       const currentLevelType = levelTypes[level % levelTypes.length];
-      const chosen = getEmojisForLevel();
+      let chosen = getEmojisForLevel();
       let instructionText = '';
       let correctAnswer = '';
 
@@ -182,37 +188,94 @@
         currentTarget = chosen[Math.floor(Math.random() * chosen.length)];
         instructionText = `${currentLevelType.prompt} ${currentTarget}`;
         correctAnswer = currentTarget;
+
+        const instructions = document.createElement('p');
+        instructions.className = 'instructions';
+        instructions.innerText = instructionText;
+        gameContainer.appendChild(instructions);
+
+        speak(instructionText);
+
+        const grid = document.createElement('div');
+        grid.className = 'emoji-grid';
+        chosen.forEach((e, index) => {
+          const div = document.createElement('div');
+          div.className = 'emoji-item';
+          div.innerText = e;
+          div.onclick = () => checkAnswer(div, e, correctAnswer);
+          grid.appendChild(div);
+        });
+        gameContainer.appendChild(grid);
       } else if (currentLevelType.type === 'findMissing') {
-        const missingIndex = Math.floor(Math.random() * chosen.length);
-        currentTarget = chosen[missingIndex];
-        chosen[missingIndex] = '❓'; // Placeholder for missing item
+        // Ensure 6 items, last one is blank
+        chosen = shuffle([...allEmojis]).slice(0, 6);
+        currentTarget = chosen[5]; // Last item is the missing one
+        chosen[5] = '❓';
         instructionText = currentLevelType.prompt;
         correctAnswer = currentTarget;
+
+        const instructions = document.createElement('p');
+        instructions.className = 'instructions';
+        instructions.innerText = instructionText;
+        gameContainer.appendChild(instructions);
+
+        speak(instructionText);
+
+        const grid = document.createElement('div');
+        grid.className = 'emoji-grid';
+        chosen.forEach((e, index) => {
+          const div = document.createElement('div');
+          div.className = 'emoji-item';
+          div.innerText = e;
+          if (e === '❓') {
+            div.style.background = '#e0e0e0'; // Gray for blank
+            div.style.cursor = 'default';
+          } else {
+            div.onclick = () => checkAnswer(div, e, correctAnswer);
+          }
+          grid.appendChild(div);
+        });
+        gameContainer.appendChild(grid);
+
+        // Add 3 options at the bottom
+        const options = [currentTarget, ...shuffle([...allEmojis].filter(e => e !== currentTarget)).slice(0, 2)];
+        shuffle(options);
+
+        const optionsGrid = document.createElement('div');
+        optionsGrid.className = 'options-grid';
+        options.forEach(e => {
+          const div = document.createElement('div');
+          div.className = 'emoji-item';
+          div.innerText = e;
+          div.onclick = () => checkAnswer(div, e, correctAnswer);
+          optionsGrid.appendChild(div);
+        });
+        gameContainer.appendChild(optionsGrid);
       } else if (currentLevelType.type === 'findDifferent') {
         const differentIndex = Math.floor(Math.random() * chosen.length);
         currentTarget = allEmojis.find(e => !chosen.includes(e));
         chosen[differentIndex] = currentTarget;
         instructionText = currentLevelType.prompt;
         correctAnswer = currentTarget;
+
+        const instructions = document.createElement('p');
+        instructions.className = 'instructions';
+        instructions.innerText = instructionText;
+        gameContainer.appendChild(instructions);
+
+        speak(instructionText);
+
+        const grid = document.createElement('div');
+        grid.className = 'emoji-grid';
+        chosen.forEach((e, index) => {
+          const div = document.createElement('div');
+          div.className = 'emoji-item';
+          div.innerText = e;
+          div.onclick = () => checkAnswer(div, e, correctAnswer);
+          grid.appendChild(div);
+        });
+        gameContainer.appendChild(grid);
       }
-
-      const instructions = document.createElement('p');
-      instructions.className = 'instructions';
-      instructions.innerText = instructionText;
-      gameContainer.appendChild(instructions);
-
-      speak(instructionText);
-
-      const grid = document.createElement('div');
-      grid.className = 'emoji-grid';
-      chosen.forEach((e, index) => {
-        const div = document.createElement('div');
-        div.className = 'emoji-item';
-        div.innerText = e;
-        div.onclick = () => checkAnswer(div, e, correctAnswer);
-        grid.appendChild(div);
-      });
-      gameContainer.appendChild(grid);
     }
 
     function checkAnswer(div, emoji, correctAnswer) {
