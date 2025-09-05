@@ -2,48 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kids Logic Game</title>
   <style>
     body {
       font-family: 'Comic Sans MS', cursive, sans-serif;
       margin: 0;
+      padding: 0;
       height: 100vh;
+      width: 100vw;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%) !important;
+      background: linear-gradient(135deg, #ffe6f0 0%, #b3e5fc 50%, #c8e6c9 100%);
+      overflow: hidden;
     }
     .container {
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 20px;
-      padding: 20px;
-      max-width: 700px;
-      width: 90%;
+      background: rgba(255, 245, 157, 0.9); /* Soft yellow for kid-friendly feel */
+      border-radius: 25px;
+      padding: 15px;
+      width: 100%;
+      max-width: 500px;
+      min-height: 100vh;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      box-sizing: border-box;
     }
     h1 {
-      margin: 0;
-      color: #ff6600;
+      margin: 10px 0;
+      color: #d81b60; /* Bright pink for fun */
+      font-size: 2rem;
     }
     .emoji-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      gap: 12px;
+      margin: 20px 10px;
     }
     .emoji-item {
-      font-size: 4rem;
-      background: #fef3c7;
+      font-size: 4rem; /* Larger emojis */
+      background: #fff3e0;
       border-radius: 15px;
       cursor: pointer;
-      padding: 15px;
+      padding: 12px;
       transition: transform 0.2s, background-color 0.2s;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .emoji-item:hover {
-      transform: scale(1.15);
-      background-color: #fde68a;
+      transform: scale(1.25);
+      background-color: #ffd54f;
     }
     .emoji-item.correct {
       animation: sparkle 1s ease-out;
@@ -52,69 +62,83 @@
       animation: shake 0.5s ease-out;
     }
     @keyframes sparkle {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 gold; }
-      50% { transform: scale(1.3); box-shadow: 0 0 20px 10px rgba(255,215,0,0.6); }
+      0% { transform: scale(1); box-shadow: 0 0 0 0 #ffd700; }
+      50% { transform: scale(1.3); box-shadow: 0 0 15px 8px rgba(255,215,0,0.7); }
       100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
     }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
     }
-    .exit-btn {
-      background: #ef4444;
+    .exit-btn, .start-btn {
+      background: #ff4081;
       color: white;
       font-weight: bold;
-      padding: 8px 16px;
-      border-radius: 10px;
-      margin-left: auto;
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: none;
       cursor: pointer;
+      font-size: 1.2rem;
+      margin: 10px;
     }
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      padding: 0 10px;
+    }
+    .level-display {
+      color: #0288d1;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .instructions {
+      font-size: 1.4rem;
+      color: #d81b60;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
   <div class="container" id="game-container">
     <div class="top-bar">
-      <h1>Logic Game 🎉</h1>
+      <h1>Fun Logic Adventure 🌟</h1>
       <button onclick="exitGame()" class="exit-btn">Exit</button>
     </div>
-    <p>Tap start and listen carefully!</p>
-    <button id="start-btn" style="padding:10px 20px; background:#3b82f6; color:white; border-radius:10px; font-size:1rem; font-weight:bold; cursor:pointer;">
-      Start Game
-    </button>
+    <p class="level-display">Level: <span id="level">1</span></p>
+    <p class="instructions">Tap start to play!</p>
+    <button class="start-btn" id="start-btn">Start Game</button>
   </div>
 
-  <!-- Background music -->
-  <audio id="bg-music" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2a9b9d347d.mp3?filename=kid-music-110271.mp3" type="audio/mpeg">
+  <audio id="bg-music" loop preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
   </audio>
 
   <script>
     const gameContainer = document.getElementById('game-container');
     const startBtn = document.getElementById('start-btn');
     const bgMusic = document.getElementById('bg-music');
+    const levelDisplay = document.getElementById('level');
 
-    // Bigger and clearer emojis
+    // Clearer and kid-friendly emojis
     const allEmojis = [
-      '🍎','🍌','🍉','🍇','🍒','🍓','🍍','🥭','🍑',
-      '🐕','🐈','🐘','🐒','🐦','🐢','🦁','🐼','🦄','🐳','🦋',
-      '🚗','🚌','🚓','🚑','🚒','🚜','🚀','✈️','🚲','🚂'
+      '😺', '🐶', '🐰', '🦒', '🦁', '🐘', '🦋', '🐝', '🦄', '🐢',
+      '🍎', '🍊', '🍇', '🍓', '🍉', '🍍', '🍒', '🥕', '🥦', '🍰',
+      '🚗', '🚒', '✈️', '🚀', '🚲', '🛵', '🚁', '🛸', '🚤', '🎈'
     ];
-    const feedback = ['Great job!','Well done!','Excellent!','Fantastic!','You did it!'];
+    const feedback = ['Super job! 🌟', 'Wow, awesome!', 'You’re a star!', 'Fantastic!', 'Yay, you did it!'];
 
     let currentTarget = '';
+    let level = 1;
+    let score = 0;
+    const maxLevels = 5;
 
     function speak(text) {
       const synth = window.speechSynthesis;
       const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 0.8; // slower for kids
-      utter.pitch = 1;
+      utter.rate = 0.7;
+      utter.pitch = 1.2;
       synth.speak(utter);
     }
 
@@ -123,26 +147,34 @@
     }
 
     function startGame() {
-      bgMusic.volume = 0.2;
-      bgMusic.play().catch(()=>{}); // autoplay needs interaction
+      bgMusic.volume = 0.15; // Slightly louder but still soft
+      bgMusic.play().catch(err => console.log('Audio play failed:', err));
+      level = 1;
+      score = 0;
+      levelDisplay.textContent = level;
       nextRound();
+    }
+
+    function getEmojisForLevel() {
+      const emojiCounts = [4, 5, 6, 7, 8];
+      return shuffle([...allEmojis]).slice(0, emojiCounts[level - 1]);
     }
 
     function nextRound() {
       gameContainer.innerHTML = `
         <div class="top-bar">
-          <h1>Logic Game 🎉</h1>
+          <h1>Fun Logic Adventure 🌟</h1>
           <button onclick="exitGame()" class="exit-btn">Exit</button>
         </div>
+        <p class="level-display">Level: ${level}</p>
       `;
 
-      const chosen = shuffle([...allEmojis]).slice(0, 6);
+      const chosen = getEmojisForLevel();
       currentTarget = chosen[Math.floor(Math.random() * chosen.length)];
 
       const instructions = document.createElement('p');
-      instructions.style.fontSize = "1.3rem";
-      instructions.style.fontWeight = "bold";
-      instructions.innerText = `Tap the ${currentTarget}`;
+      instructions.className = 'instructions';
+      instructions.innerText = `Find the ${currentTarget}`;
       gameContainer.appendChild(instructions);
 
       speak(`Can you find the ${currentTarget}?`);
@@ -162,18 +194,45 @@
     function checkAnswer(div, emoji) {
       if (emoji === currentTarget) {
         div.classList.add('correct');
+        score += 10;
         const say = feedback[Math.floor(Math.random() * feedback.length)];
         speak(say);
-        setTimeout(() => { nextRound(); }, 2000); // auto move next
+        setTimeout(() => {
+          if (level < maxLevels) {
+            level++;
+            levelDisplay.textContent = level;
+            nextRound();
+          } else {
+            gameContainer.innerHTML = `
+              <div class="top-bar">
+                <h1>Game Over! 🎉</h1>
+                <button onclick="exitGame()" class="exit-btn">Exit</button>
+              </div>
+              <p class="instructions">You won! Your score: ${score}</p>
+              <button class="start-btn" onclick="startGame()">Play Again</button>
+            `;
+            speak('Congratulations, you won!');
+          }
+        }, 1500);
       } else {
         div.classList.add('incorrect');
-        speak('Try again');
+        speak('Oops, try again!');
         setTimeout(() => div.classList.remove('incorrect'), 800);
       }
     }
 
     function exitGame() {
-      window.location.href = "index.html";
+      bgMusic.pause();
+      gameContainer.innerHTML = `
+        <div class="top-bar">
+          <h1>Fun Logic Adventure 🌟</h1>
+          <button onclick="exitGame()" class="exit-btn">Exit</button>
+        </div>
+        <p class="instructions">Tap start to play!</p>
+        <button class="start-btn" id="start-btn">Start Game</button>
+      `;
+      const newStartBtn = document.getElementById('start-btn');
+      newStartBtn.onclick = startGame;
     }
 
     startBtn.onclick = startGame;
