@@ -13,7 +13,6 @@
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
-    overflow-x: hidden;
   }
   .container {
     max-width: 600px;
@@ -43,35 +42,23 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.3s, box-shadow 0.3s;
-    font-size: 3rem;
-    background: white;
+    background: #fff;
   }
-  .emoji-item:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  }
+  .emoji-item img { max-width: 80%; max-height: 80%; }
   .emoji-item.correct { animation: glow 1s ease-out; }
   .emoji-item.incorrect { animation: shake 0.5s ease-out; }
   @keyframes glow {0%,100%{box-shadow:0 0 0px #ff0;transform:scale(1);}50%{box-shadow:0 0 20px 5px #ff0;transform:scale(1.2);}}
   @keyframes shake {0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
-  .start-btn, .exit-btn { 
-    background: #ff4081; 
-    color: #fff; 
-    border: none; 
-    border-radius: 12px; 
-    padding: 12px 20px; 
-    font-size: 1.2rem; 
-    cursor: pointer; 
-    margin: 5px; 
-    font-weight: bold;
-    transition: background 0.3s;
-  }
-  .start-btn:hover, .exit-btn:hover { background: #e91e63; transform: scale(1.05); }
+  .start-btn, .exit-btn { background: #ff4081; color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-size: 1.2rem; cursor: pointer; margin: 5px; font-weight: bold;}
+  .start-btn:hover, .exit-btn:hover { background: #e91e63; }
   .progress-bar-container { width: 90%; height: 15px; background: #ccc; border-radius: 8px; margin: 10px auto; }
   .progress-bar { width: 0%; height: 100%; background: #76ff03; border-radius: 8px; transition: width 0.5s; }
   .tutorial {
-    display: none; /* Tutorials disabled for kids */
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center;
+    z-index: 1000; flex-direction: column; color:#fff; font-size:1.5rem; text-align:center; padding: 20px;
   }
+  .tutorial button { margin-top: 20px; padding: 10px 20px; font-size:1.2rem; cursor:pointer; border-radius:10px; border:none; background:#ff4081; color:white; }
 </style>
 </head>
 <body>
@@ -88,249 +75,135 @@ const startBtn = document.getElementById('start-btn');
 const gameContainer = document.getElementById('game-container');
 const progressBar = document.getElementById('progress-bar');
 
-// Using emojis instead of external images for better reliability
+// 🔹 Local image list (you must place these in /image/ folder)
 const images = [
-  {name:'Dog', emoji:'🐶'},
-  {name:'Cat', emoji:'🐱'},
-  {name:'Cow', emoji:'🐄'},
-  {name:'Apple', emoji:'🍎'},
-  {name:'Banana', emoji:'🍌'},
-  {name:'Car', emoji:'🚗'},
-  {name:'Bus', emoji:'🚌'},
-  {name:'Plane', emoji:'✈️'},
-  {name:'Fish', emoji:'🐟'},
-  {name:'Bird', emoji:'🐦'},
-  {name:'Orange', emoji:'🍊'},
-  {name:'Train', emoji:'🚂'},
-  {name:'Bike', emoji:'🚲'},
-  {name:'Tree', emoji:'🌳'},
-  {name:'Flower', emoji:'🌸'},
-  {name:'Star', emoji:'⭐'}
+  {name:'Dog', url:'image/dog.png'},
+  {name:'Cat', url:'image/cat.png'},
+  {name:'Cow', url:'image/cow.png'},
+  {name:'Apple', url:'image/apple.png'},
+  {name:'Banana', url:'image/banana.png'},
+  {name:'Car', url:'image/car.png'},
+  {name:'Bus', url:'image/bus.png'},
+  {name:'Plane', url:'image/plane.png'}
 ];
 
-const feedback = ['Great job! 🌟', 'Awesome! 👏', 'Excellent! 🎉', 'You\'re amazing! 💫', 'Fantastic! 🏆'];
+const feedback = ['Great job! 🌟', 'Awesome!', 'Excellent!', 'You’re amazing!', 'Fantastic!'];
 let level = 0;
 const maxLevels = 10;
 
 function speak(text) {
-  if ('speechSynthesis' in window) {
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.8;
-    utter.pitch = 1.2;
-    utter.volume = 0.7;
-    speechSynthesis.speak(utter);
-  }
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.8;
+  utter.pitch = 1.2;
+  speechSynthesis.speak(utter);
 }
 
-function shuffle(array){ 
-  const newArray = [...array];
-  return newArray.sort(()=>Math.random()-0.5); 
-}
-
-function exitGame(){ 
-  if(confirm('Are you sure you want to exit the game?')) {
-    location.reload();
-  }
-}
+function shuffle(array){ return array.sort(()=>Math.random()-0.5); }
+function exitGame(){ window.location.href='index.html'; }
 
 function showTutorial(type, callback){
   const overlay = document.createElement('div');
   overlay.className='tutorial';
-  
-  let tutorialText = '';
-  if(type==='findTarget') tutorialText = '🎯 Look carefully!<br>Tap the emoji that matches the word shown above.';
-  if(type==='findMissing') tutorialText = '🔍 Find the missing piece!<br>Choose the correct emoji to complete the pattern.';
-  if(type==='findDifferent') tutorialText = '👀 Spot the odd one out!<br>Tap the emoji that is different from the others.';
-  
-  overlay.innerHTML = tutorialText;
-  const btn = document.createElement('button'); 
-  btn.innerText='Got it! Let\'s play! 🎮'; 
-  btn.onclick=()=>{ 
-    document.body.removeChild(overlay); 
-    callback(); 
-  };
+  if(type==='findTarget') overlay.innerHTML = 'Look carefully!<br>Tap the picture that matches the word.';
+  if(type==='findMissing') overlay.innerHTML = 'One picture is missing!<br>Choose the correct one to fill the blank.';
+  if(type==='findDifferent') overlay.innerHTML = 'Spot the odd one out!<br>Tap the picture that is different.';
+  const btn = document.createElement('button'); btn.innerText='Got it!'; 
+  btn.onclick=()=>{ document.body.removeChild(overlay); callback(); };
   overlay.appendChild(btn);
   document.body.appendChild(overlay);
 }
 
 function startGame(){
-  level = 0; 
-  progressBar.style.width='0%'; 
-  nextRound();
+  level = 0; progressBar.style.width='0%'; nextRound();
 }
 
 function nextRound(){
-  gameContainer.innerHTML = `
-    <h1>Fun Logic Game 🌟</h1>
-    <button class="exit-btn" onclick="exitGame()">Exit</button>
-  `;
-  
+  gameContainer.innerHTML = `<h1>Fun Logic Game 🌟</h1><button class="exit-btn" onclick="exitGame()">Exit</button>`;
   level++;
-  if(level > maxLevels){ 
-    gameContainer.innerHTML += `
-      <p class="instructions">🎉 Congratulations! You completed all levels! 🎉</p>
-      <button class="start-btn" onclick="startGame()">Play Again</button>
-    `;
-    speak('Congratulations, you won! You completed all levels!');
+  if(level>maxLevels){ 
+    gameContainer.innerHTML += `<p class="instructions">You finished! 🎉</p><button class="start-btn" onclick="startGame()">Play Again</button>`;
+    speak('Congratulations, you won!');
     progressBar.style.width='100%';
     return;
   }
-  
   progressBar.style.width = `${(level/maxLevels)*100}%`;
-  
-  let type;
-  if(level <= 3) type = 'findTarget';
-  else if(level <= 6) type = 'findMissing';
-  else type = 'findDifferent';
-  
-  if(level === 1 || level === 4 || level === 7){ 
-    showTutorial(type, ()=>runRound(type)); 
-  }
-  else {
-    runRound(type);
-  }
+  let type = level%3===1 ? 'findTarget' : (level%3===2 ? 'findMissing' : 'findDifferent');
+  if(level<=3){ showTutorial(type, ()=>runRound(type)); }
+  else runRound(type);
 }
 
 function runRound(type){
-  const grid = document.createElement('div'); 
-  grid.className='emoji-grid';
-  
+  const grid = document.createElement('div'); grid.className='emoji-grid';
+  gameContainer.appendChild(grid);
+
   if(type==='findTarget'){
-    let chosen = shuffle(images).slice(0, 4);
-    let target = chosen[Math.floor(Math.random() * chosen.length)];
-    
-    const instructions = document.createElement('p');
-    instructions.className = 'instructions';
-    instructions.innerHTML = `Find the <strong>${target.name}</strong>!`;
-    gameContainer.appendChild(instructions);
-    
+    let chosen = shuffle([...images]).slice(0,4);
+    let target = chosen[Math.floor(Math.random()*chosen.length)];
+    gameContainer.innerHTML += `<p class="instructions">Find the ${target.name}!</p>`;
     speak(`Find the ${target.name}!`);
-    
     chosen.forEach(img=>{
-      const div = document.createElement('div'); 
-      div.className='emoji-item';
-      div.innerHTML = img.emoji;
-      div.onclick = () => checkAnswer(div, img.name, target.name);
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
+      div.onclick=()=>checkAnswer(div,img.name,target.name);
       grid.appendChild(div);
     });
-    
-  } else if(type==='findMissing'){
-    let chosen = shuffle(images).slice(0, 4);
-    let blankIndex = Math.floor(Math.random() * 4);
+  }
+  else if(type==='findMissing'){
+    let chosen = shuffle([...images]).slice(0,4);
+    let blankIndex = 3;
     let missing = chosen[blankIndex];
-    
-    const instructions = document.createElement('p');
-    instructions.className = 'instructions';
-    instructions.innerHTML = 'Find the missing emoji!';
-    gameContainer.appendChild(instructions);
-    
-    speak('Find the missing emoji!');
-    
-    chosen.forEach((img, index)=>{
-      const div = document.createElement('div'); 
-      div.className='emoji-item';
-      div.innerHTML = index === blankIndex ? '❓' : img.emoji;
-      if(index === blankIndex) div.style.backgroundColor = '#ffeb3b';
+    chosen[blankIndex] = {name:'?',url:''};
+    gameContainer.innerHTML += `<p class="instructions">Find the missing item!</p>`;
+    speak('Find the missing item!');
+    chosen.forEach(img=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=img.url?`<img src="${img.url}" alt="${img.name}">`:'❓';
       grid.appendChild(div);
     });
-    
-    gameContainer.appendChild(grid);
-    
-    const optionGrid = document.createElement('div'); 
-    optionGrid.className='emoji-grid';
-    optionGrid.style.marginTop = '20px';
-    
-    let options = shuffle([missing, ...shuffle(images.filter(i=>i.name!==missing.name)).slice(0, 2)]);
+    const optionGrid = document.createElement('div'); optionGrid.className='emoji-grid';
+    let options = shuffle([missing,...shuffle(images.filter(i=>i.name!==missing.name)).slice(0,2)]);
     options.forEach(img=>{
-      const div = document.createElement('div'); 
-      div.className='emoji-item';
-      div.innerHTML = img.emoji;
-      div.onclick = () => {
-        checkAnswer(div, img.name, missing.name);
-        if(img.name === missing.name) {
-          grid.children[blankIndex].innerHTML = missing.emoji;
-          grid.children[blankIndex].style.backgroundColor = '#4caf50';
-        }
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
+      div.onclick=()=>{
+        checkAnswer(div,img.name,missing.name);
+        grid.children[blankIndex].innerHTML=`<img src="${missing.url}" alt="${missing.name}">`;
       };
       optionGrid.appendChild(div);
     });
     gameContainer.appendChild(optionGrid);
-    return; // Early return to avoid adding grid twice
-    
-  } else if(type==='findDifferent'){
-    let same = images[Math.floor(Math.random() * images.length)];
-    let different = images.find(img => img.name !== same.name);
-    let chosen = [same, same, same, different];
-    chosen = shuffle(chosen);
-    
-    const instructions = document.createElement('p');
-    instructions.className = 'instructions';
-    instructions.innerHTML = 'Find the different emoji!';
-    gameContainer.appendChild(instructions);
-    
-    speak('Find the different emoji!');
-    
+  }
+  else if(type==='findDifferent'){
+    let same = shuffle([...images]).slice(0,1)[0];
+    let chosen = [same,same,same,same];
+    let diffIndex = Math.floor(Math.random()*chosen.length);
+    let diff = shuffle(images.filter(i=>i.name!==same.name))[0];
+    chosen[diffIndex] = diff;
+    gameContainer.innerHTML += `<p class="instructions">Find the different item!</p>`;
+    speak('Find the different item!');
     chosen.forEach(img=>{
-      const div = document.createElement('div'); 
-      div.className='emoji-item';
-      div.appendChild(createImageElement(img));
-      div.onclick = () => checkAnswer(div, img.name, different.name);
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
+      div.onclick=()=>checkAnswer(div,img.name,diff.name);
       grid.appendChild(div);
     });
   }
-  
-  gameContainer.appendChild(grid);
 }
 
-function checkAnswer(div, answer, correct){
-  // Disable all clicks temporarily
-  const allItems = document.querySelectorAll('.emoji-item');
-  allItems.forEach(item => item.style.pointerEvents = 'none');
-  
-  if(answer === correct){ 
+function checkAnswer(div,answer,correct){
+  if(answer===correct){ 
     div.classList.add('correct'); 
-    speak(feedback[Math.floor(Math.random() * feedback.length)]); 
-    setTimeout(() => {
-      allItems.forEach(item => item.style.pointerEvents = 'auto');
-      nextRound();
-    }, 1200);
-  } else { 
+    speak(feedback[Math.floor(Math.random()*feedback.length)]); 
+    setTimeout(nextRound,800);
+  }
+  else { 
     div.classList.add('incorrect'); 
     speak('Oops, try again!'); 
-    setTimeout(() => {
-      div.classList.remove('incorrect');
-      allItems.forEach(item => item.style.pointerEvents = 'auto');
-    }, 800);
+    setTimeout(()=>div.classList.remove('incorrect'),800);
   }
 }
 
-// Initialize the game
-startBtn.onclick = startGame;
-
-// Add some fun sound effects (optional - will work if browser supports it)
-function playSound(type) {
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-  
-  oscillator.connect(gain);
-  gain.connect(audioContext.destination);
-  
-  if(type === 'correct') {
-    oscillator.frequency.value = 523.25; // C5
-    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-  } else if(type === 'incorrect') {
-    oscillator.frequency.value = 220; // A3
-    gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-  }
-  
-  oscillator.start(audioContext.currentTime);
-  oscillator.stop(audioContext.currentTime + 0.5);
-}
-
-console.log('Kids Logic Game loaded successfully!');
+startBtn.onclick=startGame;
 </script>
 </body>
 </html>
