@@ -10,15 +10,15 @@
     margin: 0; padding: 0;
     background: linear-gradient(135deg, #ffe6f0 0%, #b3e5fc 50%, #c8e6c9 100%);
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    align-items: flex-start;
     min-height: 100vh;
     overflow-x: hidden;
   }
   .container {
     max-width: 600px;
     width: 95%;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.95);
     border-radius: 20px;
     padding: 15px;
     margin: 20px 0;
@@ -32,6 +32,7 @@
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
     gap: 10px;
     justify-items: center;
+    margin-top: 10px;
   }
   .emoji-item {
     width: 90px; height: 90px;
@@ -46,31 +47,16 @@
   .emoji-item img { max-width: 80%; max-height: 80%; }
   .emoji-item.correct { animation: glow 1s ease-out; }
   .emoji-item.incorrect { animation: shake 0.5s ease-out; }
-  @keyframes glow {
-    0%,100% { box-shadow: 0 0 0px #ff0; transform: scale(1); }
-    50% { box-shadow: 0 0 20px 5px #ff0; transform: scale(1.2); }
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
-  }
-  .start-btn, .exit-btn { 
-    background: #ff4081; color: #fff; border: none; border-radius: 12px; 
-    padding: 12px 20px; font-size: 1.2rem; cursor: pointer; margin: 5px; 
-    font-weight: bold;
-  }
+  @keyframes glow {0%,100%{box-shadow:0 0 0px #ff0;transform:scale(1);}50%{box-shadow:0 0 20px 5px #ff0;transform:scale(1.2);}}
+  @keyframes shake {0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+  .start-btn, .exit-btn { background: #ff4081; color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-size: 1.2rem; cursor: pointer; margin: 5px; font-weight: bold;}
   .start-btn:hover, .exit-btn:hover { background: #e91e63; }
-  .progress-bar-container {
-    width: 90%; height: 15px; background: #ccc; border-radius: 8px; margin: 10px auto;
-  }
+  .progress-bar-container { width: 90%; height: 15px; background: #ccc; border-radius: 8px; margin: 10px auto; }
   .progress-bar { width: 0%; height: 100%; background: #76ff03; border-radius: 8px; transition: width 0.5s; }
-  /* Tutorial overlay */
   .tutorial {
     position: fixed; top:0; left:0; width:100%; height:100%;
     background: rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center;
-    z-index: 1000; flex-direction: column; color:#fff; font-size:1.5rem; text-align:center;
-    padding: 20px; box-sizing:border-box;
+    z-index: 1000; flex-direction: column; color:#fff; font-size:1.5rem; text-align:center; padding: 20px; box-sizing:border-box;
   }
   .tutorial button { margin-top: 20px; padding: 10px 20px; font-size:1.2rem; cursor:pointer; border-radius:10px; border:none; background:#ff4081; color:white; }
 </style>
@@ -152,11 +138,11 @@ function nextRound(){
 }
 
 function runRound(type){
-  let chosen = shuffle([...images]).slice(0,4);
   const grid = document.createElement('div'); grid.className='emoji-grid';
   gameContainer.appendChild(grid);
 
   if(type==='findTarget'){
+    let chosen = shuffle([...images]).slice(0,4);
     let target = chosen[Math.floor(Math.random()*chosen.length)];
     gameContainer.innerHTML += `<p class="instructions">Find the ${target.name}!</p>`;
     speak(`Find the ${target.name}!`);
@@ -166,12 +152,12 @@ function runRound(type){
       div.onclick=()=>checkAnswer(div,img.name,target.name);
       grid.appendChild(div);
     });
-
-  } else if(type==='findMissing'){
+  }
+  else if(type==='findMissing'){
+    let chosen = shuffle([...images]).slice(0,4);
     let blankIndex = 3;
     let missing = chosen[blankIndex];
-    let options = shuffle([missing,...shuffle(images.filter(i=>!chosen.includes(i))).slice(0,2)]);
-    chosen[blankIndex]={name:'?',url:''};
+    chosen[blankIndex] = {name:'?',url:''};
     gameContainer.innerHTML += `<p class="instructions">Find the missing item!</p>`;
     speak('Find the missing item!');
     chosen.forEach(img=>{
@@ -180,6 +166,7 @@ function runRound(type){
       grid.appendChild(div);
     });
     const optionGrid = document.createElement('div'); optionGrid.className='emoji-grid';
+    let options = shuffle([missing,...shuffle(images.filter(i=>i.name!==missing.name)).slice(0,2)]);
     options.forEach(img=>{
       const div = document.createElement('div'); div.className='emoji-item';
       div.innerHTML=`<img src="${img.url}" alt="${img.name}">`;
@@ -190,13 +177,13 @@ function runRound(type){
       optionGrid.appendChild(div);
     });
     gameContainer.appendChild(optionGrid);
-
-  } else if(type==='findDifferent'){
-    let same = chosen[0];
-    chosen = [same,same,same,same];
+  }
+  else if(type==='findDifferent'){
+    let same = shuffle([...images]).slice(0,1)[0];
+    let chosen = [same,same,same,same];
     let diffIndex = Math.floor(Math.random()*chosen.length);
     let diff = shuffle(images.filter(i=>i.name!==same.name))[0];
-    chosen[diffIndex]=diff;
+    chosen[diffIndex] = diff;
     gameContainer.innerHTML += `<p class="instructions">Find the different item!</p>`;
     speak('Find the different item!');
     chosen.forEach(img=>{
