@@ -201,7 +201,7 @@ function runRound(type){
     
     const instructions = document.createElement('p');
     instructions.className = 'instructions';
-    instructions.innerHTML = `Find the <strong>${target.name}</strong>! ${target.emoji}`;
+    instructions.innerHTML = `Find the <strong>${target.name}</strong>!`;
     gameContainer.appendChild(instructions);
     
     speak(`Find the ${target.name}!`);
@@ -330,7 +330,7 @@ function playSound(type) {
   oscillator.stop(audioContext.currentTime + 0.5);
 }
 
-console.log('Kids Logic Game loaded successfully! 🎮');
+console.log('Kids Logic Game loaded successfully!');
 </script>
 </body>
 </html>
