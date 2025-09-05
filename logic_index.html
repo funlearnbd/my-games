@@ -18,7 +18,7 @@
       overflow: hidden;
     }
     .container {
-      background: rgba(255, 245, 157, 0.9); /* Soft yellow for kid-friendly feel */
+      background: rgba(255, 245, 157, 0.9);
       border-radius: 25px;
       padding: 15px;
       width: 100%;
@@ -30,7 +30,7 @@
     }
     h1 {
       margin: 10px 0;
-      color: #d81b60; /* Bright pink for fun */
+      color: #d81b60;
       font-size: 2rem;
     }
     .emoji-grid {
@@ -40,7 +40,7 @@
       margin: 20px 10px;
     }
     .emoji-item {
-      font-size: 4rem; /* Larger emojis */
+      font-size: 4rem;
       background: #fff3e0;
       border-radius: 15px;
       cursor: pointer;
@@ -121,18 +121,22 @@
     const bgMusic = document.getElementById('bg-music');
     const levelDisplay = document.getElementById('level');
 
-    // Clearer and kid-friendly emojis
     const allEmojis = [
       '😺', '🐶', '🐰', '🦒', '🦁', '🐘', '🦋', '🐝', '🦄', '🐢',
       '🍎', '🍊', '🍇', '🍓', '🍉', '🍍', '🍒', '🥕', '🥦', '🍰',
       '🚗', '🚒', '✈️', '🚀', '🚲', '🛵', '🚁', '🛸', '🚤', '🎈'
     ];
     const feedback = ['Super job! 🌟', 'Wow, awesome!', 'You’re a star!', 'Fantastic!', 'Yay, you did it!'];
+    const levelTypes = [
+      { type: 'findTarget', prompt: 'Find the' },
+      { type: 'findMissing', prompt: 'Find the missing item!' },
+      { type: 'findDifferent', prompt: 'Find the different item!' }
+    ];
 
     let currentTarget = '';
     let level = 1;
     let score = 0;
-    const maxLevels = 5;
+    const maxLevels = 6;
 
     function speak(text) {
       const synth = window.speechSynthesis;
@@ -147,7 +151,7 @@
     }
 
     function startGame() {
-      bgMusic.volume = 0.15; // Slightly louder but still soft
+      bgMusic.volume = 0.15;
       bgMusic.play().catch(err => console.log('Audio play failed:', err));
       level = 1;
       score = 0;
@@ -156,7 +160,7 @@
     }
 
     function getEmojisForLevel() {
-      const emojiCounts = [4, 5, 6, 7, 8];
+      const emojiCounts = [4, 4, 5, 5, 6, 6];
       return shuffle([...allEmojis]).slice(0, emojiCounts[level - 1]);
     }
 
@@ -169,30 +173,50 @@
         <p class="level-display">Level: ${level}</p>
       `;
 
+      const currentLevelType = levelTypes[level % levelTypes.length];
       const chosen = getEmojisForLevel();
-      currentTarget = chosen[Math.floor(Math.random() * chosen.length)];
+      let instructionText = '';
+      let correctAnswer = '';
+
+      if (currentLevelType.type === 'findTarget') {
+        currentTarget = chosen[Math.floor(Math.random() * chosen.length)];
+        instructionText = `${currentLevelType.prompt} ${currentTarget}`;
+        correctAnswer = currentTarget;
+      } else if (currentLevelType.type === 'findMissing') {
+        const missingIndex = Math.floor(Math.random() * chosen.length);
+        currentTarget = chosen[missingIndex];
+        chosen[missingIndex] = '❓'; // Placeholder for missing item
+        instructionText = currentLevelType.prompt;
+        correctAnswer = currentTarget;
+      } else if (currentLevelType.type === 'findDifferent') {
+        const differentIndex = Math.floor(Math.random() * chosen.length);
+        currentTarget = allEmojis.find(e => !chosen.includes(e));
+        chosen[differentIndex] = currentTarget;
+        instructionText = currentLevelType.prompt;
+        correctAnswer = currentTarget;
+      }
 
       const instructions = document.createElement('p');
       instructions.className = 'instructions';
-      instructions.innerText = `Find the ${currentTarget}`;
+      instructions.innerText = instructionText;
       gameContainer.appendChild(instructions);
 
-      speak(`Can you find the ${currentTarget}?`);
+      speak(instructionText);
 
       const grid = document.createElement('div');
       grid.className = 'emoji-grid';
-      chosen.forEach(e => {
+      chosen.forEach((e, index) => {
         const div = document.createElement('div');
         div.className = 'emoji-item';
         div.innerText = e;
-        div.onclick = () => checkAnswer(div, e);
+        div.onclick = () => checkAnswer(div, e, correctAnswer);
         grid.appendChild(div);
       });
       gameContainer.appendChild(grid);
     }
 
-    function checkAnswer(div, emoji) {
-      if (emoji === currentTarget) {
+    function checkAnswer(div, emoji, correctAnswer) {
+      if (emoji === correctAnswer) {
         div.classList.add('correct');
         score += 10;
         const say = feedback[Math.floor(Math.random() * feedback.length)];
@@ -223,16 +247,7 @@
 
     function exitGame() {
       bgMusic.pause();
-      gameContainer.innerHTML = `
-        <div class="top-bar">
-          <h1>Fun Logic Adventure 🌟</h1>
-          <button onclick="exitGame()" class="exit-btn">Exit</button>
-        </div>
-        <p class="instructions">Tap start to play!</p>
-        <button class="start-btn" id="start-btn">Start Game</button>
-      `;
-      const newStartBtn = document.getElementById('start-btn');
-      newStartBtn.onclick = startGame;
+      window.location.href = 'index.html';
     }
 
     startBtn.onclick = startGame;
