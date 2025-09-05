@@ -44,6 +44,8 @@ h1 { color: #d81b60; font-size: 2rem; margin:10px 0; }
 .exit-btn { background:#ff4081; color:white; font-weight:bold; padding:10px 20px; border-radius:12px; border:none; cursor:pointer; font-size:1.2rem; margin:10px; }
 .progress-bar { width:100%; background:#eee; border-radius:10px; overflow:hidden; margin:10px 0; height:15px; }
 .progress-bar-fill { height:100%; width:0%; background:#4caf50; transition:width 0.5s; }
+.loading-screen { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; width:100vw; background:linear-gradient(135deg, #ffedcc 0%, #c8e6c9 100%); }
+.loading-text { font-size:2rem; color:#d81b60; margin-bottom:20px; }
 </style>
 </head>
 <body>
@@ -60,11 +62,7 @@ h1 { color: #d81b60; font-size: 2rem; margin:10px 0; }
 const gameContainer = document.getElementById('game-container');
 const startBtn = document.getElementById('start-btn');
 const bgMusic = document.getElementById('bg-music');
-
-const imageList = [
-  'apple','ball','banana','car','cat','cherry','dog','fish','flower',
-  'kiwi','orange','pinapple','rabbit','rainbow','star','strawberry','syn','teddy','train'
-];
+const imageList = ['apple','ball','banana','car','cat','cherry','dog','fish','flower','kiwi','orange','pinapple','rabbit','rainbow','star','strawberry','syn','teddy','train'];
 
 const levelTypes = ['findTarget','findMissing','findDifferent'];
 const maxLevels = 100;
@@ -72,14 +70,25 @@ let level=1;
 let currentTarget='';
 let score=0;
 
-// Preload all images
-function preloadImages(callback){
-  let loaded=0;
-  imageList.forEach(name=>{
-    const img=new Image();
-    img.src=`image/${name}.png?v=${Date.now()}`;
-    img.onload=()=>{ loaded++; if(loaded===imageList.length) callback(); };
-    img.onerror=()=>{ console.warn('Image missing: '+name); loaded++; if(loaded===imageList.length) callback(); };
+// Preload all images with loading screen
+function preloadImages(){
+  return new Promise(resolve=>{
+    const loadingDiv=document.createElement('div'); loadingDiv.className='loading-screen';
+    const text=document.createElement('div'); text.className='loading-text'; text.innerText='Loading... 0%';
+    loadingDiv.appendChild(text);
+    document.body.innerHTML=''; document.body.appendChild(loadingDiv);
+    let loaded=0;
+    imageList.forEach(name=>{
+      const img=new Image();
+      img.src=`image/${name}.png?v=${Date.now()}`;
+      img.onload=img.onerror=function(){
+        loaded++;
+        text.innerText='Loading... '+Math.floor((loaded/imageList.length)*100)+'%';
+        if(loaded===imageList.length){
+          setTimeout(()=>{ resolve(); },300); // short delay
+        }
+      };
+    });
   });
 }
 
@@ -105,32 +114,20 @@ function exitGame(){ bgMusic.pause(); window.location.href='index.html'; }
 function createInstructions(txt){ const p=document.createElement('p'); p.className='instructions'; p.innerText=txt; return p; }
 
 // Start game
-startBtn.onclick=()=>{
-  preloadImages(()=>{
-    bgMusic.volume=0.2; bgMusic.play().catch(()=>{});
-    nextRound();
-  });
+startBtn.onclick=async()=>{
+  await preloadImages();
+  bgMusic.volume=0.2; bgMusic.play().catch(()=>{});
+  nextRound();
 };
-
-// Progress bar
-function createProgressBar(){
-  const bar=document.createElement('div'); bar.className='progress-bar';
-  const fill=document.createElement('div'); fill.className='progress-bar-fill'; bar.appendChild(fill);
-  return {bar,fill};
-}
 
 // Next round
 async function nextRound(){
   gameContainer.innerHTML='';
   const topBar=document.createElement('div'); topBar.className='top-bar';
   const title=document.createElement('h1'); title.innerText='Fun Logic Adventure 🌟';
-  const levelDisp=document.createElement('span'); levelDisp.className='level-display'; levelDisp.innerText='Level: '+level;
   const exitBtn=document.createElement('button'); exitBtn.className='exit-btn'; exitBtn.innerText='Exit'; exitBtn.onclick=exitGame;
   topBar.appendChild(title); topBar.appendChild(exitBtn); gameContainer.appendChild(topBar);
-  gameContainer.appendChild(levelDisp);
-
-  // Tutorial first 3 levels
-  if(level<=3) await speak('This is how you play. Follow the instructions carefully!',0.7);
+  const levelDisp=document.createElement('span'); levelDisp.className='level-display'; levelDisp.innerText='Level: '+level; gameContainer.appendChild(levelDisp);
 
   const type = levelTypes[(level-1)%levelTypes.length];
   if(type==='findTarget') await findTargetRound();
@@ -143,9 +140,7 @@ async function findTargetRound(){
   const chosen = shuffle([...imageList]).slice(0,Math.min(4,3+Math.floor(level/20)));
   currentTarget = chosen[Math.floor(Math.random()*chosen.length)];
   gameContainer.appendChild(createInstructions('Find the '+currentTarget));
-
   await speak('Find the '+currentTarget,0.7 + level/50);
-
   const grid=document.createElement('div'); grid.className='emoji-grid';
   chosen.forEach(name=>{
     const div=document.createElement('div'); div.className='emoji-item';
