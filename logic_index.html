@@ -1,214 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Kids Logic Game</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: linear-gradient(135deg, #f9e79f, #fad7a0, #f5b7b1);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #startScreen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    #startBtn {
-      font-size: 2rem;
-      padding: 20px 40px;
-      border: none;
-      border-radius: 50px;
-      background: radial-gradient(circle, #f1c40f, #f39c12);
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 0 20px #f1c40f;
-      animation: glow 1.5s infinite alternate;
-    }
-    @keyframes glow {
-      from { box-shadow: 0 0 10px #f1c40f; }
-      to { box-shadow: 0 0 30px #f39c12; }
-    }
-    #gameArea {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      width: 100%;
-      height: 100%;
-      padding: 20px;
-    }
-    #question {
-      font-size: 2rem;
-      margin: 20px;
-      color: #2c3e50;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .box {
-      width: 100px;
-      height: 100px;
-      border: 3px solid #2c3e50;
-      border-radius: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: white;
-      font-size: 2rem;
-      cursor: pointer;
-    }
-    .box img {
-      max-width: 80px;
-      max-height: 80px;
-    }
-    .highlight {
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      0% { background: #abebc6; }
-      50% { background: #f9e79f; }
-      100% { background: #abebc6; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kids Logic Game</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    margin:0; padding:0;
+    height:100vh; width:100vw;
+    display:flex; justify-content:center; align-items:center;
+    background: linear-gradient(135deg,#ffe6f0 0%,#b3e5fc 50%,#c8e6c9 100%);
+  }
+  .container {
+    width:90%; max-width:600px;
+    background: rgba(255,255,255,0.95);
+    border-radius:25px;
+    text-align:center;
+    padding:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+  }
+  h1 {color:#d81b60;font-size:2rem;margin:10px 0;}
+  .emoji-grid, .options-grid {
+    display:grid;
+    gap:12px;
+    margin:15px 0;
+  }
+  .emoji-grid {grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));}
+  .options-grid {grid-template-columns: repeat(3,1fr);}
+  .emoji-item {
+    width:100%; aspect-ratio:1/1;
+    display:flex; justify-content:center; align-items:center;
+    cursor:pointer; border:2px solid #333;
+    border-radius:15px;
+    background:#fff3e0;
+    transition:0.3s; position:relative;
+  }
+  .emoji-item img {max-width:80%; max-height:80%;}
+  .emoji-item.correct {animation:glow 1s;}
+  .emoji-item.incorrect {animation:shake 0.5s;}
+  @keyframes glow {
+    0% {box-shadow:0 0 0px #ffd700;}
+    50% {box-shadow:0 0 15px 8px #ffd700;}
+    100% {box-shadow:0 0 0px transparent;}
+  }
+  @keyframes shake {
+    0%,100% {transform:translateX(0);}
+    25% {transform:translateX(-8px);}
+    75% {transform:translateX(8px);}
+  }
+  .start-btn {
+    font-size:1.8rem;
+    font-weight:bold;
+    padding:20px 40px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+    background: linear-gradient(45deg,#ff4081,#ffeb3b,#3f51b5);
+    color:white;
+    animation:shine 2s infinite alternate;
+    box-shadow:0 0 10px #ff4081;
+  }
+  @keyframes shine {
+    0% {transform:scale(1); box-shadow:0 0 10px #ff4081;}
+    50% {transform:scale(1.1); box-shadow:0 0 20px #ffd700;}
+    100% {transform:scale(1); box-shadow:0 0 10px #3f51b5;}
+  }
+  .progress-bar {
+    width:100%; height:15px;
+    background:#ddd;
+    border-radius:10px;
+    overflow:hidden;
+    margin:10px 0;
+  }
+  .progress {
+    height:100%;
+    background:#4caf50;
+    width:0%;
+    transition:width 0.5s;
+  }
+  .exit-btn {
+    padding:8px 15px;
+    background:#ff4081;
+    color:white;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    position:absolute;
+    top:10px; right:10px;
+  }
+  .instructions {font-size:1.3rem;color:#d81b60;margin:5px 0;}
+</style>
 </head>
 <body>
-  <div id="startScreen">
-    <h1 style="color:#2c3e50;">✨ Kids Logic Game ✨</h1>
-    <button id="startBtn">🌟 Start Game 🌟</button>
-  </div>
+<div class="container" id="game-container">
+  <h1>Fun Logic Adventure 🌟</h1>
+  <button class="start-btn" id="start-btn">Start Game</button>
+</div>
 
-  <div id="gameArea">
-    <div id="question">Loading...</div>
-    <div id="gameBoard" class="grid"></div>
-    <div id="answers" class="grid"></div>
-  </div>
+<audio id="bg-music" loop preload="auto">
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
+</audio>
 
-  <script>
-    const items = [
-      { name: "Dog", img: "image/dog.png" },
-      { name: "Cat", img: "image/cat.png" },
-      { name: "Car", img: "image/car.png" },
-      { name: "Bus", img: "image/bus.png" },
-      { name: "Apple", img: "image/apple.png" },
-      { name: "Ball", img: "image/ball.png" }
-    ];
+<script>
+const images = [
+  'apple','ball','banana','car','cat','cherry','dog','fish','flower','kiwi',
+  'orange','pinapple','rabbit','rainbow','star','strawberry','syn','teddy','train'
+];
 
-    let currentGame = "";
+// preload images
+const preloaded = {};
+images.forEach(name => { const img = new Image(); img.src = `image/${name}.png`; preloaded[name]=img; });
 
-    const startBtn = document.getElementById("startBtn");
-    const startScreen = document.getElementById("startScreen");
-    const gameArea = document.getElementById("gameArea");
-    const question = document.getElementById("question");
-    const gameBoard = document.getElementById("gameBoard");
-    const answers = document.getElementById("answers");
+const gameContainer = document.getElementById('game-container');
+const startBtn = document.getElementById('start-btn');
+const bgMusic = document.getElementById('bg-music');
 
-    startBtn.addEventListener("click", () => {
-      startScreen.style.display = "none";
-      gameArea.style.display = "flex";
-      nextRound();
+let level = 1;
+const maxLevels = 20;
+let currentGame = {};
+const levelTypes = ['findTarget','findMissing','findDifferent'];
+
+function speak(text){
+  const synth = window.speechSynthesis;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.7 + level*0.01;
+  utter.pitch = 1.2;
+  synth.speak(utter);
+}
+
+function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
+
+function startGame(){
+  bgMusic.volume=0.15; bgMusic.play().catch(()=>{});
+  level=1; nextRound();
+}
+
+function nextRound(){
+  gameContainer.innerHTML = `
+    <h1>Fun Logic Adventure 🌟</h1>
+    <button class="exit-btn" onclick="exitGame()">Exit</button>
+    <div class="progress-bar"><div class="progress" id="progress"></div></div>
+  `;
+  document.getElementById('progress').style.width = ((level-1)/maxLevels*100)+'%';
+
+  const type = levelTypes[(level-1)%levelTypes.length];
+  const grid = document.createElement('div'); grid.className='emoji-grid';
+  const instructions = document.createElement('p'); instructions.className='instructions';
+  let chosen = shuffle(images).slice(0,6);
+  let correct='';
+
+  if(type==='findTarget'){
+    correct = chosen[Math.floor(Math.random()*chosen.length)];
+    instructions.innerText = `Find the ${correct}`;
+    speak(`Find the ${correct}`);
+    chosen.forEach(name=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.appendChild(preloaded[name].cloneNode());
+      div.onclick = ()=>checkAnswer(div,name,correct);
+      grid.appendChild(div);
     });
+  }else if(type==='findMissing'){
+    correct = chosen[5];
+    const blank='blank';
+    instructions.innerText = `Find the missing item!`;
+    speak('Find the missing item!');
+    const gridItems = chosen.slice(0,5).concat(blank);
+    gridItems.forEach(name=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      if(name==='blank'){div.style.background='#e0e0e0'; div.dataset.blank=true;}
+      else div.appendChild(preloaded[name].cloneNode());
+      grid.appendChild(div);
+    });
+    const optionsGrid = document.createElement('div'); optionsGrid.className='options-grid';
+    const options = shuffle([correct,...shuffle(chosen.slice(0,5)).slice(0,2)]);
+    options.forEach(name=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.appendChild(preloaded[name].cloneNode());
+      div.onclick = ()=>fillMissing(name);
+      optionsGrid.appendChild(div);
+    });
+    gameContainer.appendChild(optionsGrid);
+  }else if(type==='findDifferent'){
+    correct = chosen[0];
+    for(let i=1;i<chosen.length;i++) chosen[i]=chosen[1];
+    chosen[Math.floor(Math.random()*chosen.length)] = correct;
+    instructions.innerText = `Find the different item!`;
+    speak('Find the different item!');
+    chosen.forEach(name=>{
+      const div = document.createElement('div'); div.className='emoji-item';
+      div.appendChild(preloaded[name].cloneNode());
+      div.onclick = ()=>checkAnswer(div,name,correct);
+      grid.appendChild(div);
+    });
+  }
+  gameContainer.appendChild(instructions);
+  gameContainer.appendChild(grid);
+}
 
-    function nextRound() {
-      gameBoard.innerHTML = "";
-      answers.innerHTML = "";
-      let gameType = Math.random() > 0.5 ? "missing" : "find";
-      currentGame = gameType;
-
-      if (gameType === "missing") {
-        playMissingGame();
-      } else {
-        playFindGame();
+function checkAnswer(div,name,correct){
+  if(name===correct){
+    div.classList.add('correct');
+    setTimeout(()=>{
+      if(level<maxLevels){ level++; nextRound(); }
+      else{
+        gameContainer.innerHTML=`<h1>Game Over! 🎉</h1>
+        <p class="instructions">You completed all levels!</p>
+        <button class="start-btn" onclick="startGame()">Play Again</button>`;
+        speak('Congratulations! You finished the game!');
       }
-    }
+    },800);
+  } else {
+    div.classList.add('incorrect');
+    speak('Oops, try again!');
+    setTimeout(()=>div.classList.remove('incorrect'),500);
+  }
+}
 
-    // ✅ Find the missing picture
-    function playMissingGame() {
-      let chosen = getRandomItems(3);
-      let missing = chosen[Math.floor(Math.random() * chosen.length)];
+function fillMissing(name){
+  const blankDiv = document.querySelector('[data-blank]');
+  blankDiv.innerHTML = '';
+  blankDiv.appendChild(preloaded[name].cloneNode());
+  checkAnswer(blankDiv,name,images[5]);
+}
 
-      // Question grid
-      chosen.forEach(item => {
-        let box = document.createElement("div");
-        box.className = "box";
-        if (item === missing) {
-          box.textContent = "?";
-        } else {
-          let img = document.createElement("img");
-          img.src = item.img;
-          box.appendChild(img);
-        }
-        gameBoard.appendChild(box);
-      });
+function exitGame(){ bgMusic.pause(); window.location.href='index.html'; }
 
-      // Answer options (1 correct + 2 wrong)
-      let options = [missing, ...getRandomItems(2, [missing])];
-      shuffle(options).forEach(opt => {
-        let box = document.createElement("div");
-        box.className = "box";
-        let img = document.createElement("img");
-        img.src = opt.img;
-        box.appendChild(img);
-        box.onclick = () => {
-          if (opt === missing) {
-            question.textContent = "✅ Correct!";
-            setTimeout(nextRound, 1000);
-          } else {
-            question.textContent = "❌ Try again!";
-          }
-        };
-        answers.appendChild(box);
-      });
-
-      question.textContent = "Find the missing picture!";
-    }
-
-    // ✅ Find the object
-    function playFindGame() {
-      let chosen = getRandomItems(3);
-      let answer = chosen[Math.floor(Math.random() * chosen.length)];
-      question.textContent = "Find the " + answer.name;
-
-      chosen.forEach(item => {
-        let box = document.createElement("div");
-        box.className = "box";
-        let img = document.createElement("img");
-        img.src = item.img;
-        box.appendChild(img);
-        box.onclick = () => {
-          if (item === answer) {
-            question.textContent = "✅ Correct!";
-            setTimeout(nextRound, 1000);
-          } else {
-            question.textContent = "❌ Try again!";
-          }
-        };
-        gameBoard.appendChild(box);
-      });
-    }
-
-    // Helpers
-    function getRandomItems(n, exclude = []) {
-      let pool = items.filter(i => !exclude.includes(i));
-      let arr = [];
-      while (arr.length < n) {
-        let pick = pool[Math.floor(Math.random() * pool.length)];
-        if (!arr.includes(pick)) arr.push(pick);
-      }
-      return arr;
-    }
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
-  </script>
+startBtn.onclick = startGame;
+</script>
 </body>
 </html>
