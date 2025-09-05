@@ -1,657 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kids Logic Adventure</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --accent-1: #FF6B6B;
-    --accent-2: #FFD700;
-    --accent-3: #1E90FF;
-    --good: #22c55e;
-    --bad: #ef4444;
-    --bg-gradient-start: #F9E79F;
-    --bg-gradient-end: #85C1E9;
-  }
-  html, body {
-    height: 100%;
-    margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    color: #333;
-  }
-  body {
-    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
-    animation: background-flow 20s ease infinite;
-    background-size: 200% 200%;
-  }
-  @keyframes background-flow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  .container {
-    width: 100%;
-    max-width: 820px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(5, 10, 20, 0.12);
-    padding: 24px;
-    box-sizing: border-box;
-    min-height: 86vh;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  /* --- Splash Screen Styles --- */
-  .splash-screen {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    gap: 30px;
-    padding: 40px;
-    flex: 1;
-  }
-  .splash-screen h1 {
-    font-size: clamp(2.5rem, 10vw, 5rem);
-    font-weight: 900;
-    color: var(--accent-3);
-    margin: 0;
-    text-shadow: 4px 4px 6px rgba(0,0,0,0.1);
-    animation: title-pop 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  }
-  .splash-screen p {
-    font-size: 1.25rem;
-    color: #555;
-    font-weight: 500;
-    margin: 0;
-  }
-  #start-game-btn {
-    padding: 20px 40px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border-radius: 50px;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(255, 165, 0, 0.4);
-    transition: transform 0.2s, box-shadow 0.2s, background 0.4s;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 12px 6px rgba(255, 165, 0, 0.4); }
-    50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(255, 165, 0, 0.6); }
-  }
-  #start-game-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 25px rgba(255, 165, 0, 0.5);
-  }
-  #start-game-btn:active {
-    transform: scale(0.98);
-  }
-  .spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border-left-color: var(--accent-1);
-    animation: spin 1s linear infinite;
-    margin-top: 10px;
-    display: none;
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  /* --- Game Board Styles --- */
-  .app {
-    width: 100%;
-    max-width: 820px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(5, 10, 20, 0.12);
-    padding: 24px;
-    box-sizing: border-box;
-    min-height: 86vh;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #f0f0f0;
-  }
-  .title {
-    font-weight: 800;
-    color: var(--accent-3);
-    font-size: 1.8rem;
-    margin: 0;
-  }
-  .controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  button {
-    cursor: pointer;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 12px;
-    font-weight: 700;
-    transition: transform 0.1s, box-shadow 0.1s;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
-  button:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  .btn-primary {
-    background: var(--accent-3);
-    color: white;
-  }
-  .btn-exit {
-    background: var(--bad);
-    color: white;
-  }
-  .btn-ghost {
-    background: transparent;
-    border: 2px solid #e0e0e0;
-    color: #555;
-  }
-  .meta {
-    color: #555;
-    font-weight: 700;
-  }
-  .instructions {
-    font-size: 1.15rem;
-    color: #333;
-    font-weight: 700;
-    margin: 6px 0;
-    text-align: center;
-    min-height: 28px; /* Prevent layout shift */
-  }
-  .board {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
-    overflow: auto;
-    padding-bottom: 8px;
-  }
-  .grid {
-    width: 100%;
-    display: grid;
-    gap: 16px;
-    align-items: stretch;
-  }
-  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .slot {
-    background: #fefcf3;
-    border-radius: 18px;
-    aspect-ratio: 1/1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(36px, 9vw, 84px);
-    user-select: none;
-    position: relative;
-    border: 4px solid #f0f0f0;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
-  }
-  .slot:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 30px rgba(10, 20, 60, 0.1);
-  }
-  .slot.blank {
-    background: linear-gradient(90deg, #e9e9f3, #dcdcf5);
-    color: #475569;
-    cursor: default;
-  }
-  .slot.correct { animation: correct-pop 0.9s ease both; }
-  @keyframes correct-pop {
-    0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,223,93,0); }
-    50% { transform: scale(1.2); box-shadow: 0 0 20px 12px rgba(255,223,93,0.85); }
-    100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,223,93,0); }
-  }
-  .slot.wrong { animation: shake 0.45s ease both; }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
-  }
-  .glow {
-    box-shadow: 0 0 26px 8px rgba(99,102,241,0.35);
-    transform: scale(1.06) !important;
-  }
-  .options {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .option {
-    background: #fefdf5;
-    border-radius: 14px;
-    padding: 12px 18px;
-    font-size: clamp(28px, 6vw, 48px);
-    cursor: pointer;
-    min-width: 82px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 4px solid #f0f0f0;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-  }
-  .option:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 30px rgba(10, 20, 60, 0.1);
-  }
-  .star {
-    position: absolute;
-    font-size: 18px;
-    pointer-events: none;
-    opacity: 0;
-    transform: translate(-50%,-50%) scale(0.6);
-  }
-  .star.animate {
-    animation: star-burst 900ms ease-out forwards;
-  }
-  @keyframes star-burst {
-    0% { opacity: 1; transform: translate(-50%,-50%) scale(0.6); }
-    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.6); }
-  }
-  .footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 6px;
-    padding-top: 8px;
-    border-top: 2px solid #f0f0f0;
-  }
-  .score {
-    font-weight: 900;
-    color: #333;
-    font-size: 1.1rem;
-  }
-  @media (max-width: 480px) {
-    .grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
-  }
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(135deg, #ffe6f0 0%, #b3e5fc 50%, #c8e6c9 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+.container {
+    background: rgba(255, 245, 157, 0.95);
+    border-radius: 25px;
+    padding: 15px;
+    width: 95%;
+    max-width: 600px;
+    min-height: 90vh;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    position: relative;
+}
+h1 {
+    font-size: 2rem;
+    color: #d81b60;
+    margin: 5px 0;
+}
+.instructions {
+    font-size: 1.4rem;
+    margin: 10px 0;
+    color: #d81b60;
+}
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 12px;
+    margin: 15px 0;
+}
+.emoji-item {
+    background: #fff3e0;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    border: 2px solid #333;
+    aspect-ratio: 1/1;
+    position: relative;
+}
+.emoji-item.correct {
+    animation: glow 1s ease-out;
+}
+.emoji-item.incorrect {
+    animation: shake 0.5s ease;
+}
+@keyframes glow {
+    0% { box-shadow: 0 0 0px #ffd700; transform: scale(1); }
+    50% { box-shadow: 0 0 15px #ffd700; transform: scale(1.2); }
+    100% { box-shadow: 0 0 0px #ffd700; transform: scale(1); }
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+.start-btn, .exit-btn {
+    background: linear-gradient(45deg,#ff4081,#ff80ab);
+    color: white;
+    font-weight: bold;
+    padding: 12px 25px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    margin: 10px;
+    box-shadow: 0 0 20px rgba(255,64,129,0.6);
+    animation: shine 2s infinite alternate;
+}
+@keyframes shine {
+    0% { box-shadow: 0 0 10px rgba(255,64,129,0.5); }
+    100% { box-shadow: 0 0 25px rgba(255,64,129,1); }
+}
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.level-display {
+    color: #0288d1;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 5px 0;
+}
+.progress-bar-container {
+    width: 100%;
+    height: 15px;
+    background: #ddd;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+.progress-bar {
+    height: 100%;
+    background: #4caf50;
+    width: 0%;
+    border-radius: 8px;
+    transition: width 0.5s ease;
+}
+.missing-placeholder {
+    background: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    cursor: default;
+}
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 10px 0;
+}
 </style>
 </head>
 <body>
-  <!-- Container for both splash and game -->
-  <div class="container" id="mainContainer">
-    <!-- Splash Screen -->
-    <div class="splash-screen" id="splashScreen">
-      <h1>Logic Puzzles! 🧠✨</h1>
-      <p>Ready for an adventure? Tap the button to begin!</p>
-      <button id="start-game-btn">Start Adventure</button>
-      <div class="spinner" id="audio-loading-spinner"></div>
-      <audio id="welcome-audio" preload="auto"></audio>
-    </div>
-    <!-- Game Board (hidden by default) -->
-    <div class="app" id="gameBoard" style="display: none;">
-      <div class="top">
-        <div>
-          <div class="title">Logic Adventure 🌟</div>
-          <div class="meta"><span id="levelLabel">Level 1</span></div>
-        </div>
-        <div class="controls">
-          <button id="restartBtn" class="btn-ghost">Restart</button>
-          <button id="exitBtn" class="btn-exit">Exit</button>
-        </div>
-      </div>
-      <div class="board" id="board">
-        <div class="instructions" id="instructions">Press Start to play</div>
-        <div class="score">Score: <span id="score">0</span></div>
-      </div>
-      <div class="footer">
-        <div style="font-size:0.95rem;color:#475569">Modes: Find → Different → Missing</div>
-        <div style="font-size:0.9rem;color:#334155">Tip: Listen and find the right emoji</div>
-      </div>
-    </div>
-  </div>
-  <!-- gentle music, plays after Start (gesture) -->
-  <audio id="bgAudio" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2a9b9d347d.mp3?filename=kid-music-110271.mp3"></audio>
+<div class="container" id="game-container">
+    <h1>🌟 Fun Logic Adventure 🌟</h1>
+    <p class="instructions">Tap Start to Begin!</p>
+    <button class="start-btn" id="start-btn">Start Game</button>
+</div>
+
+<audio id="bg-music" loop preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-/* ====== Data & state ====== */
-const ALL = [
-  '🐶','🐱','🐘','🦒','🦁','🐼','🐻','🐰','🐨','🐯',
-  '🍎','🍌','🍉','🍇','🍓','🍍','🥭','🍒','🍑','🍊',
-  '🚗','🚌','🚑','🚒','🚜','🚲','✈️','🚀','🚁','🚤',
-  '⚽','🎈','🧸','🎸','🌸','🌞','🌈','🐬','🦋','🐢'
-];
-const POS = ['Hooray!','Great job!','Well done!','Excellent!','You are amazing!'];
-const board = document.getElementById('board');
-const instructionsEl = document.getElementById('instructions');
-const levelLabel = document.getElementById('levelLabel');
-const scoreEl = document.getElementById('score');
-const restartBtn = document.getElementById('restartBtn');
-const exitBtn = document.getElementById('exitBtn');
-const bgAudio = document.getElementById('bgAudio');
-const splashScreen = document.getElementById('splashScreen');
-const gameBoard = document.getElementById('gameBoard');
-const startGameBtn = document.getElementById('start-game-btn');
-const audioLoadingSpinner = document.getElementById('audio-loading-spinner');
-const welcomeAudio = document.getElementById('welcome-audio');
+const gameContainer = document.getElementById('game-container');
+const startBtn = document.getElementById('start-btn');
+const bgMusic = document.getElementById('bg-music');
+const totalLevels = 30; // you can increase to 100+
 let level = 1;
 let score = 0;
-let isWaiting = false;
-let tutorialShown = { findDifferent:false, findMissing:false, findTarget:false };
-const LEVEL_SEQUENCE = [
-  { mode:'findTarget', size:4 }, { mode:'findTarget', size:5 }, { mode:'findTarget', size:6 },
-  { mode:'findDifferent', size:4 }, { mode:'findDifferent', size:5 }, { mode:'findDifferent', size:6 },
-  { mode:'findMissing', size:4 }, { mode:'findMissing', size:5 }, { mode:'findMissing', size:6 },
-  { mode:'findTarget', size:6 }, { mode:'findDifferent', size:6 }, { mode:'findMissing', size:6 },
-  { mode:'findTarget', size:7 }, { mode:'findDifferent', size:7 }, { mode:'findMissing', size:7 }
+
+const feedback = ['Super job! 🌟','Wow, awesome!','You’re a star!','Fantastic!','Yay, you did it!'];
+
+// Images for kids: animals, fruits, vehicles
+const items = [
+    {name:'Dog', img:'https://i.postimg.cc/dV2ydWvT/dog.png'},
+    {name:'Cat', img:'https://i.postimg.cc/NjJc45n1/cat.png'},
+    {name:'Cow', img:'https://i.postimg.cc/HsC3sC3M/cow.png'},
+    {name:'Apple', img:'https://i.postimg.cc/QCwS3TCZ/apple.png'},
+    {name:'Banana', img:'https://i.postimg.cc/qM5bWpSH/banana.png'},
+    {name:'Car', img:'https://i.postimg.cc/FH7wLkmx/car.png'},
+    {name:'Bus', img:'https://i.postimg.cc/2yQ6chP2/bus.png'},
+    {name:'Plane', img:'https://i.postimg.cc/4x0rjPqk/plane.png'}
 ];
-let seqIndex = 0;
-/* Utils */
-function shuffle(arr){
-  const a = arr.slice();
-  for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
+
+// Utility: shuffle array
+function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
+
+// Speech function
+function speak(text, rate=0.9){
+    const synth = window.speechSynthesis;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = rate;
+    utter.pitch = 1.2;
+    synth.speak(utter);
 }
-function speak(text, opts={rate:0.85,pitch:1.2}) {
-  try{
-    if('speechSynthesis' in window){
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang='en-US'; u.rate = opts.rate; u.pitch = opts.pitch;
-      window.speechSynthesis.speak(u);
-    }
-  }catch(e){ console.warn('TTS fail',e) }
-}
-function colsClass(n){ if(n<=2) return 'cols-2'; if(n<=6) return 'cols-3'; return 'cols-4' }
-function clearBoardBelowInstructions(){
-  const prevGrid = board.querySelector('.grid');
-  const prevOptions = board.querySelector('.options');
-  if (prevGrid) prevGrid.remove();
-  if (prevOptions) prevOptions.remove();
-}
-/* star burst */
-function starBurst(el){
-  for(let i=0;i<6;i++){
-    const s = document.createElement('div');
-    s.className='star'; s.textContent='✨';
-    s.style.left='50%'; s.style.top='50%';
-    const tx=(Math.random()*160-80)+'px', ty=(Math.random()*140-70)+'px';
-    s.style.setProperty('--tx',tx); s.style.setProperty('--ty',ty);
-    el.appendChild(s);
-    requestAnimationFrame(()=> s.classList.add('animate'));
-    setTimeout(()=> s.remove(),950);
-  }
-}
-/* Glow helper for tutorial (flash element for a few times) */
-async function flashElements(els, times=2, interval=450){
-  for(let t=0;t<times;t++){
-    els.forEach(e=> e.classList.add('glow'));
-    await new Promise(r=> setTimeout(r, interval));
-    els.forEach(e=> e.classList.remove('glow'));
-    await new Promise(r=> setTimeout(r, 140));
-  }
-}
-/* ====== Mode renderers and logic ====== */
-function renderGrid(emojis, clickable=true, correct=null){
-  clearBoardBelowInstructions();
-  const grid = document.createElement('div');
-  grid.className = 'grid ' + colsClass(emojis.length);
-  emojis.forEach((em, idx)=>{
-    const s = document.createElement('div');
-    s.className='slot';
-    s.textContent = em;
-    if(clickable && em!=='❓'){
-      s.onclick = ()=> {
-        if(isWaiting) return;
-        if(correct !== null && em === correct){
-          isWaiting = true;
-          s.classList.add('correct'); starBurst(s);
-          speak(POS[Math.floor(Math.random()*POS.length)], {rate:0.95,pitch:1.3});
-          score += 10; scoreEl.textContent = score;
-          setTimeout(()=> { isWaiting=false; nextLevel(); }, 1200);
-        } else {
-          s.classList.add('wrong'); speak('Try again', {rate:0.95,pitch:1.05});
-          setTimeout(()=> s.classList.remove('wrong'), 700);
-        }
-      };
-    }
-    grid.appendChild(s);
-  });
-  board.appendChild(grid);
-}
-function renderOptions(opts, correct){
-  const prev = board.querySelector('.options'); if(prev) prev.remove();
-  const wrap = document.createElement('div'); wrap.className='options';
-  opts.forEach(o=>{
-    const d = document.createElement('div'); d.className='option'; d.textContent=o;
-    d.onclick = ()=> {
-      if(isWaiting) return;
-      if(o === correct){
-        const blanks = board.querySelectorAll('.slot.blank');
-        if(blanks.length) {
-          const blank = blanks[0];
-          blank.textContent = o; blank.classList.add('correct'); starBurst(blank);
-        }
-        isWaiting = true;
-        speak(POS[Math.floor(Math.random()*POS.length)], {rate:0.95,pitch:1.3});
-        score += 10; scoreEl.textContent = score;
-        setTimeout(()=> { isWaiting=false; nextLevel(); }, 1200);
-      } else {
-        d.animate([{transform:'translateY(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateY(0)'}],{duration:450});
-        speak('Try again', {rate:0.95,pitch:1.05});
-      }
-    };
-    wrap.appendChild(d);
-  });
-  board.appendChild(wrap);
-}
-/* ----- Specific mode setups ----- */
-async function setupFindTarget(size){
-  const pool = shuffle(ALL).slice(0, size);
-  const target = pool[Math.floor(Math.random()*pool.length)];
-  instructionsEl.textContent = `Find the ${target}`;
-  speak(`Find the ${target}`, {rate:0.82,pitch:1.25});
-  renderGrid(pool, true, target);
-  if(!tutorialShown.findTarget){
-    tutorialShown.findTarget = true;
-    await new Promise(r=>setTimeout(r,550));
-    const slots = Array.from(board.querySelectorAll('.slot'));
-    const targetSlots = slots.filter(s => s.textContent===target);
-    if(targetSlots.length){
-      await flashElements(targetSlots.slice(0,1), 3, 430);
-    }
-  }
-}
-async function setupFindDifferent(size){
-  const pool = shuffle(ALL);
-  const repeat = pool[0];
-  const different = pool.find(e=> e!==repeat);
-  const arr = new Array(size-1).fill(repeat).concat([different]);
-  const placed = shuffle(arr);
-  instructionsEl.textContent = 'Find the different item';
-  speak('Find the different item', {rate:0.82,pitch:1.25});
-  renderGrid(placed, true, different);
-  if(!tutorialShown.findDifferent){
-    tutorialShown.findDifferent = true;
-    await new Promise(r=>setTimeout(r,600));
-    const slots = Array.from(board.querySelectorAll('.slot'));
-    const sameSlots = slots.filter(s => s.textContent === repeat);
-    const diffSlot = slots.find(s => s.textContent === different);
-    await flashElements(sameSlots.slice(0, Math.min(4, sameSlots.length)), 2, 380);
-    await new Promise(r=>setTimeout(r,200));
-    if(diffSlot) await flashElements([diffSlot], 4, 400);
-  }
-}
-async function setupFindMissing(totalSlots){
-  const pool = shuffle(ALL).slice(0, totalSlots);
-  const missingIndex = Math.floor(Math.random()*totalSlots);
-  const missingEmoji = pool[missingIndex];
-  const display = pool.slice(); display[missingIndex] = '❓';
-  instructionsEl.textContent = 'Which emoji is missing?';
-  speak('Which emoji is missing? Choose the right one to fill the blank!', {rate:0.82,pitch:1.28});
-  renderGrid(display, false, null);
-  const visible = pool.filter((_,i)=>i!==missingIndex);
-  const twoVisible = shuffle(visible).slice(0,2);
-  const options = shuffle([missingEmoji, ...twoVisible]);
-  renderOptions(options, missingEmoji);
-  if(!tutorialShown.findMissing){
-    tutorialShown.findMissing = true;
-    await new Promise(r=>setTimeout(r,600));
-    const blank = board.querySelector('.slot.blank');
-    if(blank) await flashElements([blank], 3, 420);
-    const optionEls = Array.from(board.querySelectorAll('.option'));
-    const correctOpt = optionEls.find(o => o.textContent === missingEmoji);
-    const visibleOptEls = optionEls.filter(o => twoVisible.includes(o.textContent));
-    await flashElements(visibleOptEls.slice(0,2), 2, 300);
-    await new Promise(r=>setTimeout(r,180));
-    if(correctOpt) await flashElements([correctOpt], 3, 420);
-  }
-}
-/* ===== Next level controller (deterministic) ===== */
-function nextLevel(){
-  clearBoardBelowInstructions();
-  const cur = LEVEL_SEQUENCE[seqIndex % LEVEL_SEQUENCE.length];
-  levelLabel.textContent = `Level ${seqIndex + 1}`;
-  if(cur.mode === 'findTarget') setupFindTarget(cur.size);
-  else if(cur.mode === 'findDifferent') setupFindDifferent(cur.size);
-  else if(cur.mode === 'findMissing') setupFindMissing(cur.size);
-  seqIndex++;
-}
-/* --- TTS & Audio Helpers --- */
-function base64ToArrayBuffer(base64) {
-  const binaryString = window.atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
-function pcmToWav(pcmData, sampleRate) {
-  const numChannels = 1;
-  const sampleSize = 16;
-  const numFrames = pcmData.length;
-  const byteRate = sampleRate * numChannels * (sampleSize / 8);
-  const blockAlign = numChannels * (sampleSize / 8);
-  const subChunk2Size = numFrames * numChannels * (sampleSize / 8);
-  const chunkSize = 36 + subChunk2Size;
-  const buffer = new ArrayBuffer(chunkSize + 8);
-  const view = new DataView(buffer);
-  view.setUint32(0, 0x52494646, true);
-  view.setUint32(4, chunkSize, true);
-  view.setUint32(8, 0x57415645, true);
-  view.setUint32(12, 0x666d7420, true);
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, numChannels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, byteRate, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, sampleSize, true);
-  view.setUint32(36, 0x64617461, true);
-  view.setUint32(40, subChunk2Size, true);
-  let offset = 44;
-  for (let i = 0; i < numFrames; i++) {
-    view.setInt16(offset, pcmData[i], true);
-    offset += 2;
-  }
-  return new Blob([view], { type: 'audio/wav' });
-}
-async function fetchAndPlayWelcomeAudio() {
-  audioLoadingSpinner.style.display = 'block';
-  try {
-    const payload = {
-      contents: [{
-        parts: [{ text: "Welcome to Logic Puzzle! Tap the shiny button to start the game." }]
-      }],
-      generationConfig: {
-        responseModalities: ["AUDIO"],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: "Puck" }
-          }
-        }
-      },
-      model: "gemini-2.5-flash-preview-tts"
-    };
-    const apiKey = "";
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const result = await response.json();
-    const part = result?.candidates?.[0]?.content?.parts?.[0];
-    const audioData = part?.inlineData?.data;
-    const mimeType = part?.inlineData?.mimeType;
-    if (audioData && mimeType && mimeType.startsWith("audio/")) {
-      const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-      const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 16000;
-      const pcmData = base64ToArrayBuffer(audioData);
-      const pcm16 = new Int16Array(pcmData);
-      const wavBlob = pcmToWav(pcm16, sampleRate);
-      const audioUrl = URL.createObjectURL(wavBlob);
-      welcomeAudio.src = audioUrl;
-      welcomeAudio.play().catch(e => console.warn("Audio playback failed:", e));
-    } else {
-      console.error("Failed to get valid audio data from API.");
-      speak("Welcome to Logic Puzzle! Tap the shiny button to start the game.", { rate: 0.85, pitch: 1.2 });
-    }
-  } catch (e) {
-    console.error("Error fetching audio:", e);
-    speak("Welcome to Logic Puzzle! Tap the shiny button to start the game.", { rate: 0.85, pitch: 1.2 });
-  } finally {
-    audioLoadingSpinner.style.display = 'none';
-  }
-}
-/* ===== Controls & initialization ===== */
-startGameBtn.addEventListener('click', ()=>{
-  splashScreen.style.display = 'none';
-  gameBoard.style.display = 'flex';
-  try{ bgAudio.currentTime = 0; bgAudio.play().catch(()=>{}); }catch(e){}
-  level = 1; score = 0; seqIndex = 0; scoreEl.textContent = score;
-  tutorialShown = { findDifferent:false, findMissing:false, findTarget:false };
-  speak('Let’s play! I will speak slowly and clearly — listen carefully!', {rate:0.8,pitch:1.35});
-  setTimeout(()=> nextLevel(), 700);
-});
-restartBtn.addEventListener('click', ()=>{
-  window.speechSynthesis.cancel();
-  try{ bgAudio.pause(); bgAudio.currentTime = 0; }catch(e){}
-  level = 1; score = 0; seqIndex = 0; scoreEl.textContent = score;
-  tutorialShown = { findDifferent:false, findMissing:false, findTarget:false };
-  instructionsEl.textContent = 'Restarting…';
-  setTimeout(()=> { speak('Restarting!'); nextLevel(); }, 500);
-});
-exitBtn.addEventListener('click', ()=>{
-  try{ bgAudio.pause(); }catch(e){}
-  window.location.href = window.location.href; // Simple reload for exit
-});
-window.onload = () => {
-  splashScreen.style.display = 'flex';
-  gameBoard.style.display = 'none';
-  instructionsEl.textContent = 'Tap Start to play!';
-  levelLabel.textContent = 'Level 1';
-  scoreEl.textContent = '0';
-  fetchAndPlayWelcomeAudio();
+
+// Start game
+startBtn.onclick = () => {
+    bgMusic.volume = 0.1;
+    bgMusic.play();
+    level = 1;
+    score = 0;
+    loadLevel();
 };
+
+// Exit
+function exitGame(){bgMusic.pause();window.location.href='index.html';}
+
+// Load level
+function loadLevel(){
+    gameContainer.innerHTML = `
+    <div class="top-bar">
+        <h1>🌟 Fun Logic Adventure 🌟</h1>
+        <button class="exit-btn" onclick="exitGame()">Exit</button>
+    </div>
+    <p class="level-display">Level: ${level}</p>
+    <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
+    `;
+
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = `${(level/totalLevels)*100}%`;
+
+    // Determine level type
+    let type;
+    if(level%3===1) type='findTarget';
+    else if(level%3===2) type='findDifferent';
+    else type='findMissing';
+
+    if(type==='findTarget'){
+        loadFindTarget();
+    }else if(type==='findDifferent'){
+        loadFindDifferent();
+    }else{
+        loadFindMissing();
+    }
+}
+
+// Find Target
+function loadFindTarget(){
+    const chosen = shuffle([...items]).slice(0,4);
+    const target = chosen[Math.floor(Math.random()*chosen.length)];
+    const instructions = document.createElement('p');
+    instructions.className='instructions';
+    instructions.innerText=`Find the ${target.name}!`;
+    gameContainer.appendChild(instructions);
+    speak(`Find the ${target.name}!`,0.8);
+
+    const grid = document.createElement('div');
+    grid.className='emoji-grid';
+    chosen.forEach(it=>{
+        const div=document.createElement('div');
+        div.className='emoji-item';
+        div.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
+        div.onclick=()=>checkAnswer(div,it.name,target.name);
+        grid.appendChild(div);
+    });
+    gameContainer.appendChild(grid);
+}
+
+// Find Different
+function loadFindDifferent(){
+    const chosen = shuffle([...items]).slice(0,4);
+    const same = chosen[0].name;
+    for(let i=1;i<chosen.length;i++) chosen[i].name=same; // make same
+    const different = shuffle(items.filter(i=>i.name!==same))[0];
+    const diffIndex = Math.floor(Math.random()*chosen.length);
+    chosen[diffIndex] = different;
+
+    const instructions = document.createElement('p');
+    instructions.className='instructions';
+    instructions.innerText='Find the different one!';
+    gameContainer.appendChild(instructions);
+    speak('Find the different one!',0.8);
+
+    const grid = document.createElement('div');
+    grid.className='emoji-grid';
+    chosen.forEach(it=>{
+        const div=document.createElement('div');
+        div.className='emoji-item';
+        div.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
+        div.onclick=()=>checkAnswer(div,it.name,different.name);
+        grid.appendChild(div);
+    });
+    gameContainer.appendChild(grid);
+}
+
+// Find Missing
+function loadFindMissing(){
+    const chosen = shuffle([...items]).slice(0,5);
+    const missing = shuffle([...items].filter(i=>!chosen.includes(i)))[0];
+    const gridItems=[...chosen,{name:'?',img:''}];
+
+    const instructions = document.createElement('p');
+    instructions.className='instructions';
+    instructions.innerText='Find the missing item!';
+    gameContainer.appendChild(instructions);
+    speak('Find the missing item!',0.8);
+
+    const grid = document.createElement('div');
+    grid.className='emoji-grid';
+    gridItems.forEach((it,index)=>{
+        const div=document.createElement('div');
+        div.className='emoji-item';
+        if(it.name==='?') div.classList.add('missing-placeholder');
+        div.innerHTML=it.name==='?'?'❓':`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
+        grid.appendChild(div);
+    });
+    gameContainer.appendChild(grid);
+
+    const options=[missing, ...shuffle(chosen).slice(0,2)];
+    shuffle(options);
+    const optionsGrid=document.createElement('div');
+    optionsGrid.className='options-grid';
+    options.forEach(it=>{
+        const div=document.createElement('div');
+        div.className='emoji-item';
+        div.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
+        div.onclick=()=>{
+            // Fill missing
+            const placeholder=document.querySelector('.missing-placeholder');
+            placeholder.innerHTML=`<img src="${it.img}" style="max-width:70%; max-height:70%"><br>${it.name}`;
+            checkAnswer(div,it.name,missing.name);
+        };
+        optionsGrid.appendChild(div);
+    });
+    gameContainer.appendChild(optionsGrid);
+}
+
+// Check Answer
+function checkAnswer(div, selected, correct){
+    if(selected===correct){
+        div.classList.add('correct');
+        score+=10;
+        speak(feedback[Math.floor(Math.random()*feedback.length)],0.9+(level/totalLevels));
+        setTimeout(()=>{
+            if(level<totalLevels){
+                level++;
+                loadLevel();
+            }else{
+                gameContainer.innerHTML=`
+                <div class="top-bar">
+                    <h1>Game Over! 🎉</h1>
+                    <button class="exit-btn" onclick="exitGame()">Exit</button>
+                </div>
+                <p class="instructions">Congratulations! Your score: ${score}</p>
+                <button class="start-btn" onclick="startBtn.click()">Play Again</button>`;
+                speak('Congratulations! You won!',1.0);
+            }
+        },1000);
+    }else{
+        div.classList.add('incorrect');
+        speak('Oops, try again!',0.9);
+        setTimeout(()=>div.classList.remove('incorrect'),800);
+    }
+}
 </script>
 </body>
 </html>
