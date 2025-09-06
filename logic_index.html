@@ -95,6 +95,7 @@
     margin: 25px 0;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-auto-rows: 140px; 
     gap: 18px;
     background: rgba(255, 255, 255, 0.12);
     justify-items: center;
@@ -107,7 +108,7 @@
     padding: 18px;
     margin-top: 30px;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap; 
     gap: 18px;
     justify-content: center;
     background: rgba(255, 255, 255, 0.08);
@@ -117,7 +118,7 @@
     width: 100%;
     max-width: 180px;
     height: 100%;
-    max-height: 180px;
+    aspect-ratio: 1 / 1; 
     border-radius: 25px;
     background: #fff;
     display: flex;
@@ -249,23 +250,13 @@
   /* responsive */
   @media (max-width: 600px) {
     .option-container {
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      grid-auto-rows: 100px; 
       gap: 12px;
       padding: 12px;
     }
-    .answer-container {
-      gap: 12px;
-    }
     .option {
       max-width: 120px;
-      max-height: 120px;
-    }
-    #startScreen h1 {
-      font-size: 2.5rem;
-    }
-    .start-button {
-      font-size: 2rem;
-      padding: 15px 35px;
     }
   }
 </style>
@@ -303,8 +294,8 @@ const imageList = ["apple","ball","banana","car","cat","cherry","dog","fish","fl
 let currentMode = "find";
 let voicesReady = false;
 let score = 0;
-let waitingNextRound = false; // when congrats playing
-let roundAnswered = false;    // prevents multiple fills in same round
+let waitingNextRound = false; 
+let roundAnswered = false;  
 
 const loadedImages = {};
 const bgMusic = document.getElementById('bgMusic');
@@ -325,7 +316,6 @@ imageList.forEach(name => { const img = new Image(); img.src = `image/${name}.pn
 
 /* ---------- START / EXIT ---------- */
 startBtn.addEventListener('click', () => {
-  // allow speech and music after user gesture
   voicesReady = true;
   try { bgMusic.play(); } catch(e) {}
   startScreen.style.display = 'none';
@@ -361,9 +351,7 @@ function showCongratsPopup(scoreVal){
   waitingNextRound = true;
   congratsEl.innerHTML = `🎉 Congratulations! 🎉<br>You got ${scoreVal} points!`;
   congratsEl.style.display = 'block';
-  // play music if allowed
   try{ congratsMusic.currentTime = 0; congratsMusic.play(); }catch(e){}
-  // create stars
   for(let i=0;i<18;i++){
     const s = document.createElement('div');
     s.className = 'congrats-star';
@@ -372,11 +360,9 @@ function showCongratsPopup(scoreVal){
     congratsEl.appendChild(s);
     setTimeout(()=>s.remove(),2200);
   }
-  // wait for speech to end before continuing
   speak(`Congratulations, you have got ${scoreVal} points!`, ()=>{
     congratsEl.style.display = 'none';
     waitingNextRound = false;
-    // stop music
     try{ congratsMusic.pause(); congratsMusic.currentTime = 0; }catch(e){}
     nextRound();
   });
@@ -398,7 +384,6 @@ function nextRound(){
 }
 
 /* ---------- Create visual tiles ---------- */
-/* Create a non-clickable question tile (used inside question container) */
 function createQuestionTile(name, parent){
   const tile = document.createElement('div');
   tile.className = 'option question-tile';
@@ -409,7 +394,6 @@ function createQuestionTile(name, parent){
   parent.appendChild(tile);
 }
 
-/* Create a clickable answer tile (used inside answer container) */
 function createAnswerTile(name, isCorrect, parent, blankDiv=null, missing=null){
   const tile = document.createElement('div');
   tile.className = 'option';
@@ -421,14 +405,13 @@ function createAnswerTile(name, isCorrect, parent, blankDiv=null, missing=null){
   tile.appendChild(img);
 
   tile.addEventListener('click', ()=>{
-    if(roundAnswered) return; // already answered this round
+    if(roundAnswered) return; 
     const correct = tile.dataset.correct === '1';
     if(correct){
       roundAnswered = true;
       try{ correctSound.currentTime = 0; correctSound.play(); }catch(e){}
       score++;
       updateScore();
-      // fill blank only when we have a reference
       if(blankDiv && missing){
         blankDiv.innerHTML = '';
         const im = document.createElement('img');
@@ -436,21 +419,16 @@ function createAnswerTile(name, isCorrect, parent, blankDiv=null, missing=null){
         im.alt = missing;
         im.className = 'shine';
         blankDiv.appendChild(im);
-        // sparkle stars on the filled blank
         addStars(blankDiv);
       } else {
-        // temporary stars on the tile
         addStars(tile);
       }
 
-      // speak then continue; if congrats triggered, showCongratsPopup will handle waitingNextRound
       speak('Well done!', ()=>{
-        // small delay to let shine finish
         setTimeout(()=>{ if(!waitingNextRound) nextRound(); }, 450);
       });
 
     } else {
-      // wrong: give feedback, but DO NOT reveal blank
       try{ wrongSound.currentTime = 0; wrongSound.play(); }catch(e){}
       tile.animate([{transform:'translateX(0)'},{transform:'translateX(6px)'},{transform:'translateX(-6px)'},{transform:'translateX(0)'}], {duration:250});
       speak('Try again');
@@ -460,14 +438,12 @@ function createAnswerTile(name, isCorrect, parent, blankDiv=null, missing=null){
   parent.appendChild(tile);
 }
 
-/* add small star effects centered on a target element */
 function addStars(target){
   const rect = target.getBoundingClientRect();
   for(let i=0;i<6;i++){
     const s = document.createElement('div');
     s.className = 'star-effect';
     s.textContent = '⭐';
-    // random offset around center
     const x = rect.left + rect.width/2 + (Math.random()*60-30);
     const y = rect.top + rect.height/2 + (Math.random()*20-10);
     s.style.left = x + 'px';
@@ -483,7 +459,6 @@ function startFindRound(){
   const target = choices[Math.floor(Math.random()*choices.length)];
   qEl.textContent = `Find the ${target}`;
   speak(`Can you find the ${target}?`);
-  // answer tiles (clickable)
   const ansContainer = document.createElement('div');
   ansContainer.className = 'answer-container';
   shuffle(choices).forEach(name => createAnswerTile(name, name===target, ansContainer));
@@ -504,10 +479,7 @@ function startDifferentRound(){
 }
 
 function startMissingRound(){
-  // 1) pick 6 unique items for the question grid
   const selected = shuffle(imageList).slice(0, 6);
-
-  // 2) pick exactly 1 missing item from the selected group
   const missingIndex = Math.floor(Math.random() * selected.length);
   const missing = selected[missingIndex];
   const itemsInGrid = selected.filter((_, idx) => idx !== missingIndex);
@@ -515,7 +487,6 @@ function startMissingRound(){
   qEl.textContent = 'Which picture is missing?';
   speak('Which picture is missing?');
 
-  // QUESTION container (6 slots: 5 filled + 1 blank)
   const questionContainer = document.createElement('div');
   questionContainer.className = 'option-container';
 
@@ -531,8 +502,6 @@ function startMissingRound(){
   });
   optionsEl.appendChild(questionContainer);
 
-  // ANSWER container: one correct and two WRONG options.
-  // The wrong options must NOT be in the question grid.
   const allImagesExceptGrid = imageList.filter(name => !itemsInGrid.includes(name) && name !== missing);
   const wrongOptions = shuffle(allImagesExceptGrid).slice(0, 2);
   const answerChoices = shuffle([missing, ...wrongOptions]);
@@ -545,20 +514,6 @@ function startMissingRound(){
   optionsEl.appendChild(answerContainer);
 }
 
-
-/* create question tile helper (non-clickable) */
-function createQuestionTile(name, parent){
-  const t = document.createElement('div');
-  t.className = 'option question-tile';
-  const img = document.createElement('img');
-  img.src = loadedImages[name].src;
-  img.alt = name;
-  t.appendChild(img);
-  parent.appendChild(t);
-}
-
-/* ---------- start initial UI ---------- */
-// nothing else — user clicks start to begin
 </script>
 </body>
 </html>
