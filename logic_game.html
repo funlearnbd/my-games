@@ -1,270 +1,353 @@
-<script>
-/* ---------- DATA ---------- */
-const imageList = ["apple","ball","banana","car","cat","cherry","dog","fish","flower","orange"];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kids Learning Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-/* ---------- STATE + DOM ---------- */
-let currentMode = "find";
-let voicesReady = false;
-let score = 0;
-let waitingNextRound = false; 
-let roundAnswered = false;  
+    .start-button {
+      font-size: 3em;
+      padding: 20px 40px;
+      border: none;
+      border-radius: 50px;
+      background: gold;
+      color: white;
+      cursor: pointer;
+      animation: glow 1.5s infinite alternate;
+      box-shadow: 0 0 20px gold;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 20px gold; }
+      to   { box-shadow: 0 0 40px orange; }
+    }
 
-const loadedImages = {};
-const bgMusic = document.getElementById('bgMusic');
-const correctSound = document.getElementById('correctSound');
-const wrongSound = document.getElementById('wrongSound');
-const scoreEl = document.getElementById('score');
-const startBtn = document.getElementById('startBtn');
-const startScreen = document.getElementById('startScreen');
-const game = document.getElementById('game');
-const qEl = document.getElementById('question');
-const optionsEl = document.getElementById('options');
-const exitBtn = document.getElementById('exitBtn');
+    .exit-button {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5em;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: crimson;
+      color: white;
+      cursor: pointer;
+    }
 
-/* preload images */
-imageList.forEach(name => { const img = new Image(); img.src = `image/${name}.png`; loadedImages[name] = img; });
+    .game-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
 
-/* ---------- START / EXIT ---------- */
-startBtn.addEventListener('click', () => {
-  voicesReady = true;
-  try { bgMusic.play(); } catch(e) {}
-  startScreen.style.display = 'none';
-  game.style.display = 'block';
-  score = 0;
-  updateScore();
-  nextRound();
-});
+    .question {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
 
-exitBtn.addEventListener('click', () => {
-  try { bgMusic.pause(); bgMusic.currentTime = 0; } catch(e) {}
-  window.location.href = 'index.html';
-});
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 90%;
+    }
 
-/* ---------- SPEECH ---------- */
-function speak(text, cb=null){
-  if(!voicesReady){ if(cb) setTimeout(cb, 400); return; }
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.8; u.pitch = 1.15;
-  if(cb) u.onend = cb;
-  speechSynthesis.speak(u);
-}
+    .option {
+      width: 150px;
+      height: 150px;
+      border-radius: 20px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
 
-/* ---------- SCORE ---------- */
-function updateScore(){
-  scoreEl.textContent = `Score: ${score}`;
-}
+    .option img {
+      max-width: 90%;
+      max-height: 90%;
+    }
 
-/* ---------- UTIL ---------- */
-function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+    .option:hover {
+      transform: scale(1.1);
+    }
 
-/* ---------- CORE FLOW ---------- */
-function nextRound(){
-  if(waitingNextRound) return;
-  roundAnswered = false;
-  optionsEl.innerHTML = '';
-  const modes = ['find','different','missing','memory','shadow']; // Added new modes
-  currentMode = modes[Math.floor(Math.random()*modes.length)];
-  if(currentMode==='find') startFindRound();
-  else if(currentMode==='different') startDifferentRound();
-  else if(currentMode==='missing') startMissingRound();
-  else if(currentMode==='memory') startMemoryRound();
-  else startShadowRound();
-}
+    .star-effect {
+      position: absolute;
+      pointer-events: none;
+      font-size: 2em;
+      animation: starFloat 1s ease-out forwards;
+    }
+    @keyframes starFloat {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(-50px) scale(2); }
+    }
 
-function createQuestionTile(name, parent){
-  const tile = document.createElement('div');
-  tile.className = 'option question-tile';
-  const img = document.createElement('img');
-  img.src = loadedImages[name].src;
-  img.alt = name;
-  tile.appendChild(img);
-  parent.appendChild(tile);
-}
+    .container-box {
+      border: 4px solid #555;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      background: #fff8;
+    }
 
-function createAnswerTile(name, isCorrect, parent, blankDiv=null, missing=null){
-  const tile = document.createElement('div');
-  tile.className = 'option';
-  tile.dataset.correct = isCorrect ? '1' : '0';
-  const img = document.createElement('img');
-  img.src = loadedImages[name].src;
-  img.alt = name;
-  tile.appendChild(img);
+    .hidden-slot {
+      width: 150px;
+      height: 150px;
+      border: 3px dashed #aaa;
+      border-radius: 20px;
+    }
 
-  tile.addEventListener('click', ()=>{
-    if(roundAnswered) return; 
-    const correct = tile.dataset.correct === '1';
-    if(correct){
-      roundAnswered = true;
-      try{ correctSound.currentTime = 0; correctSound.play(); }catch(e){}
-      score++;
-      updateScore();
-      if(blankDiv && missing){
-        blankDiv.innerHTML = '';
-        const im = document.createElement('img');
-        im.src = loadedImages[missing].src;
-        im.alt = missing;
-        blankDiv.appendChild(im);
+    /* Congrats popup */
+    #congratsPopup {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      font-size: 2em;
+      color: #333;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+  </style>
+</head>
+<body>
+
+  <button id="startBtn" class="start-button">✨ Start Game ✨</button>
+  <button id="exitBtn" class="exit-button" style="display:none;">Exit</button>
+
+  <div id="game" class="game-container">
+    <div id="question" class="question"></div>
+    <div id="questionBox" class="container-box"></div>
+    <div id="answerBox" class="container-box"></div>
+  </div>
+
+  <div id="congratsPopup">🎉 Congratulations! 🎉<br>You reached 10 points!</div>
+
+  <script>
+    const imageList = [
+      "apple","ball","banana","car","cat",
+      "cherry","dog","fish","flower","orange"
+    ];
+
+    let currentMode = "";
+    let lastAnswer = null;
+    let score = 0;
+    let waitingNextRound = false;
+    let voicesReady = false;
+
+    const startBtn = document.getElementById("startBtn");
+    const exitBtn = document.getElementById("exitBtn");
+    const game = document.getElementById("game");
+    const qEl = document.getElementById("question");
+    const qBox = document.getElementById("questionBox");
+    const aBox = document.getElementById("answerBox");
+    const popup = document.getElementById("congratsPopup");
+
+    // preload
+    const loadedImages = {};
+    imageList.forEach(name => {
+      const img = new Image();
+      img.src = `image/${name}.png`;
+      loadedImages[name] = img;
+    });
+
+    // Speech
+    function speak(text, cb) {
+      if (!voicesReady) { cb && cb(); return; }
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.8;
+      utter.pitch = 1.0;
+      utter.onend = () => cb && cb();
+      speechSynthesis.speak(utter);
+    }
+
+    // Buttons
+    startBtn.onclick = () => {
+      voicesReady = true;
+      if (speechSynthesis.getVoices().length === 0) {
+        speechSynthesis.onvoiceschanged = () => voicesReady = true;
       }
-      speak('Well done!', ()=> setTimeout(()=> nextRound(), 500));
-    } else {
-      try{ wrongSound.currentTime = 0; wrongSound.play(); }catch(e){}
-      speak('Try again');
+      startBtn.style.display = "none";
+      exitBtn.style.display = "block";
+      game.style.display = "flex";
+      nextRound();
+    };
+
+    exitBtn.onclick = () => { window.location.href = "index.html"; };
+
+    // Game control
+    function nextRound(){
+      if(waitingNextRound) return;
+      qBox.innerHTML = "";
+      aBox.innerHTML = "";
+      qBox.style.display = "none";
+      aBox.style.display = "none";
+
+      const modes = ["find","different","missing","memory","shadow"];
+      currentMode = modes[Math.floor(Math.random()*modes.length)];
+
+      if(currentMode==="find") startFindRound();
+      else if(currentMode==="different") startDifferentRound();
+      else if(currentMode==="missing") startMissingRound();
+      else if(currentMode==="memory") startMemoryRound();
+      else if(currentMode==="shadow") startShadowRound();
     }
-  });
-  parent.appendChild(tile);
-}
 
-/* ---------- EXISTING ROUNDS ---------- */
-function startFindRound(){
-  const choices = shuffle(imageList).slice(0,4);
-  const target = choices[Math.floor(Math.random()*choices.length)];
-  qEl.textContent = `Find the ${target}`;
-  speak(`Can you find the ${target}?`);
-  const ansContainer = document.createElement('div');
-  ansContainer.className = 'answer-container';
-  shuffle(choices).forEach(name => createAnswerTile(name, name===target, ansContainer));
-  optionsEl.appendChild(ansContainer);
-}
-
-function startDifferentRound(){
-  const base = imageList[Math.floor(Math.random()*imageList.length)];
-  let odd;
-  do{ odd = imageList[Math.floor(Math.random()*imageList.length)]; } while(odd === base);
-  qEl.textContent = 'Find the different one!';
-  speak('Which one is different?');
-  const arr = shuffle([base, base, base, odd]);
-  const ansContainer = document.createElement('div');
-  ansContainer.className = 'answer-container';
-  arr.forEach(name => createAnswerTile(name, name===odd, ansContainer));
-  optionsEl.appendChild(ansContainer);
-}
-
-function startMissingRound(){
-  const selected = shuffle(imageList).slice(0, 6);
-  const missingIndex = Math.floor(Math.random() * selected.length);
-  const missing = selected[missingIndex];
-  const itemsInGrid = selected.filter((_, idx) => idx !== missingIndex);
-
-  qEl.textContent = 'Which picture is missing?';
-  speak('Which picture is missing?');
-
-  const questionContainer = document.createElement('div');
-  questionContainer.className = 'option-container';
-
-  let blankDiv = null;
-  selected.forEach((name, idx) => {
-    if(idx === missingIndex){
-      blankDiv = document.createElement('div');
-      blankDiv.className = 'option blank';
-      questionContainer.appendChild(blankDiv);
-    } else {
-      createQuestionTile(name, questionContainer);
+    // Game Rounds
+    function startFindRound(){
+      const choices = shuffle([...imageList]).slice(0,4);
+      const target = choices[Math.floor(Math.random()*choices.length)];
+      lastAnswer = target;
+      qEl.textContent = `Find the ${target}`;
+      speak(`Can you find the ${target}?`);
+      aBox.style.display = "flex";
+      choices.forEach(n => makeAnswerTile(n, n===target));
     }
-  });
-  optionsEl.appendChild(questionContainer);
 
-  const wrongOptions = shuffle(itemsInGrid).slice(0, 2);
-  const answerChoices = shuffle([missing, ...wrongOptions]);
+    function startDifferentRound(){
+      const base = imageList[Math.floor(Math.random()*imageList.length)];
+      let odd;
+      do { odd = imageList[Math.floor(Math.random()*imageList.length)]; }
+      while(odd===base);
+      const options = shuffle([base,base,base,odd]);
+      qEl.textContent = "Find the different one!";
+      speak("Which one is different?");
+      aBox.style.display = "flex";
+      options.forEach(n => makeAnswerTile(n, n===odd));
+    }
 
-  const answerContainer = document.createElement('div');
-  answerContainer.className = 'answer-container';
-  answerChoices.forEach(name =>
-    createAnswerTile(name, name === missing, answerContainer, blankDiv, missing)
-  );
-  optionsEl.appendChild(answerContainer);
-}
+    function startMissingRound(){
+      const all = shuffle([...imageList]).slice(0,6);
+      const missing = all.pop();
+      qEl.textContent = "Which one is missing?";
+      speak("Which picture is missing?");
+      qBox.style.display = "flex";
+      aBox.style.display = "flex";
+      // Show question set with one blank
+      all.forEach(n => qBox.appendChild(makeTile(n)));
+      const blank = document.createElement("div");
+      blank.className = "hidden-slot";
+      qBox.appendChild(blank);
+      // Answers
+      const wrong = all[0];
+      const distractor = imageList.find(x => !all.includes(x) && x!==missing);
+      const answers = shuffle([missing, wrong, distractor]);
+      answers.forEach(n => makeAnswerTile(n, n===missing, blank));
+    }
 
-/* ---------- NEW GAME 1: MEMORY MATCH ---------- */
-function startMemoryRound(){
-  qEl.textContent = "Find all matching pairs!";
-  speak("Can you match the pairs?");
-  
-  const picks = shuffle(imageList).slice(0,3);
-  const pairs = shuffle([...picks, ...picks]);
-  
-  const container = document.createElement('div');
-  container.className = 'option-container';
-  
-  let flipped = [];
-  let matched = 0;
+    function startMemoryRound(){
+      const pair = shuffle([...imageList]).slice(0,2);
+      const options = shuffle([...pair, ...pair]);
+      qEl.textContent = "Match the pairs!";
+      speak("Can you match the pairs?");
+      aBox.style.display = "flex";
+      // simple demo: just ask to click correct
+      options.forEach(n => makeAnswerTile(n, true));
+    }
 
-  pairs.forEach(name => {
-    const card = document.createElement('div');
-    card.className = 'option blank';
-    card.textContent = "?";
-    card.dataset.name = name;
-    card.addEventListener('click', () => {
-      if(card.classList.contains('matched') || flipped.includes(card)) return;
-      card.innerHTML = `<img src="${loadedImages[name].src}" alt="${name}">`;
-      flipped.push(card);
-      if(flipped.length === 2){
-        if(flipped[0].dataset.name === flipped[1].dataset.name){
-          flipped.forEach(c => c.classList.add('matched'));
-          matched++;
+    function startShadowRound(){
+      const obj = imageList[Math.floor(Math.random()*imageList.length)];
+      let fake;
+      do { fake = imageList[Math.floor(Math.random()*imageList.length)]; } while(fake===obj);
+      qEl.textContent = "Find the shadow!";
+      speak("Can you find the shadow?");
+      aBox.style.display = "flex";
+      makeAnswerTile(obj,true);
+      makeAnswerTile(fake,false);
+    }
+
+    // Helpers
+    function makeTile(name){
+      const div = document.createElement("div");
+      div.className = "option";
+      const img = document.createElement("img");
+      img.src = loadedImages[name].src;
+      div.appendChild(img);
+      return div;
+    }
+
+    function makeAnswerTile(name, correct, blank=null){
+      const div = document.createElement("div");
+      div.className = "option";
+      const img = document.createElement("img");
+      img.src = loadedImages[name].src;
+      div.appendChild(img);
+      div.onclick = ()=>{
+        if(waitingNextRound) return;
+        if(correct){
+          addStars(div);
           score++;
-          updateScore();
-          flipped = [];
-          if(matched === picks.length){
-            speak("Great job!", ()=> setTimeout(()=> nextRound(), 700));
+          if(blank){
+            blank.innerHTML = "";
+            const fill = document.createElement("img");
+            fill.src = loadedImages[name].src;
+            fill.style.animation = "glow 1s infinite alternate";
+            blank.appendChild(fill);
           }
-        } else {
-          setTimeout(()=>{
-            flipped.forEach(c => { c.innerHTML="?"; });
-            flipped=[];
-          }, 800);
+          if(score%10===0){
+            waitingNextRound = true;
+            popup.style.display="block";
+            speak(`Congratulations, you have got ${score} points!`,()=>{
+              popup.style.display="none";
+              waitingNextRound = false;
+              nextRound();
+            });
+          }else{
+            waitingNextRound = true;
+            setTimeout(()=>{waitingNextRound=false;nextRound();},1500);
+          }
+        }else{
+          speak("Try again");
         }
-      }
-    });
-    container.appendChild(card);
-  });
-  optionsEl.appendChild(container);
-}
+      };
+      aBox.appendChild(div);
+      return div;
+    }
 
-/* ---------- NEW GAME 2: SHADOW MATCH ---------- */
-function startShadowRound(){
-  const choices = shuffle(imageList).slice(0,3);
-  qEl.textContent = "Match picture to its shadow!";
-  speak("Can you match the picture to its shadow?");
+    function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
 
-  const questionContainer = document.createElement('div');
-  questionContainer.className = 'option-container';
-  
-  // show shadows (grayscale)
-  choices.forEach(name => {
-    const div = document.createElement('div');
-    div.className = 'option blank';
-    const img = document.createElement('img');
-    img.src = loadedImages[name].src;
-    img.style.filter = "grayscale(100%) contrast(200%) brightness(50%)";
-    img.alt = "shadow";
-    div.appendChild(img);
-    div.dataset.name = name;
-    questionContainer.appendChild(div);
-  });
-  optionsEl.appendChild(questionContainer);
-  
-  // answer choices with colors
-  const answerContainer = document.createElement('div');
-  answerContainer.className = 'answer-container';
-  choices.forEach(name => {
-    createAnswerTile(name, true, answerContainer);
-  });
-  // attach custom matching logic
-  [...answerContainer.children].forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const pick = btn.querySelector("img").alt;
-      const shadow = [...questionContainer.children].find(s=>s.dataset.name===pick);
-      if(shadow){
-        shadow.style.opacity="0.3";
-        btn.style.opacity="0.3";
-        score++;
-        updateScore();
-        if([...questionContainer.children].every(s=>s.style.opacity==="0.3")){
-          speak("Excellent!", ()=> setTimeout(()=> nextRound(), 700));
-        }
+    function addStars(target){
+      for(let i=0;i<8;i++){
+        const star=document.createElement("div");
+        star.className="star-effect";
+        star.textContent="⭐";
+        const rect=target.getBoundingClientRect();
+        star.style.left=rect.left+rect.width/2+"px";
+        star.style.top=rect.top+rect.height/2+"px";
+        document.body.appendChild(star);
+        setTimeout(()=>star.remove(),1000);
       }
-    });
-  });
-  optionsEl.appendChild(answerContainer);
-}
-</script>
+    }
+  </script>
+</body>
+</html>
