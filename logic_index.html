@@ -1,144 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Kids Logic Adventure</title>
 <style>
-body {
-  font-family: 'Comic Sans MS', cursive, sans-serif;
-  margin:0; padding:0; display:flex; justify-content:center; align-items:center;
-  height:100vh; background: linear-gradient(135deg, #ffe6f0, #b3e5fc, #c8e6c9);
-  overflow:hidden;
-}
-.container {
-  background: rgba(255, 245, 157, 0.95);
-  border-radius: 25px; padding:15px;
-  width:100%; max-width:600px; min-height:100vh;
-  text-align:center; box-shadow:0 8px 20px rgba(0,0,0,0.15);
-  box-sizing:border-box;
-  position:relative;
-}
-h1 {margin:10px 0;color:#d81b60;font-size:2rem;}
-.emoji-grid, .options-grid {
-  display:grid; gap:12px; margin:20px 10px;
-}
-.emoji-grid {
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-}
-.options-grid {grid-template-columns: repeat(3,1fr);}
-.emoji-item {
-  background:#fff3e0; border-radius:15px; cursor:pointer; 
-  padding:8px; display:flex; justify-content:center; align-items:center; 
-  border:3px solid #6d4c41; aspect-ratio:1/1;
-  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
-  position:relative;
-}
-.emoji-item img {
-  max-width:90%; max-height:90%;
-  object-fit:contain;
-}
-.emoji-item.correct {animation: sparkle 1s ease-out;}
-.emoji-item.incorrect {animation: shake 0.5s ease-out;}
-@keyframes sparkle {
-  0%{transform:scale(1); box-shadow:0 0 0 #ffd700;}
-  50%{transform:scale(1.2); box-shadow:0 0 15px 8px rgba(255,215,0,0.7);}
-  100%{transform:scale(1); box-shadow:0 0 0 transparent;}
-}
-@keyframes shake {
-  0%,100%{transform:translateX(0);}
-  25%{transform:translateX(-8px);}
-  75%{transform:translateX(8px);}
-}
-.exit-btn,.start-btn {
-  background:#ff4081;color:white;font-weight:bold;
-  padding:14px 28px;border-radius:20px;border:none;
-  cursor:pointer;font-size:2rem;margin:10px;
-  animation: shine 1.5s infinite alternate;
-}
-@keyframes shine {
-  0%{box-shadow:0 0 5px #ff4081;}
-  100%{box-shadow:0 0 20px #ffeb3b;}
-}
-.top-bar {display:flex; justify-content:space-between; align-items:center; padding:0 10px;}
-.level-display {color:#0288d1;font-size:1.2rem;font-weight:bold;}
-.instructions {font-size:1.4rem;color:#d81b60;margin:10px 0;}
-.loading-screen {
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  background:rgba(255,255,255,0.95);display:flex;
-  justify-content:center;align-items:center;flex-direction:column;z-index:999;
-}
-.loading-text{font-size:2rem;color:#d81b60;margin-bottom:10px;}
-.progress-bar {
-  width:80%;height:20px;background:#ccc;border-radius:10px;overflow:hidden;margin-top:10px;
-}
-.progress-fill{height:100%;width:0;background:#ff4081;border-radius:10px;}
+  :root{
+    --card-bg:#fff3e0;
+    --accent:#ff4081;
+    --border:#6d4c41;
+    --gold: #ffd700;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:0; font-family:"Comic Sans MS",cursive,sans-serif;
+    background: linear-gradient(135deg,#ffe6f0 0%,#b3e5fc 50%,#c8e6c9 100%);
+    display:flex; justify-content:center; align-items:center; min-height:100vh; overflow:hidden;
+  }
+
+  .container{
+    width:100%; max-width:720px; min-height:100vh;
+    background: rgba(255,245,157,0.95);
+    border-radius:20px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.12);
+    display:flex; flex-direction:column; align-items:stretch;
+    gap:8px;
+  }
+
+  header{display:flex;align-items:center;justify-content:space-between}
+  header h1{margin:0; font-size:1.6rem; color:#d81b60}
+  .exit-btn{background:var(--accent); color:white; border:none; padding:10px 12px;border-radius:10px; cursor:pointer}
+
+  .progress-wrap{margin-top:10px; display:flex;align-items:center;gap:12px}
+  .progress-text{font-weight:700;color:#0288d1}
+  .progress-bar{flex:1; height:14px; background:#e6e6e6; border-radius:10px; overflow:hidden; border:2px solid rgba(0,0,0,0.06)}
+  .progress-fill{width:0%; height:100%; background:linear-gradient(90deg,var(--accent),#ffd54f); transition:width .4s ease}
+
+  .main-area{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:10px}
+
+  .instructions{font-size:1.3rem; color:#d81b60; text-align:center; margin:6px 0}
+
+  /* Responsive grid - dynamically adapts */
+  .emoji-grid{display:grid; gap:12px; width:100%; margin:8px 0}
+  /* min box size changes with viewport (keeps boxes from getting huge on large screens or too tiny on phones) */
+  .emoji-grid { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); }
+  .options-grid { display:grid; gap:12px; grid-template-columns: repeat(auto-fit,minmax(84px,1fr)); width:100% }
+
+  .emoji-item{
+    background:var(--card-bg);
+    border-radius:14px;
+    border:3px solid var(--border);
+    aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center;
+    padding:6px; cursor:pointer; overflow:hidden; position:relative;
+    transition: transform .16s ease, box-shadow .16s ease;
+  }
+  .emoji-item:hover{ transform:scale(1.06); box-shadow: 0 6px 18px rgba(0,0,0,.12) }
+  .emoji-item img{ max-width:88%; max-height:88%; object-fit:contain; display:block }
+
+  .correct{ animation:correctPulse .9s ease-out forwards; }
+  .incorrect{ animation:shake .5s ease-out; }
+  @keyframes correctPulse{ 0%{transform:scale(1)}50%{transform:scale(1.18); box-shadow: 0 0 14px rgba(255,215,0,.9)}100%{transform:scale(1)} }
+  @keyframes shake{ 0%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}100%{transform:translateX(0)} }
+
+  .star{ position:absolute; top:6px; right:6px; font-size:1.25rem; animation:starpop .9s ease-out; pointer-events:none}
+  @keyframes starpop{ 0%{transform:scale(0);opacity:0}50%{transform:scale(1.35);opacity:1}100%{transform:scale(1);opacity:1} }
+
+  .pattern-row{ display:flex; gap:10px; align-items:center; justify-content:center; margin:12px 0; flex-wrap:wrap }
+  .pattern-slot{ width:88px; height:88px; border-radius:12px; border:3px solid var(--border); display:flex;align-items:center;justify-content:center; background:var(--card-bg) }
+  .shadow-box{ width:160px; height:160px; border-radius:12px; border:3px solid var(--border); display:flex; align-items:center; justify-content:center; margin:10px auto; background:#fff3e0 }
+
+  /* start button */
+  .start-area{ display:flex; flex-direction:column; align-items:center; gap:12px; padding-top:8vh }
+  .start-btn{
+    font-size:2rem; font-weight:800; padding:18px 36px; border-radius:26px; border:none; color:#fff;
+    background:linear-gradient(45deg,var(--accent),#ffca28); cursor:pointer; box-shadow: 0 8px 30px rgba(255,64,129,.25);
+    animation:shine 1.6s infinite alternate;
+  }
+  @keyframes shine{ 0%{box-shadow: 0 8px 20px rgba(255,64,129,.18)} 100%{box-shadow: 0 12px 34px rgba(255,200,64,.35)} }
+
+  .loading-screen{ position:fixed; inset:0; background:rgba(255,255,255,0.98); display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:9999 }
+  .loading-text{ font-size:1.4rem; color:#d81b60; margin-bottom:12px }
+  .loading-progress{ width:320px; max-width:80%; height:14px; background:#eee; border-radius:8px; overflow:hidden; border:2px solid rgba(0,0,0,.06) }
+  .loading-fill{ height:100%; width:0; background:linear-gradient(90deg,var(--accent),#ffd54f); transition:width .2s ease }
+
+  /* small screens adjustments */
+  @media (max-width:420px){
+    .start-btn{ font-size:1.6rem; padding:14px 26px }
+    .pattern-slot, .emoji-item { aspect-ratio:1/1; }
+    .emoji-grid { gap:8px }
+  }
 </style>
 </head>
 <body>
-<div class="container" id="game-container">
-  <h1>Fun Logic Adventure 🌟</h1>
-  <button class="start-btn" id="start-btn">Start Game</button>
-</div>
+  <div class="container" id="container">
+    <header>
+      <h1>🌟 Fun Logic Adventure</h1>
+      <button class="exit-btn" id="exitBtn">Exit</button>
+    </header>
 
-<audio id="bg-music" loop preload="auto">
-  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
-</audio>
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-text" id="progressText">Level 1 / 50</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <main class="main-area" id="mainArea">
+      <!-- start screen -->
+      <div class="start-area" id="startArea">
+        <div style="font-size:1.05rem;color:#555">Ready to play? Tap Start!</div>
+        <button class="start-btn" id="startBtn">Start Game</button>
+      </div>
+    </main>
+  </div>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2a9b9d347d.mp3" type="audio/mpeg">
+  </audio>
 
 <script>
-const gameContainer = document.getElementById('game-container');
-const startBtn = document.getElementById('start-btn');
-const bgMusic = document.getElementById('bg-music');
-const imageList = ['apple','ball','banana','car','cat','cherry','dog','fish','flower','orange'];
-let images = {};
-let level = 1, score=0, currentTarget='', maxLevels=50;
-let laps=[];
-const feedback = ['Super job! 🌟','Wow, awesome!','You’re a star!','Fantastic!','Yay, you did it!'];
+/* -------------------------
+   Configuration & assets
+   ------------------------- */
+const imageList = ['apple','ball','banana','car','cat','cherry','dog','fish','flower','orange']; // filenames: image/<name>.png
+const images = {}; // will hold preloaded Image objects
+const totalPerPhase = 10; // number of laps per phase
+let laps = []; // final sequence array
+let level = 1;
+let score = 0;
+let maxLevels = 50; // will be set to laps.length after createLaps()
+let lastTarget = null;
 
-if ('caches' in window) caches.keys().then(keys=>{keys.forEach(k=>caches.delete(k));});
+/* UI references */
+const startArea = document.getElementById('startArea');
+const startBtn = document.getElementById('startBtn');
+const mainArea = document.getElementById('mainArea');
+const progressWrap = document.getElementById('progressWrap');
+const progressText = document.getElementById('progressText');
+const progressFill = document.getElementById('progressFill');
+const exitBtn = document.getElementById('exitBtn');
+const bgMusic = document.getElementById('bgMusic');
 
-function speak(text, rate=0.9) {
+/* speech helper: accepts callback executed after speech finishes */
+function speak(text, onEnd, rate=0.92){
   const synth = window.speechSynthesis;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = rate; utter.pitch=1.2;
-  synth.speak(utter);
+  if(!synth) { if(onEnd) onEnd(); return; }
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = Math.min(1.25, rate + level*0.0025);
+  utt.pitch = 1.2;
+  utt.onend = ()=>{ if(onEnd) onEnd(); };
+  synth.speak(utt);
 }
 
-function preloadImages(callback){
-  const loadingOverlay=document.createElement('div');
-  loadingOverlay.className='loading-screen';
-  const loadingText=document.createElement('div');
-  loadingText.className='loading-text'; loadingText.innerText='Loading 0%';
-  const progress=document.createElement('div'); progress.className='progress-bar';
-  const fill=document.createElement('div'); fill.className='progress-fill';
-  progress.appendChild(fill);
-  loadingOverlay.appendChild(loadingText); loadingOverlay.appendChild(progress);
-  document.body.appendChild(loadingOverlay);
+/* shuffle helper */
+function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
-  let loaded=0;
-  imageList.forEach(name=>{
-    const img=new Image();
-    img.src=`image/${name}.png?v=${Date.now()}`;
-    img.onload=img.onerror=()=>{
-      loaded++; images[name]=img;
-      let pct=Math.floor((loaded/imageList.length)*100);
-      loadingText.innerText=`Loading ${pct}%`;
-      fill.style.width=`${pct}%`;
-      if(loaded===imageList.length){
-        setTimeout(()=>{loadingOverlay.remove(); callback();},300);
-      }
+/* Avoid immediate repetition of chosen item */
+function pickNonRepeating(pool){
+  if(pool.length===0) return null;
+  let pickItem = pick(pool);
+  if(pickItem === lastTarget && pool.length > 1){
+    // try a few times
+    for(let i=0;i<6;i++){
+      const candidate = pick(pool);
+      if(candidate !== lastTarget){ pickItem = candidate; break; }
     }
+  }
+  lastTarget = pickItem;
+  return pickItem;
+}
+
+/* -------------------------
+   Preload images (cache strategy)
+   - On first session start we append ?v=timestamp
+   - Next sessions in same tab use cached filenames
+   ------------------------- */
+function preloadImages(onComplete){
+  // show loading overlay
+  const overlay = document.createElement('div'); overlay.className='loading-screen';
+  const txt = document.createElement('div'); txt.className='loading-text'; txt.innerText='Loading 0%';
+  const prog = document.createElement('div'); prog.className='loading-progress';
+  const fill = document.createElement('div'); fill.className='loading-fill';
+  prog.appendChild(fill); overlay.appendChild(txt); overlay.appendChild(prog);
+  document.body.appendChild(overlay);
+
+  const firstLoad = !sessionStorage.getItem('logic_first_load');
+  let loaded = 0;
+  imageList.forEach(name=>{
+    const img = new Image();
+    img.src = firstLoad ? `image/${name}.png?v=${Date.now()}` : `image/${name}.png`;
+    img.onload = img.onerror = () => {
+      images[name] = img; // store
+      loaded++;
+      const pct = Math.round((loaded / imageList.length) * 100);
+      txt.innerText = `Loading ${pct}%`;
+      fill.style.width = `${pct}%`;
+      if(loaded === imageList.length){
+        sessionStorage.setItem('logic_first_load','1');
+        setTimeout(()=>{ overlay.remove(); onComplete(); }, 350);
+      }
+    };
   });
 }
 
-function startGame(){
-  bgMusic.volume=0.2; bgMusic.play().catch(()=>{});
-  level=1; score=0; laps=createLaps();
-  nextRound();
-}
-
+/* -------------------------
+   Laps / phases sequence
+   Phase plan:
+   - 10 findTarget
+   - 10 findDifferent
+   - 10 findMissing
+   - 10 shadowMatch
+   - 10 patternMatch
+   ------------------------- */
 function createLaps(){
-  let arr=[];
+  const arr = [];
   for(let i=0;i<10;i++) arr.push('findTarget');
   for(let i=0;i<10;i++) arr.push('findDifferent');
   for(let i=0;i<10;i++) arr.push('findMissing');
@@ -147,108 +222,339 @@ function createLaps(){
   return arr;
 }
 
-function nextRound(){
-  gameContainer.innerHTML='';
-  if(level>laps.length){
-    gameContainer.innerHTML=`<h1>Game Over 🎉</h1><p>Your Score: ${score}</p><button class="start-btn" onclick="startGame()">Play Again</button>`;
-    speak('Congratulations, you won!');
+/* -------------------------
+   UI helpers
+   ------------------------- */
+function setProgress(lvl){
+  progressWrap.style.display = 'flex';
+  progressText.innerText = `Level ${lvl} / ${maxLevels}`;
+  const pct = Math.round((lvl / maxLevels) * 100);
+  progressFill.style.width = `${pct}%`;
+}
+
+/* clear main area and show header + exit/progress present in container */
+function clearMain(){
+  mainArea.innerHTML = '';
+}
+
+/* -------------------------
+   Render helpers for each mode
+   ------------------------- */
+
+/* Render grid: arr = array of item names ('' for blank)
+   correct = name of correct item (string)
+   type controls behavior on click (findTarget / findDifferent / findMissing / shadow / pattern)
+   missingIndex used in missing mode to know which slot is blank
+*/
+function renderGrid(arr, correct, type, missingIndex = null){
+  clearMain();
+
+  const header = document.createElement('div'); header.className = 'top-bar';
+  // header shows title left; exit button already in container header
+  // show instructions area above grid created by caller
+  const grid = document.createElement('div'); grid.className = 'emoji-grid';
+  arr.forEach((name, idx) => {
+    const cell = document.createElement('div'); cell.className = 'emoji-item';
+    if(name !== ''){
+      const img = images[name].cloneNode(true);
+      img.alt = name;
+      cell.appendChild(img);
+      cell.addEventListener('click', ()=>handleClick(cell, name, correct, type, missingIndex));
+    } else {
+      // blank slot (only used for missing)
+      cell.style.background = '#e0e0e0';
+    }
+    grid.appendChild(cell);
+  });
+  mainArea.appendChild(grid);
+  return grid;
+}
+
+function handleClick(cell, name, correct, type, missingIndex){
+  // prevent multiple clicks while speaking
+  if(cell.dataset.locked === '1') return;
+  if(name === correct){
+    cell.dataset.locked = '1';
+    cell.classList.add('correct');
+    const star = document.createElement('div'); star.className = 'star'; star.innerText = '⭐';
+    cell.appendChild(star);
+    speakRandomPositive(() => {
+      // For missing: if the clicked item is in options area (not grid), we still want to fill the blank in grid
+      if(type === 'findMissing'){
+        // fill the blank visually (we stored missingIndex in closure when options created)
+        const grid = document.querySelector('.emoji-grid');
+        if(grid && (typeof missingIndexGlobal === 'number')){
+          const blankCell = grid.children[missingIndexGlobal];
+          if(blankCell){
+            blankCell.innerHTML = '';
+            blankCell.appendChild(images[correct].cloneNode(true));
+          }
+        }
+      }
+      // proceed to next round
+      setTimeout(()=>{ level++; updateUIAndNext(); }, 400);
+    });
+  } else {
+    cell.classList.add('incorrect');
+    speak('Oops! Try again.');
+    setTimeout(()=>{ cell.classList.remove('incorrect'); }, 700);
+  }
+}
+
+/* speak a random positive phrase and wait for it to finish */
+function speakRandomPositive(onEnd){
+  const phrases = ['Great job!', 'Super!', 'Well done!', 'Awesome!', 'You did it!'];
+  const txt = pick(phrases);
+  speak(txt, onEnd);
+}
+
+/* -------------------------
+   Mode generators
+   ------------------------- */
+
+let missingIndexGlobal = null; // track for missing mode fill
+
+function generateFindTarget(){
+  // show 6 items including the target
+  const count = Math.min(6, imageList.length);
+  let pool = shuffle(imageList);
+  const chosen = pool.slice(0, count);
+  const target = pickNonRepeating(chosen);
+  const instr = document.createElement('div'); instr.className = 'instructions'; instr.innerText = `Find the ${target}`;
+  mainArea.appendChild(instr);
+  speak(`Find the ${target}`);
+  renderGrid(chosen, target, 'findTarget');
+}
+
+function generateFindDifferent(){
+  // create 6 slots where 5 are identical and 1 is different
+  const count = Math.min(6, imageList.length);
+  const base = pickNonRepeating(imageList);
+  // choose a different one not equal to base
+  const different = pick(imageList.filter(i=>i!==base));
+  const arr = new Array(count).fill(base);
+  const idx = Math.floor(Math.random()*count);
+  arr[idx] = different;
+  const instr = document.createElement('div'); instr.className='instructions'; instr.innerText = 'Find the different item!';
+  mainArea.appendChild(instr);
+  speak('Find the different item!');
+  renderGrid(arr, different, 'findDifferent');
+}
+
+function generateFindMissing(){
+  // We will display 5 visible items and 1 blank (total 6).
+  // The missing item must NOT appear among the 5 visible items.
+  // Options: [missingItem, distractorA, distractorB] where distractorA and B are from the visible items
+  const visibleCount = 5;
+  // pick 5 unique visible images
+  let visible = shuffle(imageList).slice(0, visibleCount);
+  // pick a missing that's NOT in visible
+  const possibleMissing = imageList.filter(i => !visible.includes(i));
+  // if none available (unlikely with enough images), refill visible differently
+  if(possibleMissing.length === 0){
+    visible = shuffle(imageList).slice(0, visibleCount - 1);
+  }
+  const missing = pick(possibleMissing.length?possibleMissing: imageList.filter(i=>!visible.includes(i)));
+  // build grid items with a blank inserted at random position
+  const gridItems = visible.slice();
+  const blankIndex = Math.floor(Math.random()* (visibleCount + 1)); // 0..5
+  gridItems.splice(blankIndex, 0, ''); // now length = 6
+  missingIndexGlobal = blankIndex; // store globally so option clicks can fill
+  // Prepare options: one correct missing + 2 distractors from visible items
+  const distractors = shuffle(visible).slice(0,2);
+  const options = shuffle([missing, ...distractors]);
+
+  const instr = document.createElement('div'); instr.className='instructions'; instr.innerText = 'Find the missing item!';
+  mainArea.appendChild(instr);
+  speak('Find the missing item!');
+
+  const grid = renderGrid(gridItems, missing, 'findMissing', blankIndex);
+
+  // options area: show images (the two distractors will already appear in the grid; the missing won't)
+  const optsWrap = document.createElement('div'); optsWrap.className='options-grid';
+  options.forEach(opt => {
+    const optCell = document.createElement('div'); optCell.className='emoji-item';
+    const img = images[opt].cloneNode(true);
+    optCell.appendChild(img);
+    optCell.addEventListener('click', ()=>{
+      // Filling the blank in grid visually
+      const gridDiv = grid.children[blankIndex];
+      gridDiv.innerHTML = '';
+      gridDiv.appendChild(images[opt].cloneNode(true));
+      // Now evaluate correctness
+      if(opt === missing){
+        optCell.classList.add('correct');
+        const star = document.createElement('div'); star.className='star'; star.innerText='⭐'; optCell.appendChild(star);
+        speakRandomPositive(()=>{ level++; updateUIAndNext(); });
+      } else {
+        optCell.classList.add('incorrect');
+        speak('Oops! That one is already there. Try again!');
+        setTimeout(()=>optCell.classList.remove('incorrect'), 700);
+      }
+    });
+    optsWrap.appendChild(optCell);
+  });
+  mainArea.appendChild(optsWrap);
+}
+
+function generateShadowMatch(){
+  // Show one shadow silhouette and 3 option images (one correct).
+  const options = shuffle(imageList).slice(0,3);
+  // pick correct from options
+  const correct = pick(options);
+  const instr = document.createElement('div'); instr.className='instructions'; instr.innerText = 'Match the shadow!';
+  mainArea.appendChild(instr);
+  // create shadow canvas for correct
+  createShadowImage(images[correct], 200, 200, (dataURL) => {
+    const shadowBox = document.createElement('div'); shadowBox.className='shadow-box';
+    const img = document.createElement('img'); img.src = dataURL; img.style.width='90%'; img.style.height='90%'; img.style.objectFit='contain';
+    shadowBox.appendChild(img);
+    mainArea.appendChild(shadowBox);
+
+    // options
+    const optsWrap = document.createElement('div'); optsWrap.className='options-grid';
+    const opts = shuffle(options);
+    opts.forEach(opt => {
+      const optCell = document.createElement('div'); optCell.className='emoji-item';
+      const imgOpt = images[opt].cloneNode(true);
+      optCell.appendChild(imgOpt);
+      optCell.addEventListener('click', ()=> {
+        if(opt === correct){
+          optCell.classList.add('correct');
+          const star = document.createElement('div'); star.className='star'; star.innerText='⭐'; optCell.appendChild(star);
+          speakRandomPositive(()=>{ level++; updateUIAndNext(); });
+        } else {
+          optCell.classList.add('incorrect');
+          speak('Nope, try again!');
+          setTimeout(()=>optCell.classList.remove('incorrect'),700);
+        }
+      });
+      optsWrap.appendChild(optCell);
+    });
+    mainArea.appendChild(optsWrap);
+  });
+}
+
+/* create a silhouette dataURL from an Image object using canvas */
+function createShadowImage(imgObject, outW, outH, cb){
+  // create canvas scaled to outW/outH while preserving aspect
+  const canvas = document.createElement('canvas');
+  canvas.width = outW; canvas.height = outH;
+  const ctx = canvas.getContext('2d');
+  // draw white bg transparent
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // compute aspect fit
+  const iw = imgObject.naturalWidth || imgObject.width;
+  const ih = imgObject.naturalHeight || imgObject.height;
+  const ratio = Math.min(outW/iw, outH/ih);
+  const dw = iw * ratio;
+  const dh = ih * ratio;
+  const dx = (outW - dw) / 2;
+  const dy = (outH - dh) / 2;
+
+  ctx.drawImage(imgObject, dx, dy, dw, dh);
+  // convert non-transparent pixels to black: use source-in trick
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  // done
+  const url = canvas.toDataURL();
+  cb(url);
+}
+
+/* pattern match:
+   show a short pattern like A-B-A and ask which comes next => choices will include A (correct) and two distractors
+*/
+function generatePatternMatch(){
+  // choose 2 distinct images A, B and show [A, B, A], ask which comes next (A)
+  const [A,B] = shuffle(imageList).slice(0,2);
+  const pattern = [A,B,A];
+  const instr = document.createElement('div'); instr.className='instructions'; instr.innerText='Which comes next?';
+  mainArea.appendChild(instr);
+
+  const row = document.createElement('div'); row.className='pattern-row';
+  pattern.forEach(name=>{
+    const slot = document.createElement('div'); slot.className='pattern-slot';
+    slot.appendChild(images[name].cloneNode(true));
+    row.appendChild(slot);
+  });
+  mainArea.appendChild(row);
+
+  // options: include correct A and two distractors
+  const distractors = shuffle(imageList.filter(i=>i!==A)).slice(0,2);
+  const options = shuffle([A, ...distractors]);
+  const optsWrap = document.createElement('div'); optsWrap.className='options-grid';
+  options.forEach(opt=>{
+    const optCell = document.createElement('div'); optCell.className='emoji-item';
+    optCell.appendChild(images[opt].cloneNode(true));
+    optCell.addEventListener('click', ()=>{
+      if(opt === A){
+        optCell.classList.add('correct');
+        speakRandomPositive(()=>{ level++; updateUIAndNext(); });
+      } else {
+        optCell.classList.add('incorrect');
+        speak('Try again!');
+        setTimeout(()=>optCell.classList.remove('incorrect'),700);
+      }
+    });
+    optsWrap.appendChild(optCell);
+  });
+  mainArea.appendChild(optsWrap);
+}
+
+/* -------------------------
+   Next round control
+   ------------------------- */
+function updateUIAndNext(){
+  // update progress
+  setProgress(level);
+  // small guard
+  if(level > maxLevels){
+    // finished
+    mainArea.innerHTML = `<h1>🎉 Well done!</h1><p style="font-size:1.1rem">Score: ${score}</p><button class="start-btn" onclick="startAgain()">Play Again</button>`;
+    speak('Congratulations! You finished the game!');
     return;
   }
-
-  const roundType=laps[level-1];
-  const chosen=shuffle([...imageList]).slice(0,6);
-  currentTarget=chosen[0];
-
-  const title=document.createElement('h1'); title.innerText='Fun Logic Adventure 🌟'; gameContainer.appendChild(title);
-  const levelDisp=document.createElement('p'); levelDisp.className='level-display'; levelDisp.innerText=`Level ${level}`; gameContainer.appendChild(levelDisp);
-
-  if(roundType==='findTarget'){
-    const instr=document.createElement('p'); instr.className='instructions'; instr.innerText=`Find the ${currentTarget}`;
-    gameContainer.appendChild(instr); speak(`Find the ${currentTarget}`);
-    renderGrid(chosen, currentTarget,'findTarget');
-  } else if(roundType==='findDifferent'){
-    const instr=document.createElement('p'); instr.className='instructions'; instr.innerText='Find the different item!';
-    gameContainer.appendChild(instr);
-    let sameItem=currentTarget;
-    let gridItems=new Array(5).fill(sameItem); gridItems.push(shuffle([...imageList].filter(e=>e!==sameItem))[0]);
-    gridItems=shuffle(gridItems);
-    speak('Find the different item!');
-    renderGrid(gridItems, gridItems.find(e=>e!==sameItem),'findDifferent');
-  } else if(roundType==='findMissing'){
-    const instr=document.createElement('p'); instr.className='instructions'; instr.innerText='Find the missing item!';
-    gameContainer.appendChild(instr);
-    let missingIndex=Math.floor(Math.random()*6);
-    let gridItems=[...chosen]; let answer=gridItems[missingIndex];
-    gridItems[missingIndex]='';
-    speak('Find the missing item!');
-    renderGrid(gridItems, answer,'findMissing',missingIndex);
-  } else if(roundType==='shadowMatch'){
-    const instr=document.createElement('p'); instr.className='instructions'; instr.innerText='Match the shadow!';
-    gameContainer.appendChild(instr);
-    renderShadowGrid(chosen, currentTarget);
-  } else if(roundType==='patternMatch'){
-    const instr=document.createElement('p'); instr.className='instructions'; instr.innerText='Find the matching pattern!';
-    gameContainer.appendChild(instr);
-    renderPatternGrid(chosen, currentTarget);
-  }
+  // decide and render appropriate round
+  const roundType = laps[level - 1];
+  if(roundType === 'findTarget') generateFindTarget();
+  else if(roundType === 'findDifferent') generateFindDifferent();
+  else if(roundType === 'findMissing') generateFindMissing();
+  else if(roundType === 'shadowMatch') generateShadowMatch();
+  else if(roundType === 'patternMatch') generatePatternMatch();
 }
 
-function renderGrid(arr, correct, type, missingIndex=null){
-  const grid=document.createElement('div'); grid.className='emoji-grid';
-  arr.forEach((name,index)=>{
-    const div=document.createElement('div'); div.className='emoji-item';
-    if(name!==''){
-      const img=images[name].cloneNode(); div.appendChild(img);
-      div.onclick=()=>checkAnswer(div,name,correct,type,missingIndex);
-    } else div.style.background='#ccc';
-    grid.appendChild(div);
+/* -------------------------
+   Start / lifecycle
+   ------------------------- */
+function startAgain(){
+  level = 1; score = 0; laps = createLaps(); maxLevels = laps.length;
+  updateUIAndNext();
+  bgMusic.play().catch(()=>{});
+}
+
+function startSequence(){
+  // prepare laps, progress UI and run preload
+  laps = createLaps(); maxLevels = laps.length;
+  progressWrap.style.display = 'flex';
+  setProgress(0);
+  // preload images then start
+  preloadImages(()=>{
+    // user started game (interaction), allow speech & audio
+    bgMusic.volume = 0.18; bgMusic.play().catch(()=>{});
+    // small pause then start first round
+    level = 1; score = 0;
+    setProgress(1);
+    updateUIAndNext();
   });
-  gameContainer.appendChild(grid);
 }
 
-function renderShadowGrid(arr, correct){
-  const grid=document.createElement('div'); grid.className='emoji-grid';
-  arr.forEach(name=>{
-    const div=document.createElement('div'); div.className='emoji-item';
-    const img=images[name].cloneNode();
-    img.style.filter='brightness(0) invert(1)';
-    div.appendChild(img);
-    div.onclick=()=>checkAnswer(div,name,correct,'shadow');
-    grid.appendChild(div);
-  });
-  gameContainer.appendChild(grid);
-}
+startBtn.addEventListener('click', startSequence);
+exitBtn.addEventListener('click', ()=>{ bgMusic.pause(); window.location.href = 'index.html'; });
 
-function renderPatternGrid(arr, correct){
-  const grid=document.createElement('div'); grid.className='emoji-grid';
-  shuffle(arr).forEach(name=>{
-    const div=document.createElement('div'); div.className='emoji-item';
-    div.appendChild(images[name].cloneNode());
-    div.onclick=()=>checkAnswer(div,name,correct,'pattern');
-    grid.appendChild(div);
-  });
-  gameContainer.appendChild(grid);
-}
-
-function checkAnswer(div,name,correct,type,missingIndex){
-  if(name===correct){
-    div.classList.add('correct');
-    const star=document.createElement('div'); star.innerText='🌟'; star.style.position='absolute';
-    star.style.top='5px'; star.style.right='5px'; star.style.fontSize='2rem'; div.appendChild(star);
-    speak(feedback[Math.floor(Math.random()*feedback.length)],1.1);
-    if(type==='findMissing'){
-      div.innerHTML=''; div.appendChild(images[correct].cloneNode());
-    }
-    setTimeout(()=>{level++; nextRound();},1200);
-  } else {
-    div.classList.add('incorrect');
-    speak('Oops, try again!',0.9);
-    setTimeout(()=>div.classList.remove('incorrect'),800);
-  }
-}
-
-function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
-startBtn.onclick=()=>preloadImages(startGame);
+/* expose startAgain to inline onclick in finishing UI */
+window.startAgain = startAgain;
 </script>
 </body>
 </html>
