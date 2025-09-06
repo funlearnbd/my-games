@@ -53,9 +53,24 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       width: 100%;
       height: 100%;
+      padding: 20px;
+    }
+
+    .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .score {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #2e7d32;
     }
 
     .question {
@@ -93,6 +108,15 @@
       transform: scale(1.1);
     }
 
+    .set-separator {
+      width: 100%;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #444;
+    }
+
     .star-effect {
       position: absolute;
       pointer-events: none;
@@ -113,9 +137,15 @@
   </div>
 
   <div id="game" class="game-container">
-    <div id="question" class="question"></div>
+    <div class="top-bar">
+      <div id="question" class="question"></div>
+      <div id="score" class="score">Score: 0</div>
+    </div>
     <div id="options" class="options"></div>
   </div>
+
+  <audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 
   <script>
     const imageList = [
@@ -126,6 +156,15 @@
     let currentMode = "find"; 
     let lastAnswer = null;
     let voicesReady = false;
+    let score = 0;
+
+    const correctSound = document.getElementById("correctSound");
+    const wrongSound = document.getElementById("wrongSound");
+    const scoreEl = document.getElementById("score");
+
+    function updateScore() {
+      scoreEl.textContent = `Score: ${score}`;
+    }
 
     function speak(text) {
       if (!voicesReady) return;
@@ -156,6 +195,8 @@
       }
       startScreen.style.display = "none";
       game.style.display = "flex";
+      score = 0;
+      updateScore();
       nextRound();
     });
 
@@ -202,20 +243,32 @@
       speak("Which picture is missing?");
 
       // First set (with blank)
-      shown.forEach(name => createOption(name, false));
+      const firstSet = document.createElement("div");
+      firstSet.className = "options";
+      shown.forEach(name => createOption(name, false, firstSet));
       const blankDiv = document.createElement("div");
       blankDiv.className = "option";
       blankDiv.style.background = "#eee";
       blankDiv.textContent = "?";
       blankDiv.style.fontSize = "3em";
-      optionsEl.appendChild(blankDiv);
+      firstSet.appendChild(blankDiv);
+      optionsEl.appendChild(firstSet);
+
+      // Separator
+      const separator = document.createElement("div");
+      separator.className = "set-separator";
+      separator.textContent = "Choose the missing one ↓";
+      optionsEl.appendChild(separator);
 
       // Second set (choices)
-      const secondSet = shuffle([missing, ...shuffle(shown).slice(0,2)]);
-      secondSet.forEach(name => createOption(name, name === missing));
+      const secondSet = document.createElement("div");
+      secondSet.className = "options";
+      const choices = shuffle([missing, ...shuffle(shown).slice(0,2)]);
+      choices.forEach(name => createOption(name, name === missing, secondSet));
+      optionsEl.appendChild(secondSet);
     }
 
-    function createOption(name, isCorrect) {
+    function createOption(name, isCorrect, parent = optionsEl) {
       const div = document.createElement("div");
       div.className = "option";
       const img = document.createElement("img");
@@ -224,13 +277,17 @@
       div.onclick = () => {
         if (isCorrect) {
           addStars(div);
+          correctSound.play();
+          score++;
+          updateScore();
           speak("Great job!");
           setTimeout(nextRound, 1500);
         } else {
+          wrongSound.play();
           speak("Try again");
         }
       };
-      optionsEl.appendChild(div);
+      parent.appendChild(div);
     }
 
     function shuffle(arr) {
