@@ -333,12 +333,13 @@ function startDifferentRound(){
 }
 
 function startMissingRound(){
-  // 1) pick 6 unique items
-  const selected = shuffle(imageList).slice(0,6);
+  // 1) pick 6 unique items for the question grid
+  const selected = shuffle(imageList).slice(0, 6);
 
-  // 2) pick exactly 1 missing from selected
+  // 2) pick exactly 1 missing item from the selected group
   const missingIndex = Math.floor(Math.random() * selected.length);
   const missing = selected[missingIndex];
+  const itemsInGrid = selected.filter((_, idx) => idx !== missingIndex);
 
   qEl.textContent = 'Which picture is missing?';
   speak('Which picture is missing?');
@@ -359,8 +360,10 @@ function startMissingRound(){
   });
   optionsEl.appendChild(questionContainer);
 
-  // ANSWER container → 1 correct + 2 wrong (wrong must be from selected but not missing!)
-  const wrongOptions = shuffle(selected.filter(n => n !== missing)).slice(0,2);
+  // ANSWER container: one correct and two WRONG options.
+  // The wrong options must NOT be in the question grid.
+  const allImagesExceptGrid = imageList.filter(name => !itemsInGrid.includes(name) && name !== missing);
+  const wrongOptions = shuffle(allImagesExceptGrid).slice(0, 2);
   const answerChoices = shuffle([missing, ...wrongOptions]);
 
   const answerContainer = document.createElement('div');
