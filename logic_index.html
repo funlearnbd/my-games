@@ -16,7 +16,6 @@
       overflow: hidden;
     }
 
-    /* --- Start screen --- */
     #startScreen {
       display: flex;
       flex-direction: column;
@@ -48,7 +47,6 @@
       to   { box-shadow: 0 0 50px orange; }
     }
 
-    /* --- Game screen --- */
     .game-container {
       display: none;
       flex-direction: column;
@@ -193,9 +191,7 @@
 
   <script>
     const imageList = ["apple","ball","banana","car","cat","cherry","dog","fish","flower","orange"];
-
     let currentMode = "find"; 
-    let lastAnswer = null;
     let voicesReady = false;
     let score = 0;
 
@@ -203,13 +199,6 @@
     const wrongSound = document.getElementById("wrongSound");
     const scoreEl = document.getElementById("score");
     const congratsEl = document.getElementById("congrats");
-
-    function updateScore() {
-      scoreEl.textContent = `Score: ${score}`;
-      if(score > 0 && score % 10 === 0){
-        showCongratsPopup();
-      }
-    }
 
     function speak(text) {
       if (!voicesReady) return;
@@ -240,10 +229,17 @@
       nextRound();
     });
 
+    function updateScore(){
+      scoreEl.textContent = `Score: ${score}`;
+      if(score > 0 && score % 10 === 0){
+        showCongratsPopup();
+      }
+    }
+
     function showCongratsPopup(){
-      congratsEl.innerHTML = "🎉 Congratulations! 🎉<br>You have got 10 points!";
+      congratsEl.innerHTML = `🎉 Congratulations! 🎉<br>You have got ${score} points!`;
       congratsEl.style.display = 'block';
-      speak("Congratulations, you have got 10 points!");
+      speak(`Congratulations, you have got ${score} points!`);
       for(let i=0;i<15;i++){
         const star = document.createElement('div');
         star.className = 'congrats-star';
@@ -255,60 +251,15 @@
       setTimeout(()=>{congratsEl.style.display='none'; nextRound();},2200);
     }
 
-    function nextRound() {
-      optionsEl.innerHTML = "";
+    function nextRound(){
+      optionsEl.innerHTML = '';
       const modes = ["find","different","missing"];
       currentMode = modes[Math.floor(Math.random() * modes.length)];
-      if (currentMode === "find") startFindRound();
-      else if (currentMode === "different") startDifferentRound();
-      else if (currentMode === "missing") startMissingRound();
+      if(currentMode==='find') startFindRound();
+      else if(currentMode==='different') startDifferentRound();
+      else if(currentMode==='missing') startMissingRound();
     }
 
-    function startFindRound() {
+    function startFindRound(){
       const choices = shuffle([...imageList]).slice(0,4);
-      const target = choices[Math.floor(Math.random()*choices.length)];
-      lastAnswer = target;
-      qEl.textContent = `Find the ${target}`;
-      speak(`Can you find the ${target}?`);
-      choices.forEach(name => createOption(name, name === target));
-    }
-
-    function startDifferentRound() {
-      const base = imageList[Math.floor(Math.random()*imageList.length)];
-      let odd;
-      do { odd = imageList[Math.floor(Math.random()*imageList.length)]; } while (odd === base);
-      const options = [base, base, base, odd];
-      qEl.textContent = "Find the different one!";
-      speak("Which one is different?");
-      shuffle(options).forEach(name => createOption(name, name === odd));
-    }
-
-    function startMissingRound() {
-      const selected = shuffle([...imageList]).slice(0,6);
-      const missing = selected[Math.floor(Math.random()*selected.length)];
-      const shown = selected.filter(n => n !== missing);
-      qEl.textContent = "Which one is missing?";
-      speak("Which picture is missing?");
-      const firstSet = document.createElement("div");
-      firstSet.className = "options";
-      shown.forEach(name => createOption(name, false, firstSet));
-      const blankDiv = document.createElement("div");
-      blankDiv.className = "option";
-      blankDiv.style.background = "#eee";
-      blankDiv.textContent = "?";
-      blankDiv.style.fontSize = "3em";
-      blankDiv.id = "missingBlank";
-      firstSet.appendChild(blankDiv);
-      optionsEl.appendChild(firstSet);
-      const separator = document.createElement("div");
-      separator.className = "set-separator";
-      separator.textContent = "Choose the missing one ↓";
-      optionsEl.appendChild(separator);
-      const secondSet = document.createElement("div");
-      secondSet.className = "options";
-      const choices = shuffle([missing, ...shuffle(shown).slice(0,2)]);
-      choices.forEach(name => createOption(name, name === missing, secondSet, blankDiv, missing));
-      optionsEl.appendChild(secondSet);
-    }
-
-    function createOption(name, isCorrect, parent = optionsEl, blankDiv=null, missing
+      const
