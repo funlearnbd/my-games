@@ -335,48 +335,42 @@ function startDifferentRound(){
 function startMissingRound(){
   // 1) pick 6 unique items
   const selected = shuffle(imageList).slice(0,6);
+
   // 2) pick exactly 1 missing from selected
-  const missingIndex = Math.floor(Math.random()*selected.length);
+  const missingIndex = Math.floor(Math.random() * selected.length);
   const missing = selected[missingIndex];
 
   qEl.textContent = 'Which picture is missing?';
   speak('Which picture is missing?');
 
-  // QUESTION container (one container, 2 rows x 3 columns)
+  // QUESTION container (6 slots: 5 filled + 1 blank)
   const questionContainer = document.createElement('div');
   questionContainer.className = 'option-container';
 
-  // We'll create a blankDiv where the missing should appear, maintain order so layout clear
   let blankDiv = null;
   selected.forEach((name, idx) => {
     if(idx === missingIndex){
       blankDiv = document.createElement('div');
       blankDiv.className = 'option blank';
-      // show placeholder symbol (question mark) while empty
-      // keep empty content: CSS will render placeholder visually
       questionContainer.appendChild(blankDiv);
     } else {
-      // show the tile (non-clickable)
       createQuestionTile(name, questionContainer);
     }
   });
-
   optionsEl.appendChild(questionContainer);
 
-  // ANSWER container (separate, clear gap) — only missing + 2 distractors NOT in selected
-  const unused = imageList.filter(n => !selected.includes(n));
-  let distractors = shuffle(unused).slice(0,2);
-  // Safety fallback: if not enough unused (rare), pick from selected but not the missing:
-  if(distractors.length < 2){
-    distractors = shuffle(imageList.filter(n => n !== missing && !distractors.includes(n))).slice(0,2);
-  }
+  // ANSWER container → 1 correct + 2 wrong (wrong must be from selected but not missing!)
+  const wrongOptions = shuffle(selected.filter(n => n !== missing)).slice(0,2);
+  const answerChoices = shuffle([missing, ...wrongOptions]);
 
   const answerContainer = document.createElement('div');
   answerContainer.className = 'answer-container';
-  const answerChoices = shuffle([missing, ...distractors]);
-  answerChoices.forEach(name => createAnswerTile(name, name === missing, answerContainer, blankDiv, missing));
+  answerChoices.forEach(name =>
+    createAnswerTile(name, name === missing, answerContainer, blankDiv, missing)
+  );
   optionsEl.appendChild(answerContainer);
 }
+
 
 /* create question tile helper (non-clickable) */
 function createQuestionTile(name, parent){
