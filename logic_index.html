@@ -145,7 +145,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: gold;
+      background: linear-gradient(135deg, #ffeb3b, #ff9800);
       padding: 50px;
       border-radius: 30px;
       font-size: 3em;
@@ -154,6 +154,20 @@
       box-shadow: 0 0 50px orange;
       display: none;
       z-index: 1000;
+      overflow: hidden;
+    }
+
+    .congrats-star {
+      position: absolute;
+      font-size: 2em;
+      color: gold;
+      animation: starFly 2s forwards;
+    }
+
+    @keyframes starFly {
+      0% { transform: translateY(100px) scale(0.5); opacity: 0; }
+      50% { opacity: 1; transform: translateY(-50px) scale(1.2); }
+      100% { transform: translateY(-150px) scale(1); opacity: 0; }
     }
   </style>
 </head>
@@ -172,7 +186,7 @@
     <div id="options" class="options"></div>
   </div>
 
-  <div id="congrats" class="congrats">🎉 Congratulations! 🎉</div>
+  <div id="congrats" class="congrats"></div>
 
   <audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
   <audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
@@ -193,8 +207,7 @@
     function updateScore() {
       scoreEl.textContent = `Score: ${score}`;
       if(score > 0 && score % 10 === 0){
-        congratsEl.style.display = 'block';
-        setTimeout(()=>{congratsEl.style.display='none';},2000);
+        showCongratsPopup();
       }
     }
 
@@ -226,6 +239,21 @@
       updateScore();
       nextRound();
     });
+
+    function showCongratsPopup(){
+      congratsEl.innerHTML = "🎉 Congratulations! 🎉<br>You have got 10 points!";
+      congratsEl.style.display = 'block';
+      speak("Congratulations, you have got 10 points!");
+      for(let i=0;i<15;i++){
+        const star = document.createElement('div');
+        star.className = 'congrats-star';
+        star.style.left = Math.random()*window.innerWidth + 'px';
+        star.style.top = window.innerHeight + 'px';
+        congratsEl.appendChild(star);
+        setTimeout(()=>star.remove(),2000);
+      }
+      setTimeout(()=>{congratsEl.style.display='none'; nextRound();},2200);
+    }
 
     function nextRound() {
       optionsEl.innerHTML = "";
@@ -259,11 +287,8 @@
       const selected = shuffle([...imageList]).slice(0,6);
       const missing = selected[Math.floor(Math.random()*selected.length)];
       const shown = selected.filter(n => n !== missing);
-
       qEl.textContent = "Which one is missing?";
       speak("Which picture is missing?");
-
-      // First set (2 rows, 3 pics per row, 6 pics with 1 missing)
       const firstSet = document.createElement("div");
       firstSet.className = "options";
       shown.forEach(name => createOption(name, false, firstSet));
@@ -275,14 +300,10 @@
       blankDiv.id = "missingBlank";
       firstSet.appendChild(blankDiv);
       optionsEl.appendChild(firstSet);
-
-      // Separator
       const separator = document.createElement("div");
       separator.className = "set-separator";
       separator.textContent = "Choose the missing one ↓";
       optionsEl.appendChild(separator);
-
-      // Second set (choices)
       const secondSet = document.createElement("div");
       secondSet.className = "options";
       const choices = shuffle([missing, ...shuffle(shown).slice(0,2)]);
@@ -290,51 +311,4 @@
       optionsEl.appendChild(secondSet);
     }
 
-    function createOption(name, isCorrect, parent = optionsEl, blankDiv=null, missingName=null) {
-      const div = document.createElement("div");
-      div.className = "option";
-      const img = document.createElement("img");
-      img.src = loadedImages[name].src;
-      div.appendChild(img);
-      div.onclick = () => {
-        if (isCorrect) {
-          addStars(div);
-          correctSound.play();
-          score++;
-          updateScore();
-          speak("Great job!");
-
-          if(blankDiv && missingName){
-            const shineImg = document.createElement("img");
-            shineImg.src = loadedImages[missingName].src;
-            shineImg.className = "shine";
-            blankDiv.innerHTML = '';
-            blankDiv.appendChild(shineImg);
-          }
-
-          setTimeout(nextRound, 1500);
-        } else {
-          wrongSound.play();
-          speak("Try again");
-        }
-      };
-      parent.appendChild(div);
-    }
-
-    function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
-
-    function addStars(target) {
-      for (let i=0;i<5;i++) {
-        const star = document.createElement("div");
-        star.className = "star-effect";
-        star.textContent = "⭐";
-        const rect = target.getBoundingClientRect();
-        star.style.left = rect.left + rect.width/2 + "px";
-        star.style.top = rect.top + rect.height/2 + "px";
-        document.body.appendChild(star);
-        setTimeout(()=>star.remove(),1000);
-      }
-    }
-  </script>
-</body>
-</html>
+    function createOption(name, isCorrect, parent = optionsEl, blankDiv=null, missing
