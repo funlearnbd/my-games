@@ -100,6 +100,17 @@ body {
 .option:hover {
   transform: scale(1.1);
 }
+.option-container {
+  border: 4px dashed #ff9800;
+  padding: 10px;
+  border-radius: 20px;
+  margin: 10px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.2);
+}
 .star-effect {
   position: absolute;
   pointer-events: none;
@@ -173,14 +184,17 @@ body {
 <div id="congrats" class="congrats"></div>
 <audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 <audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<audio id="congratsMusic" src="https://actions.google.com/sounds/v1/cartoon/party_horn.ogg"></audio>
 <script>
 const imageList=["apple","ball","banana","car","cat","cherry","dog","fish","flower","orange"];
 let currentMode="find";
 let voicesReady=false;
 let score=0;
+let waitingNextRound=false;
 const loadedImages={};
 const correctSound=document.getElementById("correctSound");
 const wrongSound=document.getElementById("wrongSound");
+const congratsMusic=document.getElementById("congratsMusic");
 const scoreEl=document.getElementById("score");
 const congratsEl=document.getElementById("congrats");
 const startBtn=document.getElementById("startBtn");
@@ -199,16 +213,30 @@ startBtn.addEventListener("click",()=>{
   nextRound();
 });
 exitBtn.addEventListener("click",()=>{window.location.href='index.html';});
-function speak(text){if(!voicesReady)return; const utter=new SpeechSynthesisUtterance(text); utter.rate=0.8; utter.pitch=1.2; speechSynthesis.speak(utter);}
-function updateScore(){scoreEl.textContent=`Score: ${score}`; if(score>0 && score%10===0){showCongratsPopup();}}
-function showCongratsPopup(){congratsEl.innerHTML=`🎉 Congratulations! 🎉<br>You have got ${score} points!`; congratsEl.style.display='block'; speak(`Congratulations, you have got ${score} points!`); for(let i=0;i<20;i++){const star=document.createElement('div'); star.className='congrats-star'; star.style.left=Math.random()*window.innerWidth+'px'; star.style.top=window.innerHeight+'px'; congratsEl.appendChild(star); setTimeout(()=>star.remove(),2200);} setTimeout(()=>{congratsEl.style.display='none'; nextRound();},2300);}
+function speak(text,callback=null){if(!voicesReady)return; const utter=new SpeechSynthesisUtterance(text); utter.rate=0.8; utter.pitch=1.2; utter.onend=()=>{if(callback)callback();}; speechSynthesis.speak(utter);}
+function updateScore(){scoreEl.textContent=`Score: ${score}`; if(score>0 && score%10===0 && !waitingNextRound){showCongratsPopup();}}
+function showCongratsPopup(){
+  waitingNextRound=true;
+  congratsEl.innerHTML=`🎉 Congratulations! 🎉<br>You have got ${score} points!`;
+  congratsEl.style.display='block';
+  congratsMusic.play();
+  speak(`Congratulations, you have got ${score} points!`,()=>{congratsEl.style.display='none'; waitingNextRound=false; nextRound();});
+  for(let i=0;i<20;i++){
+    const star=document.createElement('div');
+    star.className='congrats-star';
+    star.style.left=Math.random()*window.innerWidth+'px';
+    star.style.top=window.innerHeight+'px';
+    congratsEl.appendChild(star);
+    setTimeout(()=>star.remove(),2200);
+  }
+}
 function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
-function nextRound(){optionsEl.innerHTML=''; const modes=["find","different","missing"]; currentMode=modes[Math.floor(Math.random()*modes.length)]; if(currentMode==='find')startFindRound(); else if(currentMode==='different')startDifferentRound(); else startMissingRound();}
-function createOption(name,isCorrect,parent=optionsEl,blankDiv=null,missing=null){const div=document.createElement('div'); div.className='option'; const img=document.createElement('img'); img.src=loadedImages[name].src; div.appendChild(img); div.onclick=()=>{if(isCorrect){correctSound.play(); score++; updateScore(); if(blankDiv && missing){blankDiv.innerHTML=''; const correctImg=document.createElement('img'); correctImg.src=loadedImages[missing].src; correctImg.className='shine'; blankDiv.appendChild(correctImg); setTimeout(nextRound,1500);} else {addStars(div); setTimeout(nextRound,1500);} speak('Well done!');} else {wrongSound.play(); speak('Try again');}}; parent.appendChild(div);}
+function nextRound(){if(waitingNextRound)return; optionsEl.innerHTML=''; const modes=["find","different","missing"]; currentMode=modes[Math.floor(Math.random()*modes.length)]; if(currentMode==='find')startFindRound(); else if(currentMode==='different')startDifferentRound(); else startMissingRound();}
+function createOption(name,isCorrect,parent=optionsEl,blankDiv=null,missing=null){const div=document.createElement('div'); div.className='option'; const img=document.createElement('img'); img.src=loadedImages[name].src; div.appendChild(img); div.onclick=()=>{if(isCorrect){correctSound.play(); score++; updateScore(); if(blankDiv && missing){blankDiv.innerHTML=''; const correctImg=document.createElement('img'); correctImg.src=loadedImages[missing].src; correctImg.className='shine'; blankDiv.appendChild(correctImg); setTimeout(()=>{if(!waitingNextRound)nextRound();},1500);} else {addStars(div); setTimeout(()=>{if(!waitingNextRound)nextRound();},1500);} speak('Well done!');} else {wrongSound.play(); speak('Try again');}}; parent.appendChild(div);}
 function addStars(target){for(let i=0;i<5;i++){const star=document.createElement('div'); star.className='star-effect'; star.textContent='⭐'; const rect=target.getBoundingClientRect(); star.style.left=rect.left + rect.width/2 + 'px'; star.style.top=rect.top + rect.height/2 + 'px'; document.body.appendChild(star); setTimeout(()=>star.remove(),1000);}}
 function startFindRound(){const choices=shuffle([...imageList]).slice(0,4); const target=choices[Math.floor(Math.random()*choices.length)]; qEl.textContent=`Find the ${target}`; speak(`Can you find the ${target}?`); choices.forEach(name=>createOption(name,name===target));}
 function startDifferentRound(){const base=imageList[Math.floor(Math.random()*imageList.length)]; let odd; do{odd=imageList[Math.floor(Math.random()*imageList.length)];}while(odd===base); const options=[base,base,base,odd]; qEl.textContent="Find the different one!"; speak('Which one is different?'); shuffle(options).forEach(name=>createOption(name,name===odd));}
-function startMissingRound(){const selected=shuffle([...imageList]).slice(0,6); const missing=selected[Math.floor(Math.random()*selected.length)]; const firstSet=selected.slice(0,3); const secondSet=selected.slice(3); qEl.textContent='Which picture is missing?'; speak('Which picture is missing?'); const firstRow=document.createElement('div'); firstRow.className='options'; let blankDivFirst=null; firstSet.forEach(name=>{if(name===missing){blankDivFirst=document.createElement('div'); blankDivFirst.className='option'; firstRow.appendChild(blankDivFirst);} else {createOption(name,false,firstRow);}}); optionsEl.appendChild(firstRow); const spacer=document.createElement('div'); spacer.style.height='20px'; optionsEl.appendChild(spacer); const secondRow=document.createElement('div'); secondRow.className='options'; let blankDivSecond=null; secondSet.forEach(name=>{if(name===missing){blankDivSecond=document.createElement('div'); blankDivSecond.className='option'; secondRow.appendChild(blankDivSecond);} else {createOption(name,false,secondRow);}}); optionsEl.appendChild(secondRow); const answerChoices=[missing, ...shuffle(imageList.filter(n=>n!==missing)).slice(0,2)]; const answerRow=document.createElement('div'); answerRow.className='options'; shuffle(answerChoices).forEach(name=>{createOption(name,name===missing,answerRow,blankDivFirst||blankDivSecond,missing);}); optionsEl.appendChild(answerRow);}
+function startMissingRound(){const selected=shuffle([...imageList]).slice(0,6); const missing=selected[Math.floor(Math.random()*selected.length)]; const firstSet=selected.slice(0,3); const secondSet=selected.slice(3); qEl.textContent='Which picture is missing?'; speak('Which picture is missing?'); const firstRow=document.createElement('div'); firstRow.className='option-container'; let blankDivFirst=null; firstSet.forEach(name=>{if(name===missing){blankDivFirst=document.createElement('div'); blankDivFirst.className='option'; firstRow.appendChild(blankDivFirst);} else {createOption(name,false,firstRow);}}); optionsEl.appendChild(firstRow); const secondRow=document.createElement('div'); secondRow.className='option-container'; let blankDivSecond=null; secondSet.forEach(name=>{if(name===missing){blankDivSecond=document.createElement('div'); blankDivSecond.className='option'; secondRow.appendChild(blankDivSecond);} else {createOption(name,false,secondRow);}}); optionsEl.appendChild(secondRow); const answerChoices=[missing, ...shuffle(imageList.filter(n=>n!==missing)).slice(0,2)]; const answerRow=document.createElement('div'); answerRow.className='option-container'; shuffle(answerChoices).forEach(name=>{createOption(name,name===missing,answerRow,blankDivFirst||blankDivSecond,missing);}); optionsEl.appendChild(answerRow);}
 </script>
 </body>
 </html>
