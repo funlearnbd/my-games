@@ -375,12 +375,10 @@ function startMissingRound(){
   });
   optionsEl.appendChild(questionContainer);
 
-  // FIXED: Get wrong options from images not currently in the grid
-  const allImagesExceptGrid = imageList.filter(name => !itemsInGrid.includes(name));
+  // Get two items that are already in the grid (incorrect answers)
+  const wrongOptions = shuffle(itemsInGrid).slice(0, 2);
   
-  // Make sure we don't include the missing item in wrong options
-  const wrongOptions = shuffle(allImagesExceptGrid.filter(name => name !== missing)).slice(0, 2);
-  
+  // Combine with the missing item (correct answer)
   const answerChoices = shuffle([missing, ...wrongOptions]);
 
   const answerContainer = document.createElement('div');
