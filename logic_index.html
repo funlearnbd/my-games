@@ -23,20 +23,26 @@ h1 {margin:10px 0;color:#d81b60;font-size:2rem;}
 .emoji-grid, .options-grid {
   display:grid; gap:12px; margin:20px 10px;
 }
-.emoji-grid {grid-template-columns: repeat(auto-fit, minmax(100px,1fr));}
+.emoji-grid {
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+}
 .options-grid {grid-template-columns: repeat(3,1fr);}
 .emoji-item {
   background:#fff3e0; border-radius:15px; cursor:pointer; 
-  padding:12px; display:flex; justify-content:center; align-items:center; 
-  border:3px solid #6d4c41; font-size:4rem; aspect-ratio:1/1;
+  padding:8px; display:flex; justify-content:center; align-items:center; 
+  border:3px solid #6d4c41; aspect-ratio:1/1;
   transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
   position:relative;
+}
+.emoji-item img {
+  max-width:90%; max-height:90%;
+  object-fit:contain;
 }
 .emoji-item.correct {animation: sparkle 1s ease-out;}
 .emoji-item.incorrect {animation: shake 0.5s ease-out;}
 @keyframes sparkle {
   0%{transform:scale(1); box-shadow:0 0 0 #ffd700;}
-  50%{transform:scale(1.3); box-shadow:0 0 15px 8px rgba(255,215,0,0.7);}
+  50%{transform:scale(1.2); box-shadow:0 0 15px 8px rgba(255,215,0,0.7);}
   100%{transform:scale(1); box-shadow:0 0 0 transparent;}
 }
 @keyframes shake {
@@ -46,8 +52,8 @@ h1 {margin:10px 0;color:#d81b60;font-size:2rem;}
 }
 .exit-btn,.start-btn {
   background:#ff4081;color:white;font-weight:bold;
-  padding:10px 20px;border-radius:12px;border:none;
-  cursor:pointer;font-size:1.5rem;margin:10px;
+  padding:14px 28px;border-radius:20px;border:none;
+  cursor:pointer;font-size:2rem;margin:10px;
   animation: shine 1.5s infinite alternate;
 }
 @keyframes shine {
@@ -84,19 +90,17 @@ const gameContainer = document.getElementById('game-container');
 const startBtn = document.getElementById('start-btn');
 const bgMusic = document.getElementById('bg-music');
 const imageList = ['apple','ball','banana','car','cat','cherry','dog','fish','flower','orange'];
-let images = {}; // Preloaded images
+let images = {};
 let level = 1, score=0, currentTarget='', maxLevels=50;
-let laps=[]; // sequence of challenges
+let laps=[];
 const feedback = ['Super job! 🌟','Wow, awesome!','You’re a star!','Fantastic!','Yay, you did it!'];
 
-// Clear cache at startup for testing
 if ('caches' in window) caches.keys().then(keys=>{keys.forEach(k=>caches.delete(k));});
 
 function speak(text, rate=0.9) {
   const synth = window.speechSynthesis;
   const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = rate;
-  utter.pitch=1.2;
+  utter.rate = rate; utter.pitch=1.2;
   synth.speak(utter);
 }
 
@@ -135,7 +139,6 @@ function startGame(){
 
 function createLaps(){
   let arr=[];
-  // 10 find item
   for(let i=0;i<10;i++) arr.push('findTarget');
   for(let i=0;i<10;i++) arr.push('findDifferent');
   for(let i=0;i<10;i++) arr.push('findMissing');
@@ -161,13 +164,11 @@ function nextRound(){
 
   if(roundType==='findTarget'){
     const instr=document.createElement('p'); instr.className='instructions'; instr.innerText=`Find the ${currentTarget}`;
-    gameContainer.appendChild(instr);
-    speak(`Find the ${currentTarget}`);
+    gameContainer.appendChild(instr); speak(`Find the ${currentTarget}`);
     renderGrid(chosen, currentTarget,'findTarget');
   } else if(roundType==='findDifferent'){
     const instr=document.createElement('p'); instr.className='instructions'; instr.innerText='Find the different item!';
     gameContainer.appendChild(instr);
-    // all same except one
     let sameItem=currentTarget;
     let gridItems=new Array(5).fill(sameItem); gridItems.push(shuffle([...imageList].filter(e=>e!==sameItem))[0]);
     gridItems=shuffle(gridItems);
@@ -184,8 +185,7 @@ function nextRound(){
   } else if(roundType==='shadowMatch'){
     const instr=document.createElement('p'); instr.className='instructions'; instr.innerText='Match the shadow!';
     gameContainer.appendChild(instr);
-    let shadowItems=chosen.map(c=>c); let answer=currentTarget;
-    renderShadowGrid(shadowItems, answer);
+    renderShadowGrid(chosen, currentTarget);
   } else if(roundType==='patternMatch'){
     const instr=document.createElement('p'); instr.className='instructions'; instr.innerText='Find the matching pattern!';
     gameContainer.appendChild(instr);
@@ -198,7 +198,7 @@ function renderGrid(arr, correct, type, missingIndex=null){
   arr.forEach((name,index)=>{
     const div=document.createElement('div'); div.className='emoji-item';
     if(name!==''){
-      div.appendChild(images[name].cloneNode());
+      const img=images[name].cloneNode(); div.appendChild(img);
       div.onclick=()=>checkAnswer(div,name,correct,type,missingIndex);
     } else div.style.background='#ccc';
     grid.appendChild(div);
@@ -221,11 +221,10 @@ function renderShadowGrid(arr, correct){
 
 function renderPatternGrid(arr, correct){
   const grid=document.createElement('div'); grid.className='emoji-grid';
-  const targetPattern=correct;
   shuffle(arr).forEach(name=>{
     const div=document.createElement('div'); div.className='emoji-item';
     div.appendChild(images[name].cloneNode());
-    div.onclick=()=>checkAnswer(div,name,targetPattern,'pattern');
+    div.onclick=()=>checkAnswer(div,name,correct,'pattern');
     grid.appendChild(div);
   });
   gameContainer.appendChild(grid);
