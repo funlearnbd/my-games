@@ -313,32 +313,41 @@ function startDifferentRound(){
 }
 
 function startMissingRound(){
+  // Step 1: pick 6 unique items
   const selected = shuffle([...imageList]).slice(0,6);
+
+  // Step 2: choose exactly one to be missing
   const missing = selected[Math.floor(Math.random()*selected.length)];
 
   qEl.textContent = 'Which picture is missing?';
   speak('Which picture is missing?');
 
-  // Question container: 6 images in 2 rows of 3
+  // Step 3: show 5 items + 1 blank
   const questionContainer = document.createElement('div');
   questionContainer.className = 'option-container';
   let blankDiv = null;
+
   selected.forEach(name => {
     if(name === missing){
       blankDiv = document.createElement('div');
       blankDiv.className = 'option';
       questionContainer.appendChild(blankDiv);
-    } else { createOption(name,false,questionContainer); }
+    } else {
+      createOption(name,false,questionContainer);
+    }
   });
   optionsEl.appendChild(questionContainer);
 
-  // Answer container
+  // Step 4: answers (missing + 2 distractors not in question set)
+  const distractors = shuffle(imageList.filter(n => !selected.includes(n))).slice(0,2);
+  const answerChoices = shuffle([missing, ...distractors]);
+
   const answerContainer = document.createElement('div');
   answerContainer.className = 'option-container';
-  const answerChoices = shuffle([missing, ...shuffle(imageList.filter(n=>n!==missing)).slice(0,2)]);
-  answerChoices.forEach(name => createOption(name,name===missing,answerContainer,blankDiv,missing));
+  answerChoices.forEach(name => createOption(name, name===missing, answerContainer, blankDiv, missing));
   optionsEl.appendChild(answerContainer);
 }
+
 </script>
 </body>
 </html>
