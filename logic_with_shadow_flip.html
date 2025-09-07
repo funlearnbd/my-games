@@ -250,23 +250,67 @@ const answerContainer=document.createElement('div'); answerContainer.className='
 answerChoices.forEach(name=>createAnswerTile(name,name===missing,answerContainer,blankDiv,missing));
 optionsEl.appendChild(answerContainer); }
 
-function startMemoryRound(){ qEl.textContent='Match the pair!'; speak('Can you match the pair?'); const pairImages=shuffle(imageList).slice(0,2); const cards=shuffle([...pairImages,...pairImages]);
-const container=document.createElement('div'); container.className='option-container';
-let first=null, second=null;
-cards.forEach(name=>{ const tile=document.createElement('div'); tile.className='option'; const img=document.createElement('img'); img.src=loadedImages[name].src; img.alt=name; img.style.visibility='hidden'; tile.appendChild(img); tile.dataset.name=name;
-tile.addEventListener('click',()=>{ if(img.style.visibility==='visible') return; img.style.visibility='visible';
-if(!first){ first={tile,img,name}; } else { second={tile,img,name}; 
-if(first.name===second.name){ first=null; second=null; score++; updateScore(); } else { setTimeout(()=>{ first.img.style.visibility='hidden'; second.img.style.visibility='hidden'; first=null; second=null; },700); } } });
-container.appendChild(tile); });
-optionsEl.appendChild(container); }
+function startMemoryRound(){
+  qEl.textContent = "Can you find the matching pair?";
+  speak("Can you find the matching pair?");
+  const ansContainer = document.createElement('div');
+  ansContainer.className = 'option-container';
 
-function startShadowRound(){ qEl.textContent='Find the shadow!'; speak('Can you find the shadow?'); const target=imageList[Math.floor(Math.random()*imageList.length)];
-const shadowContainer=document.createElement('div'); shadowContainer.className='option-container';
-const options=[target,...shuffle(imageList.filter(x=>x!==target)).slice(0,2)]; shuffle(options).forEach(name=>{
-const tile=document.createElement('div'); tile.className='option'; tile.dataset.correct=name===target?'1':'0'; const img=document.createElement('img'); img.src=loadedImages[name].src; img.alt=name; tile.appendChild(img);
-tile.addEventListener('click',()=>{ if(roundAnswered) return; const correct=tile.dataset.correct==='1'; if(correct){ roundAnswered=true; score++; updateScore(); try{correctSound.currentTime=0; correctSound.play();}catch(e){} speak('Well done!',()=>setTimeout(()=>nextRound(),500)); } else { try{wrongSound.currentTime=0; wrongSound.play();}catch(e){} speak('Try again'); } });
-shadowContainer.appendChild(tile); });
-optionsEl.appendChild(shadowContainer); }
+  // 1. Pick a pair
+  const pairImage = imageList[Math.floor(Math.random() * imageList.length)];
+
+  // 2. Pick 4 other different images (no duplicates)
+  const others = shuffle(imageList.filter(name => name !== pairImage)).slice(0, 4);
+
+  // 3. Combine pair + others
+  const cards = shuffle([pairImage, pairImage, ...others]);
+
+  // Track flipped cards
+  let flipped = [];
+  let matched = false;
+
+  cards.forEach(name => {
+    const tile = document.createElement('div');
+    tile.className = 'option';
+    tile.dataset.name = name;
+
+    const img = document.createElement('img');
+    img.src = loadedImages[name].src;
+    img.alt = name;
+    img.style.visibility = 'hidden'; // initially hidden
+    tile.appendChild(img);
+
+    tile.addEventListener('click', () => {
+      if(flipped.length >= 2 || tile.classList.contains('matched')) return;
+      img.style.visibility = 'visible';
+      flipped.push(tile);
+
+      if(flipped.length === 2){
+        if(flipped[0].dataset.name === flipped[1].dataset.name){
+          // Correct match
+          flipped.forEach(t => t.classList.add('matched'));
+          try{ correctSound.currentTime = 0; correctSound.play(); }catch(e){}
+          score++;
+          updateScore();
+          speak("Well done!", () => setTimeout(nextRound, 800));
+        } else {
+          // Wrong match, flip back after short delay
+          try{ wrongSound.currentTime = 0; wrongSound.play(); }catch(e){}
+          setTimeout(() => {
+            flipped.forEach(t => t.querySelector('img').style.visibility = 'hidden');
+            flipped = [];
+          }, 800);
+        }
+        flipped = [];
+      }
+    });
+
+    ansContainer.appendChild(tile);
+  });
+
+  optionsEl.appendChild(ansContainer);
+}
+
 </script>
 
 </body>
