@@ -267,7 +267,6 @@ function startMemoryRound(){
 
   // Track flipped cards
   let flipped = [];
-  let matched = false;
 
   cards.forEach(name => {
     const tile = document.createElement('div');
@@ -277,11 +276,11 @@ function startMemoryRound(){
     const img = document.createElement('img');
     img.src = loadedImages[name].src;
     img.alt = name;
-    img.style.visibility = 'hidden'; // initially hidden
+    img.style.visibility = 'hidden'; // hidden until clicked
     tile.appendChild(img);
 
     tile.addEventListener('click', () => {
-      if(flipped.length >= 2 || tile.classList.contains('matched')) return;
+      if(flipped.includes(tile) || tile.classList.contains('matched')) return;
       img.style.visibility = 'visible';
       flipped.push(tile);
 
@@ -292,13 +291,14 @@ function startMemoryRound(){
           try{ correctSound.currentTime = 0; correctSound.play(); }catch(e){}
           score++;
           updateScore();
-          speak("Well done!", () => setTimeout(nextRound, 800));
+          speak("Well done!", () => {
+            setTimeout(nextRound, 800); // move to next round after short delay
+          });
         } else {
-          // Wrong match, flip back after short delay
+          // Wrong match: flip back after short delay
           try{ wrongSound.currentTime = 0; wrongSound.play(); }catch(e){}
           setTimeout(() => {
             flipped.forEach(t => t.querySelector('img').style.visibility = 'hidden');
-            flipped = [];
           }, 800);
         }
         flipped = [];
@@ -310,6 +310,7 @@ function startMemoryRound(){
 
   optionsEl.appendChild(ansContainer);
 }
+
 
 </script>
 
