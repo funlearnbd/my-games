@@ -1,315 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Kids Learning Game</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kids Game</title>
 <style>
   body {
+    font-family: Arial, sans-serif;
+    text-align: center;
     margin: 0;
-    font-family: "Comic Sans MS", Arial, sans-serif;
-    background: linear-gradient(135deg, #a8c0ff, #3f2b96);
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    color: #fff;
+    padding: 0;
+    background: #f0f8ff;
   }
-  /* Start screen */
-  #startScreen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  h1 {
+    font-size: 24px;
+    margin: 10px 0;
   }
-  #startScreen h1 {
-    font-size: 3.8rem;
-    color: #ffeb3b;
-    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5);
-    margin-bottom: 40px;
+  #game {
+    margin: 10px auto;
+    max-width: 800px;
   }
-  .start-button {
-    font-size: 3rem;
-    padding: 28px 70px;
-    border-radius: 60px;
-    border: none;
-    background: linear-gradient(45deg, #ff4081, #ff9800, #ffeb3b);
-    color: #fff;
-    cursor: pointer;
-    box-shadow: 0 12px 35px rgba(255, 140, 0, 0.6);
-    animation: pulse 2s infinite ease-in-out;
-    transition: transform 0.25s;
-  }
-  .start-button:hover {
-    transform: scale(1.1) rotate(-1deg);
-  }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 20px #ff4081; }
-    50% { box-shadow: 0 0 40px #ffeb3b; }
-    100% { box-shadow: 0 0 20px #ff9800; }
-  }
-  /* Game container */
-  .game-container {
-    display: none;
-    width: 100%;
-    max-width: 850px;
-    padding: 24px;
-    box-sizing: border-box;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 24px;
-    box-shadow: 0 0 35px rgba(0, 0, 0, 0.35);
-  }
-  .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 22px;
-    font-size: 1.8rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  }
-  #question {
-    font-size: 2rem;
-    color: #fff;
-    margin: 12px auto;
-  }
-  .score {
-    font-size: 1.6rem;
-    color: #ffeb3b;
-    font-weight: 700;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-  }
-  .option-container {
-    border: 4px dashed #ffeb3b;
-    border-radius: 22px;
-    padding: 20px;
-    margin: 25px 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    background: rgba(255, 255, 255, 0.15);
-    justify-items: center;
-    align-items: center;
-  }
-  .answer-container {
-    border: 4px dashed #4caf50;
-    border-radius: 22px;
-    padding: 20px;
-    margin-top: 40px;
+  .option-container, .answer-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.12);
+    gap: 10px;
+    margin: 10px 0;
   }
   .option {
-    width: 140px;
-    height: 140px;
-    border-radius: 25px;
+    border: 2px solid #333;
+    border-radius: 10px;
     background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 5px;
     cursor: pointer;
-    user-select: none;
-    position: relative;
-    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .option:hover {
+    transform: scale(1.05);
   }
   .option img {
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
+    max-width: 120px;
+    max-height: 120px;
   }
-  .option:hover { transform: scale(1.08); }
-  .question-tile { cursor: default; pointer-events: none; }
-  .blank { background: #fafafa; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #666; border: 3px dashed #9e9e9e; }
-  #exitBtn { margin-top: 30px; padding: 16px 40px; border-radius: 40px; border: none; background: linear-gradient(45deg, #ff1744, #e53935); color: #fff; font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: 0 8px 25px rgba(229, 57, 53, 0.6); transition: transform 0.25s, background 0.25s; }
-  #exitBtn:hover { background: linear-gradient(45deg, #e53935, #c62828); transform: scale(1.05); }
-  .congrats { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #ffeb3b, #ff9800); padding: 40px 50px; border-radius: 25px; font-size: 2.2rem; color: #fff; text-align: center; box-shadow: 0 0 60px rgba(255, 140, 0, 0.9); z-index: 2000; display: none; overflow: visible; }
-  .congrats-star { position: absolute; font-size: 1.8rem; color: gold; animation: starFly 2.2s forwards; }
-  @keyframes starFly { 0% { transform: translateY(150px) scale(0.5); opacity: 0; } 50% { opacity: 1; transform: translateY(-30px) scale(1.3); } 100% { transform: translateY(-180px) scale(1.1); opacity: 0; } }
+  .blank {
+    background: #ddd;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #congrats {
+    display: none;
+    font-size: 24px;
+    margin: 20px;
+    color: #e91e63;
+    font-weight: bold;
+  }
+  #score {
+    font-size: 20px;
+    margin: 10px;
+  }
+  .congrats-star {
+    position: fixed;
+    font-size: 24px;
+    color: gold;
+    animation: fly 2s linear;
+  }
+  @keyframes fly {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-300px); opacity: 0; }
+  }
+  #exitBtn {
+    margin-top: 15px;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: #ff5252;
+    color: white;
+    cursor: pointer;
+  }
+
+  /* 📱 Responsive fix for phones */
+  @media (max-width: 600px) {
+    .option img {
+      max-width: 80px;
+      max-height: 80px;
+    }
+    .blank {
+      width: 80px;
+      height: 80px;
+    }
+    h1 {
+      font-size: 18px;
+    }
+    #score {
+      font-size: 16px;
+    }
+  }
 </style>
 </head>
 <body>
-
-<div id="startScreen">
-  <h1>🌟 Fun Learning Game 🌟</h1>
-  <button id="startBtn" class="start-button">▶ Start Game</button>
-</div>
-
-<div id="game" class="game-container" aria-live="polite">
-  <div class="top-bar">
-    <div id="question"></div>
-    <div id="score" class="score">Score: 0</div>
+  <h1 id="question">Press Start to Play!</h1>
+  <div id="score">Score: 0</div>
+  <button onclick="startGame()">Start Game</button>
+  <div id="game">
+    <div id="options"></div>
   </div>
-  <div id="options"></div>
-  <button id="exitBtn">⏹ Exit Game</button>
-</div>
-
-<div id="congrats" class="congrats"></div>
-
-<audio id="bgMusic" src="https://actions.google.com/sounds/v1/musical/melodious_tunes.ogg" loop></audio>
-<audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-<audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
-<audio id="congratsMusic" src="https://actions.google.com/sounds/v1/cartoon/party_horn.ogg"></audio>
+  <div id="congrats"></div>
+  <button id="exitBtn" onclick="window.location.href='index.html'">Exit</button>
 
 <script>
-const imageList = ["apple","ball","banana","car","cat","cherry","dog","fish","flower","orange"];
+const imageList = ["🐶","🐱","🐰","🐸","🐵","🦁","🐮","🐷","🐔","🐟"];
+const optionsEl = document.getElementById('options');
+const qEl = document.getElementById('question');
+const scoreEl = document.getElementById('score');
+const congratsEl = document.getElementById('congrats');
 
-let currentMode = "find";
-let voicesReady = false;
 let score = 0;
 let roundNumber = 0;
 let currentDifficulty = 'beginner';
-let waitingNextRound = false;
 let roundAnswered = false;
 
-const loadedImages = {};
-const bgMusic = document.getElementById('bgMusic');
-const correctSound = document.getElementById('correctSound');
-const wrongSound = document.getElementById('wrongSound');
-const congratsMusic = document.getElementById('congratsMusic');
-const scoreEl = document.getElementById('score');
-const congratsEl = document.getElementById('congrats');
-const startBtn = document.getElementById('startBtn');
-const startScreen = document.getElementById('startScreen');
-const game = document.getElementById('game');
-const qEl = document.getElementById('question');
-const optionsEl = document.getElementById('options');
-const exitBtn = document.getElementById('exitBtn');
+function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
 
-imageList.forEach(name => { const img = new Image(); img.src = `image/${name}.png`; loadedImages[name] = img; });
-
-startBtn.addEventListener('click', () => {
-  voicesReady = true;
-  try { bgMusic.play(); } catch(e) {}
-  startScreen.style.display = 'none';
-  game.style.display = 'block';
-  score = 0; roundNumber = 0; currentDifficulty = 'beginner';
-  updateScore();
-  nextRound();
-});
-
-exitBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
-
-function speak(text, cb=null){
-  if(!voicesReady){ if(cb) setTimeout(cb,400); return; }
-  const u = new SpeechSynthesisUtterance(text); u.rate = 0.8; u.pitch = 1.15;
-  if(cb) u.onend = cb;
+function speak(text, cb){
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.9;
+  u.onend = cb;
   speechSynthesis.speak(u);
 }
 
-function updateScore(){ scoreEl.textContent = `Score: ${score}`; }
+function startGame(){
+  score = 0;
+  roundNumber = 0;
+  currentDifficulty = 'beginner';
+  scoreEl.textContent = 'Score: 0';
+  nextRound();
+}
 
-function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+function updateScore(){ scoreEl.textContent = 'Score: '+score; }
 
 function nextRound(){
-  if(waitingNextRound) return;
-  roundAnswered = false; optionsEl.innerHTML = '';
+  roundAnswered = false;
+  optionsEl.innerHTML = '';
   roundNumber++;
-  // Check difficulty upgrade
-  let newDifficulty = currentDifficulty;
-  if(roundNumber >= 11) newDifficulty = 'advanced';
-  else if(roundNumber >= 6) newDifficulty = 'intermediate';
-  else newDifficulty = 'beginner';
 
-  if(newDifficulty !== currentDifficulty){
-    showLevelUp(newDifficulty, () => { currentDifficulty = newDifficulty; nextRound(); });
+  // Difficulty upgrade
+  let newDiff = currentDifficulty;
+  if(roundNumber >= 11) newDiff = 'advanced';
+  else if(roundNumber >= 6) newDiff = 'intermediate';
+
+  if(newDiff !== currentDifficulty){
+    showLevelUp(newDiff, ()=>{ currentDifficulty = newDiff; nextRound(); });
     return;
   }
 
   const modes = ['find','different','missing'];
-  currentMode = modes[Math.floor(Math.random()*modes.length)];
-  if(currentMode==='find') startFindRound();
-  else if(currentMode==='different') startDifferentRound();
+  const mode = modes[Math.floor(Math.random()*modes.length)];
+  if(mode==='find') startFindRound();
+  else if(mode==='different') startDifferentRound();
   else startMissingRound();
 }
 
 function showLevelUp(level, cb){
-  waitingNextRound = true;
-  congratsEl.innerHTML = `🎉 Level Up! 🎉<br>You reached ${level.charAt(0).toUpperCase() + level.slice(1)}!`;
+  congratsEl.innerHTML = `🎉 Level Up! 🎉<br>You reached ${level}!`;
   congratsEl.style.display = 'block';
-  try { congratsMusic.currentTime=0; congratsMusic.play(); } catch(e){}
-  for(let i=0;i<18;i++){
-    const s = document.createElement('div');
-    s.className = 'congrats-star';
-    s.style.left = (20 + Math.random()*(window.innerWidth-40)) + 'px';
-    s.style.top = (window.innerHeight + 20) + 'px';
-    congratsEl.appendChild(s);
-    setTimeout(()=>s.remove(),2200);
+  for(let i=0;i<15;i++){
+    const s=document.createElement('div');
+    s.className='congrats-star'; s.textContent='⭐';
+    s.style.left = (Math.random()*window.innerWidth)+'px';
+    s.style.top = (window.innerHeight-20)+'px';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),2000);
   }
-  speak(`Congratulations! You reached ${level}`, () => {
+  speak(`Congratulations! You reached ${level}`, ()=>{
     congratsEl.style.display='none';
-    waitingNextRound = false;
-    try { congratsMusic.pause(); congratsMusic.currentTime = 0; } catch(e){}
     if(cb) cb();
   });
 }
 
-// ---------- Visual Tiles ----------
-function createQuestionTile(name, parent){
-  const tile = document.createElement('div'); tile.className='option question-tile';
-  const img = document.createElement('img'); img.src=loadedImages[name].src; img.alt=name;
-  tile.appendChild(img); parent.appendChild(tile);
-}
-function createAnswerTile(name,isCorrect,parent,blankDiv=null,missing=null){
-  const tile = document.createElement('div'); tile.className='option'; tile.dataset.correct=isCorrect?'1':'0';
-  const img = document.createElement('img'); img.src=loadedImages[name].src; img.alt=name;
-  tile.appendChild(img);
-  tile.addEventListener('click', ()=>{
+function createAnswerTile(symbol,isCorrect){
+  const tile=document.createElement('div');
+  tile.className='option';
+  tile.innerHTML=`<div style="font-size:50px">${symbol}</div>`;
+  tile.onclick=()=>{
     if(roundAnswered) return;
-    const correct = tile.dataset.correct==='1';
-    if(correct){ roundAnswered=true; try{ correctSound.currentTime=0; correctSound.play(); }catch(e){} score++; updateScore();
-      if(blankDiv && missing){ blankDiv.innerHTML=''; const im = document.createElement('img'); im.src=loadedImages[missing].src; im.alt=missing; blankDiv.appendChild(im); }
-      speak('Well done!', ()=> setTimeout(()=> nextRound(),500));
-    } else { try{ wrongSound.currentTime=0; wrongSound.play(); }catch(e){} speak('Try again'); }
-  });
-  parent.appendChild(tile);
+    if(isCorrect){
+      roundAnswered=true;
+      score++; updateScore();
+      speak('Well done!', ()=> setTimeout(()=>nextRound(),500));
+    } else {
+      speak('Try again');
+    }
+  };
+  return tile;
 }
 
-// ---------- Game Rounds ----------
+// --- Game Rounds ---
 function startFindRound(){
-  const choices = shuffle(imageList).slice(0,4);
-  const target = choices[Math.floor(Math.random()*choices.length)];
+  let numChoices = currentDifficulty==='beginner'?3:4;
+  const choices=shuffle(imageList).slice(0,numChoices);
+  const target=choices[Math.floor(Math.random()*choices.length)];
   qEl.textContent=`Find the ${target}`;
   speak(`Can you find the ${target}?`);
-  const ansContainer = document.createElement('div'); ansContainer.className='answer-container';
-  shuffle(choices).forEach(name => createAnswerTile(name,name===target,ansContainer));
-  optionsEl.appendChild(ansContainer);
+  const ans=document.createElement('div'); ans.className='answer-container';
+  shuffle(choices).forEach(c=> ans.appendChild(createAnswerTile(c,c===target)));
+  optionsEl.appendChild(ans);
 }
 
 function startDifferentRound(){
-  const base = imageList[Math.floor(Math.random()*imageList.length)];
+  let base=imageList[Math.floor(Math.random()*imageList.length)];
   let odd; do{ odd=imageList[Math.floor(Math.random()*imageList.length)]; }while(odd===base);
-  qEl.textContent='Find the different one!'; speak('Which one is different?');
-  const arr=shuffle([base,base,base,odd]);
-  const ansContainer = document.createElement('div'); ansContainer.className='answer-container';
-  arr.forEach(name=>createAnswerTile(name,name===odd,ansContainer));
-  optionsEl.appendChild(ansContainer);
+  let arr;
+  if(currentDifficulty==='beginner') arr=[base,odd,base]; 
+  else arr=shuffle([base,base,base,odd]);
+  qEl.textContent='Find the different one!';
+  speak('Which one is different?');
+  const ans=document.createElement('div'); ans.className='answer-container';
+  arr.forEach(c=> ans.appendChild(createAnswerTile(c,c===odd)));
+  optionsEl.appendChild(ans);
 }
 
 function startMissingRound(){
-  const selected = shuffle(imageList).slice(0,6);
-  const missingIndex = Math.floor(Math.random()*selected.length);
-  const missing = selected[missingIndex];
-  const itemsInGrid = selected.filter((_,idx)=>idx!==missingIndex);
-  qEl.textContent='Which picture is missing?'; speak('Which picture is missing?');
-  const questionContainer=document.createElement('div'); questionContainer.className='option-container';
-  let blankDiv=null;
-  selected.forEach((name,idx)=>{
-    if(idx===missingIndex){ blankDiv=document.createElement('div'); blankDiv.className='option blank'; questionContainer.appendChild(blankDiv);}
-    else{ createQuestionTile(name,questionContainer);}
+  let numItems = currentDifficulty==='beginner'?3:6;
+  const selected=shuffle(imageList).slice(0,numItems);
+  const missingIndex=Math.floor(Math.random()*selected.length);
+  const missing=selected[missingIndex];
+  const itemsInGrid=selected.filter((_,i)=>i!==missingIndex);
+  qEl.textContent='Which picture is missing?';
+  speak('Which picture is missing?');
+
+  const qBox=document.createElement('div'); qBox.className='option-container';
+  selected.forEach((s,i)=>{
+    if(i===missingIndex){
+      const blank=document.createElement('div');
+      blank.className='blank'; qBox.appendChild(blank);
+    } else {
+      qBox.appendChild(createAnswerTile(s,false));
+    }
   });
-  optionsEl.appendChild(questionContainer);
-  const wrongOptions = shuffle(itemsInGrid).slice(0,2);
-  const answerChoices=shuffle([missing,...wrongOptions]);
-  const answerContainer=document.createElement('div'); answerContainer.className='answer-container';
-  answerChoices.forEach(name => createAnswerTile(name,name===missing,answerContainer,blankDiv,missing));
-  optionsEl.appendChild(answerContainer);
+  optionsEl.appendChild(qBox);
+
+  const wrong=shuffle(itemsInGrid).slice(0,2);
+  const choices=shuffle([missing,...wrong]);
+  const ans=document.createElement('div'); ans.className='answer-container';
+  choices.forEach(c=> ans.appendChild(createAnswerTile(c,c===missing)));
+  optionsEl.appendChild(ans);
 }
 </script>
 </body>
