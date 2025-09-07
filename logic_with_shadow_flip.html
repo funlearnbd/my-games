@@ -81,6 +81,53 @@
     font-weight: 700;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
   }
+.option {
+  perspective: 600px; /* Needed for 3D flip effect */
+}
+
+.option-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.option.flipped .option-inner {
+  transform: rotateY(180deg);
+}
+
+.option-front, .option-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 25px;
+}
+
+.option-front {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.option-front img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
+.option-back {
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotateY(180deg);
+  font-size: 2rem;
+  color: #888;
+  border: 3px dashed #ccc;
+}
 
   .option-container {
     border: 4px dashed #ffeb3b;
@@ -256,61 +303,66 @@ function startMemoryRound(){
   const ansContainer = document.createElement('div');
   ansContainer.className = 'option-container';
 
-  // 1. Pick a pair
   const pairImage = imageList[Math.floor(Math.random() * imageList.length)];
-
-  // 2. Pick 4 other different images (no duplicates)
   const others = shuffle(imageList.filter(name => name !== pairImage)).slice(0, 4);
-
-  // 3. Combine pair + others
   const cards = shuffle([pairImage, pairImage, ...others]);
 
-  // Track flipped cards
-  let flipped = [];
+  let flippedCard = null;
 
   cards.forEach(name => {
     const tile = document.createElement('div');
     tile.className = 'option';
-    tile.dataset.name = name;
 
+    const inner = document.createElement('div');
+    inner.className = 'option-inner';
+
+    const front = document.createElement('div');
+    front.className = 'option-front';
     const img = document.createElement('img');
     img.src = loadedImages[name].src;
     img.alt = name;
-    img.style.visibility = 'hidden'; // hidden until clicked
-    tile.appendChild(img);
+    front.appendChild(img);
+
+    const back = document.createElement('div');
+    back.className = 'option-back';
+    back.textContent = "?";
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    tile.appendChild(inner);
 
     tile.addEventListener('click', () => {
-      if(flipped.includes(tile) || tile.classList.contains('matched')) return;
-      img.style.visibility = 'visible';
-      flipped.push(tile);
+      if(tile.classList.contains('matched')) return;
+      if(tile === flippedCard) return;
 
-      if(flipped.length === 2){
-        if(flipped[0].dataset.name === flipped[1].dataset.name){
-          // Correct match
-          flipped.forEach(t => t.classList.add('matched'));
+      tile.classList.add('flipped');
+
+      if(!flippedCard){
+        flippedCard = tile;
+      } else {
+        if(tile.dataset.name === flippedCard.dataset.name){
+          tile.classList.add('matched');
+          flippedCard.classList.add('matched');
           try{ correctSound.currentTime = 0; correctSound.play(); }catch(e){}
           score++;
           updateScore();
-          speak("Well done!", () => {
-            setTimeout(nextRound, 800); // move to next round after short delay
-          });
+          flippedCard = null;
+          speak("Well done!", () => setTimeout(nextRound, 800));
         } else {
-          // Wrong match: flip back after short delay
           try{ wrongSound.currentTime = 0; wrongSound.play(); }catch(e){}
-          setTimeout(() => {
-            flipped.forEach(t => t.querySelector('img').style.visibility = 'hidden');
-          }, 800);
+          const prev = flippedCard;
+          flippedCard = tile;
+          setTimeout(() => prev.classList.remove('flipped'), 500);
         }
-        flipped = [];
       }
     });
 
+    tile.dataset.name = name;
     ansContainer.appendChild(tile);
   });
 
   optionsEl.appendChild(ansContainer);
 }
-
 
 </script>
 
