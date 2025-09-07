@@ -3,252 +3,286 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kids Game</title>
+<title>Kids Learning Game</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    text-align: center;
     margin: 0;
-    padding: 0;
-    background: #f0f8ff;
-  }
-  h1 {
-    font-size: 24px;
-    margin: 10px 0;
-  }
-  #game {
-    margin: 10px auto;
-    max-width: 800px;
-  }
-  .option-container, .answer-container {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ffecd2, #fcb69f);
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin: 10px 0;
-  }
-  .option {
-    border: 2px solid #333;
-    border-radius: 10px;
-    background: #fff;
-    padding: 5px;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  .option:hover {
-    transform: scale(1.05);
-  }
-  .option img {
-    max-width: 120px;
-    max-height: 120px;
-  }
-  .blank {
-    background: #ddd;
-    width: 120px;
-    height: 120px;
-    display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-  }
-  #congrats {
-    display: none;
-    font-size: 24px;
-    margin: 20px;
-    color: #e91e63;
-    font-weight: bold;
-  }
-  #score {
-    font-size: 20px;
-    margin: 10px;
-  }
-  .congrats-star {
-    position: fixed;
-    font-size: 24px;
-    color: gold;
-    animation: fly 2s linear;
-  }
-  @keyframes fly {
-    from { transform: translateY(0); opacity: 1; }
-    to { transform: translateY(-300px); opacity: 0; }
-  }
-  #exitBtn {
-    margin-top: 15px;
-    padding: 8px 16px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    background: #ff5252;
-    color: white;
-    cursor: pointer;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
   }
 
-  /* 📱 Responsive fix for phones */
+  .start-button {
+    font-size: 3em;
+    padding: 20px 40px;
+    border: none;
+    border-radius: 50px;
+    background: gold;
+    color: white;
+    cursor: pointer;
+    animation: glow 1.5s infinite alternate;
+    box-shadow: 0 0 20px gold;
+  }
+  @keyframes glow {
+    from { box-shadow: 0 0 20px gold; }
+    to   { box-shadow: 0 0 40px orange; }
+  }
+
+  .game-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .question {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    max-width: 90%;
+    justify-content: center;
+  }
+
+  .option {
+    width: 140px;
+    height: 140px;
+    border-radius: 20px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .option img {
+    max-width: 90%;
+    max-height: 90%;
+  }
+
+  .option:hover {
+    transform: scale(1.1);
+  }
+
+  .star-effect {
+    position: absolute;
+    pointer-events: none;
+    font-size: 2em;
+    animation: starFloat 1s ease-out forwards;
+  }
+  @keyframes starFloat {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to   { opacity: 0; transform: translateY(-50px) scale(2); }
+  }
+
+  /* 📱 Mobile fix */
   @media (max-width: 600px) {
+    .option {
+      width: 90px;
+      height: 90px;
+    }
     .option img {
-      max-width: 80px;
-      max-height: 80px;
+      max-width: 80%;
+      max-height: 80%;
     }
-    .blank {
-      width: 80px;
-      height: 80px;
-    }
-    h1 {
-      font-size: 18px;
-    }
-    #score {
-      font-size: 16px;
+    .question {
+      font-size: 1.4em;
+      margin-bottom: 15px;
     }
   }
 </style>
 </head>
 <body>
-  <h1 id="question">Press Start to Play!</h1>
-  <div id="score">Score: 0</div>
-  <button onclick="startGame()">Start Game</button>
-  <div id="game">
-    <div id="options"></div>
+
+  <button id="startBtn" class="start-button">✨ Start ✨</button>
+
+  <div id="game" class="game-container">
+    <div id="question" class="question"></div>
+    <div id="options" class="options"></div>
   </div>
-  <div id="congrats"></div>
-  <button id="exitBtn" onclick="window.location.href='index.html'">Exit</button>
 
 <script>
-const imageList = ["🐶","🐱","🐰","🐸","🐵","🦁","🐮","🐷","🐔","🐟"];
-const optionsEl = document.getElementById('options');
-const qEl = document.getElementById('question');
-const scoreEl = document.getElementById('score');
-const congratsEl = document.getElementById('congrats');
+  const imageList = [
+    "apple","ball","banana","car","cat",
+    "cherry","dog","fish","flower","orange"
+  ];
 
-let score = 0;
-let roundNumber = 0;
-let currentDifficulty = 'beginner';
-let roundAnswered = false;
+  let currentMode = "find"; 
+  let lastAnswer = null;
+  let voicesReady = false;
 
-function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
-
-function speak(text, cb){
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.9;
-  u.onend = cb;
-  speechSynthesis.speak(u);
-}
-
-function startGame(){
-  score = 0;
-  roundNumber = 0;
-  currentDifficulty = 'beginner';
-  scoreEl.textContent = 'Score: 0';
-  nextRound();
-}
-
-function updateScore(){ scoreEl.textContent = 'Score: '+score; }
-
-function nextRound(){
-  roundAnswered = false;
-  optionsEl.innerHTML = '';
-  roundNumber++;
-
-  // Difficulty upgrade
-  let newDiff = currentDifficulty;
-  if(roundNumber >= 11) newDiff = 'advanced';
-  else if(roundNumber >= 6) newDiff = 'intermediate';
-
-  if(newDiff !== currentDifficulty){
-    showLevelUp(newDiff, ()=>{ currentDifficulty = newDiff; nextRound(); });
-    return;
+  // --- Speech synthesis ---
+  function speak(text, cb) {
+    if (!voicesReady) { if(cb) cb(); return; }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.85; // slower for kids
+    utter.pitch = 1.1;
+    utter.onend = cb;
+    speechSynthesis.speak(utter);
   }
 
-  const modes = ['find','different','missing'];
-  const mode = modes[Math.floor(Math.random()*modes.length)];
-  if(mode==='find') startFindRound();
-  else if(mode==='different') startDifferentRound();
-  else startMissingRound();
-}
+  // --- Preload images ---
+  const loadedImages = {};
+  imageList.forEach(name => {
+    const img = new Image();
+    img.src = `image/${name}.png`;
+    loadedImages[name] = img;
+  });
 
-function showLevelUp(level, cb){
-  congratsEl.innerHTML = `🎉 Level Up! 🎉<br>You reached ${level}!`;
-  congratsEl.style.display = 'block';
-  for(let i=0;i<15;i++){
-    const s=document.createElement('div');
-    s.className='congrats-star'; s.textContent='⭐';
-    s.style.left = (Math.random()*window.innerWidth)+'px';
-    s.style.top = (window.innerHeight-20)+'px';
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(),2000);
+  // --- Game logic ---
+  const startBtn = document.getElementById("startBtn");
+  const game = document.getElementById("game");
+  const qEl = document.getElementById("question");
+  const optionsEl = document.getElementById("options");
+
+  startBtn.addEventListener("click", () => {
+    voicesReady = true;
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.onvoiceschanged = () => voicesReady = true;
+    }
+    startBtn.style.display = "none";
+    game.style.display = "flex";
+    nextRound();
+  });
+
+  function nextRound() {
+    optionsEl.innerHTML = "";
+
+    const modes = ["find","different","missing"];
+    currentMode = modes[Math.floor(Math.random() * modes.length)];
+
+    if (currentMode === "find") {
+      startFindRound();
+    } else if (currentMode === "different") {
+      startDifferentRound();
+    } else if (currentMode === "missing") {
+      startMissingRound();
+    }
   }
-  speak(`Congratulations! You reached ${level}`, ()=>{
-    congratsEl.style.display='none';
-    if(cb) cb();
-  });
-}
 
-function createAnswerTile(symbol,isCorrect){
-  const tile=document.createElement('div');
-  tile.className='option';
-  tile.innerHTML=`<div style="font-size:50px">${symbol}</div>`;
-  tile.onclick=()=>{
-    if(roundAnswered) return;
-    if(isCorrect){
-      roundAnswered=true;
-      score++; updateScore();
-      speak('Well done!', ()=> setTimeout(()=>nextRound(),500));
-    } else {
-      speak('Try again');
+  function startFindRound() {
+    const choices = shuffle([...imageList]).slice(0,4);
+    const target = choices[Math.floor(Math.random()*choices.length)];
+    lastAnswer = target;
+
+    qEl.textContent = `Find the ${target}`;
+    speak(`Can you find the ${target}?`);
+
+    choices.forEach(name => {
+      const div = document.createElement("div");
+      div.className = "option";
+      const img = document.createElement("img");
+      img.src = loadedImages[name].src;
+      div.appendChild(img);
+      div.onclick = () => {
+        if (name === target) {
+          addStars(div);
+          speak("Great job!", ()=> setTimeout(nextRound, 1200));
+        } else {
+          speak("Try again");
+        }
+      };
+      optionsEl.appendChild(div);
+    });
+  }
+
+  function startDifferentRound() {
+    const base = imageList[Math.floor(Math.random()*imageList.length)];
+    let odd;
+    do { odd = imageList[Math.floor(Math.random()*imageList.length)]; }
+    while (odd === base);
+
+    const options = [base, base, base, odd];
+    qEl.textContent = "Find the different one!";
+    speak("Which one is different?");
+
+    shuffle(options).forEach(name => {
+      const div = document.createElement("div");
+      div.className = "option";
+      const img = document.createElement("img");
+      img.src = loadedImages[name].src;
+      div.appendChild(img);
+      div.onclick = () => {
+        if (name === odd) {
+          addStars(div);
+          speak("Correct!", ()=> setTimeout(nextRound, 1200));
+        } else {
+          speak("Not that one");
+        }
+      };
+      optionsEl.appendChild(div);
+    });
+  }
+
+  function startMissingRound() {
+    const all = shuffle([...imageList]).slice(0,5);
+    const missing = all.pop();
+    qEl.textContent = "Which one is missing?";
+    speak("Which picture is missing?");
+
+    // First set (question images, with blank spot)
+    all.forEach(name => {
+      const div = document.createElement("div");
+      div.className = "option";
+      const img = document.createElement("img");
+      img.src = loadedImages[name].src;
+      div.appendChild(img);
+      optionsEl.appendChild(div);
+    });
+
+    // Second set (answers)
+    shuffle([missing, ...shuffle([...imageList]).slice(0,2)]).forEach(name => {
+      const div = document.createElement("div");
+      div.className = "option";
+      const img = document.createElement("img");
+      img.src = loadedImages[name].src;
+      div.appendChild(img);
+      div.onclick = () => {
+        if (name === missing) {
+          addStars(div);
+          speak("Well done!", ()=> setTimeout(nextRound, 1200));
+        } else {
+          speak("Nope, try again");
+        }
+      };
+      optionsEl.appendChild(div);
+    });
+  }
+
+  // --- Helpers ---
+  function shuffle(arr) {
+    return arr.sort(() => Math.random() - 0.5);
+  }
+
+  function addStars(target) {
+    for (let i=0;i<5;i++) {
+      const star = document.createElement("div");
+      star.className = "star-effect";
+      star.textContent = "⭐";
+      const rect = target.getBoundingClientRect();
+      star.style.left = rect.left + rect.width/2 + "px";
+      star.style.top = rect.top + rect.height/2 + "px";
+      document.body.appendChild(star);
+      setTimeout(()=>star.remove(),1000);
     }
-  };
-  return tile;
-}
-
-// --- Game Rounds ---
-function startFindRound(){
-  let numChoices = currentDifficulty==='beginner'?3:4;
-  const choices=shuffle(imageList).slice(0,numChoices);
-  const target=choices[Math.floor(Math.random()*choices.length)];
-  qEl.textContent=`Find the ${target}`;
-  speak(`Can you find the ${target}?`);
-  const ans=document.createElement('div'); ans.className='answer-container';
-  shuffle(choices).forEach(c=> ans.appendChild(createAnswerTile(c,c===target)));
-  optionsEl.appendChild(ans);
-}
-
-function startDifferentRound(){
-  let base=imageList[Math.floor(Math.random()*imageList.length)];
-  let odd; do{ odd=imageList[Math.floor(Math.random()*imageList.length)]; }while(odd===base);
-  let arr;
-  if(currentDifficulty==='beginner') arr=[base,odd,base]; 
-  else arr=shuffle([base,base,base,odd]);
-  qEl.textContent='Find the different one!';
-  speak('Which one is different?');
-  const ans=document.createElement('div'); ans.className='answer-container';
-  arr.forEach(c=> ans.appendChild(createAnswerTile(c,c===odd)));
-  optionsEl.appendChild(ans);
-}
-
-function startMissingRound(){
-  let numItems = currentDifficulty==='beginner'?3:6;
-  const selected=shuffle(imageList).slice(0,numItems);
-  const missingIndex=Math.floor(Math.random()*selected.length);
-  const missing=selected[missingIndex];
-  const itemsInGrid=selected.filter((_,i)=>i!==missingIndex);
-  qEl.textContent='Which picture is missing?';
-  speak('Which picture is missing?');
-
-  const qBox=document.createElement('div'); qBox.className='option-container';
-  selected.forEach((s,i)=>{
-    if(i===missingIndex){
-      const blank=document.createElement('div');
-      blank.className='blank'; qBox.appendChild(blank);
-    } else {
-      qBox.appendChild(createAnswerTile(s,false));
-    }
-  });
-  optionsEl.appendChild(qBox);
-
-  const wrong=shuffle(itemsInGrid).slice(0,2);
-  const choices=shuffle([missing,...wrong]);
-  const ans=document.createElement('div'); ans.className='answer-container';
-  choices.forEach(c=> ans.appendChild(createAnswerTile(c,c===missing)));
-  optionsEl.appendChild(ans);
-}
+  }
 </script>
 </body>
 </html>
