@@ -94,7 +94,7 @@ const shadowImages = ['image1.jpg','image2.jpg','image3.jpg','image4.jpg','image
 const memoryGame = document.getElementById('memory-game');
 const shadowGame = document.getElementById('shadow-game');
 
-// --- Create memory game ---
+// --- Memory Game ---
 function createMemoryGame() {
   const shuffled = [...memoryImages, ...memoryImages].sort(() => Math.random() - 0.5);
   shuffled.forEach(src => {
@@ -116,7 +116,7 @@ function createMemoryGame() {
   });
 }
 
-// --- Create shadow game ---
+// --- Shadow Game ---
 function createShadowGame() {
   shadowImages.forEach(src => {
     const option = document.createElement('div');
@@ -138,19 +138,18 @@ function createShadowGame() {
 }
 
 // --- Convert image to silhouette ---
-function convertToSilhouette(img) {
+function convertToSilhouette(img, width, height) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
+  canvas.width = width;
+  canvas.height = height;
+  ctx.drawImage(img, 0, 0, width, height);
 
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, width, height);
   const data = imageData.data;
 
   for (let i=0; i<data.length; i+=4){
-    const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+    const avg = (data[i] + data[i+1] + data[i+2])/3;
     const color = avg < 128 ? 0 : 255;
     data[i] = data[i+1] = data[i+2] = color;
   }
@@ -159,7 +158,7 @@ function convertToSilhouette(img) {
   return canvas.toDataURL();
 }
 
-// --- Handle clicks ---
+// --- Memory Click ---
 function handleMemoryClick(option){
   if(option.classList.contains('flipped') || option.classList.contains('matched')) return;
   option.classList.add('flipped');
@@ -171,22 +170,25 @@ function handleMemoryClick(option){
       first.classList.add('matched');
       second.classList.add('matched');
     }
-    setTimeout(()=>flipped.forEach(o=>o.classList.remove('flipped')), 1000);
+    setTimeout(()=>flipped.forEach(o=>o.classList.remove('flipped')),1000);
   }
 }
 
+// --- Shadow Click ---
 function handleShadowClick(option){
   if(option.classList.contains('flipped')) return;
   const img = option.querySelector('img');
+
   if(!img.complete){
-    img.onload = ()=> img.src = convertToSilhouette(img);
+    img.onload = ()=> img.src = convertToSilhouette(img, option.clientWidth, option.clientHeight);
   } else {
-    img.src = convertToSilhouette(img);
+    img.src = convertToSilhouette(img, option.clientWidth, option.clientHeight);
   }
+
   option.classList.add('flipped');
 }
 
-// --- Add event listeners ---
+// --- Event Listeners ---
 memoryGame.addEventListener('click', e=>{
   const opt = e.target.closest('.option');
   if(opt) handleMemoryClick(opt);
