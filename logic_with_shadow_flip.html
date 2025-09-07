@@ -17,7 +17,6 @@
     color: #fff;
   }
 
-  /* Start screen */
   #startScreen {
     display: flex;
     flex-direction: column;
@@ -52,7 +51,6 @@
     100% { box-shadow: 0 0 20px #ff9800; }
   }
 
-  /* Game */
   .game-container {
     display: none;
     width: 100%;
@@ -84,7 +82,6 @@
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
   }
 
-  /* containers */
   .option-container {
     border: 4px dashed #ffeb3b;
     border-radius: 22px;
@@ -109,17 +106,6 @@
     background: rgba(255, 255, 255, 0.12);
   }
 
-  /* labels */
-  .set-label {
-    font-size: 1.6rem;
-    font-weight: bold;
-    margin-top: 10px;
-    margin-bottom: 8px;
-    color: #ffeb3b;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
-  }
-
-  /* uniform option box */
   .option {
     width: 140px;
     height: 140px;
@@ -143,12 +129,8 @@
   .option:hover {
     transform: scale(1.08);
   }
-  .question-tile {
-    cursor: default;
-    pointer-events: none;
-  }
+  .question-tile { cursor: default; pointer-events: none; }
 
-  /* blank tile */
   .blank {
     background: #fafafa;
     display: flex;
@@ -159,7 +141,6 @@
     border: 3px dashed #9e9e9e;
   }
 
-  /* Exit button */
   #exitBtn {
     margin-top: 30px;
     padding: 16px 40px;
@@ -173,262 +154,120 @@
     box-shadow: 0 8px 25px rgba(229, 57, 53, 0.6);
     transition: transform 0.25s, background 0.25s;
   }
-  #exitBtn:hover {
-    background: linear-gradient(45deg, #e53935, #c62828);
-    transform: scale(1.05);
-  }
+  #exitBtn:hover { background: linear-gradient(45deg, #e53935, #c62828); transform: scale(1.05); }
 
-  /* responsive */
   @media (max-width: 600px) {
-    .option-container {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    .option {
-      width: 100px;
-      height: 100px;
-    }
-    .start-button {
-      font-size: 2.2rem;
-      padding: 20px 40px;
-    }
-    .set-label {
-      font-size: 1.3rem;
-    }
+    .option-container { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .option { width: 100px; height: 100px; }
+    .start-button { font-size: 2.2rem; padding: 20px 40px; }
   }
 </style>
 </head>
 <body>
 
-  <div id="startScreen">
-    <h1>🌟 Fun Learning Game 🌟</h1>
-    <button id="startBtn" class="start-button">▶ Start Game</button>
+<div id="startScreen">
+  <h1>🌟 Fun Learning Game 🌟</h1>
+  <button id="startBtn" class="start-button">▶ Start Game</button>
+</div>
+
+<div id="game" class="game-container" aria-live="polite">
+  <div class="top-bar">
+    <div id="question"></div>
+    <div id="score" class="score">Score: 0</div>
   </div>
+  <div id="options"></div>
+  <button id="exitBtn">⏹ Exit Game</button>
+</div>
 
-  <div id="game" class="game-container" aria-live="polite">
-    <div class="top-bar">
-      <div id="question"></div>
-      <div id="score" class="score">Score: 0</div>
-    </div>
+<div id="congrats" class="congrats"></div>
 
-    <div id="options"></div>
-
-    <button id="exitBtn">⏹ Exit Game</button>
-  </div>
-
-  <div id="congrats" class="congrats"></div>
-
-  <audio id="bgMusic" src="https://actions.google.com/sounds/v1/musical/melodious_tunes.ogg" loop></audio>
-  <audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-  <audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
-  <audio id="congratsMusic" src="https://actions.google.com/sounds/v1/cartoon/party_horn.ogg"></audio>
+<audio id="bgMusic" src="https://actions.google.com/sounds/v1/musical/melodious_tunes.ogg" loop></audio>
+<audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+<audio id="congratsMusic" src="https://actions.google.com/sounds/v1/cartoon/party_horn.ogg"></audio>
 
 <script>
-/* ---------- DATA ---------- */
 const imageList = ["apple","ball","banana","car","cat","cherry","dog","fish","flower","orange"];
-
-/* ---------- STATE + DOM ---------- */
 let currentMode = "find";
-let voicesReady = false;
-let score = 0;
-let waitingNextRound = false; 
-let roundAnswered = false;  
+let voicesReady=false, score=0, waitingNextRound=false, roundAnswered=false;
+const loadedImages={};
+const bgMusic=document.getElementById('bgMusic');
+const correctSound=document.getElementById('correctSound');
+const wrongSound=document.getElementById('wrongSound');
+const congratsMusic=document.getElementById('congratsMusic');
+const scoreEl=document.getElementById('score');
+const congratsEl=document.getElementById('congrats');
+const startBtn=document.getElementById('startBtn');
+const startScreen=document.getElementById('startScreen');
+const game=document.getElementById('game');
+const qEl=document.getElementById('question');
+const optionsEl=document.getElementById('options');
+const exitBtn=document.getElementById('exitBtn');
 
-const loadedImages = {};
-const bgMusic = document.getElementById('bgMusic');
-const correctSound = document.getElementById('correctSound');
-const wrongSound = document.getElementById('wrongSound');
-const congratsMusic = document.getElementById('congratsMusic');
-const scoreEl = document.getElementById('score');
-const congratsEl = document.getElementById('congrats');
-const startBtn = document.getElementById('startBtn');
-const startScreen = document.getElementById('startScreen');
-const game = document.getElementById('game');
-const qEl = document.getElementById('question');
-const optionsEl = document.getElementById('options');
-const exitBtn = document.getElementById('exitBtn');
+imageList.forEach(name=>{ const img=new Image(); img.src=`image/${name}.png`; loadedImages[name]=img; });
 
-/* preload images */
-imageList.forEach(name => { const img = new Image(); img.src = `image/${name}.png`; loadedImages[name] = img; });
-
-/* ---------- START / EXIT ---------- */
-startBtn.addEventListener('click', () => {
-  voicesReady = true;
-  try { bgMusic.play(); } catch(e) {}
-  startScreen.style.display = 'none';
-  game.style.display = 'block';
-  score = 0;
-  updateScore();
+startBtn.addEventListener('click',()=>{
+  voicesReady=true; try{bgMusic.play();}catch(e){}
+  startScreen.style.display='none';
+  game.style.display='block';
+  score=0; updateScore();
   nextRound();
 });
+exitBtn.addEventListener('click',()=>{ try{bgMusic.pause(); bgMusic.currentTime=0;}catch(e){} window.location.href='index.html'; });
 
-exitBtn.addEventListener('click', () => {
-  try { bgMusic.pause(); bgMusic.currentTime = 0; } catch(e) {}
-  window.location.href = 'index.html';
-});
+function speak(text,cb=null){ if(!voicesReady){ if(cb)setTimeout(cb,400); return; } const u=new SpeechSynthesisUtterance(text); u.rate=0.8; u.pitch=1.15; if(cb)u.onend=cb; speechSynthesis.speak(u); }
+function updateScore(){ scoreEl.textContent=`Score: ${score}`; }
 
-/* ---------- SPEECH ---------- */
-function speak(text, cb=null){
-  if(!voicesReady){ if(cb) setTimeout(cb, 400); return; }
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.8; u.pitch = 1.15;
-  if(cb) u.onend = cb;
-  speechSynthesis.speak(u);
-}
-
-/* ---------- SCORE ---------- */
-function updateScore(){
-  scoreEl.textContent = `Score: ${score}`;
-}
-
-/* ---------- UTIL ---------- */
 function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
 
-/* ---------- CORE FLOW ---------- */
-function nextRound(){
-  if(waitingNextRound) return;
-  roundAnswered = false;
-  optionsEl.innerHTML = '';
-  const modes = ['find','different','missing'];
-  currentMode = modes[Math.floor(Math.random()*modes.length)];
-  if(currentMode==='find') startFindRound();
-  else if(currentMode==='different') startDifferentRound();
-  else startMissingRound();
-}
+function nextRound(){ if(waitingNextRound) return; roundAnswered=false; optionsEl.innerHTML=''; const modes=['find','different','missing','memory','shadow']; currentMode=modes[Math.floor(Math.random()*modes.length)]; 
+if(currentMode==='find') startFindRound(); else if(currentMode==='different') startDifferentRound();
+else if(currentMode==='missing') startMissingRound(); else if(currentMode==='memory') startMemoryRound(); else startShadowRound(); }
 
-function createQuestionTile(name, parent){
-  const tile = document.createElement('div');
-  tile.className = 'option question-tile';
-  const img = document.createElement('img');
-  img.src = loadedImages[name].src;
-  img.alt = name;
-  tile.appendChild(img);
-  parent.appendChild(tile);
-}
+function createQuestionTile(name,parent){ const tile=document.createElement('div'); tile.className='option question-tile'; const img=document.createElement('img'); img.src=loadedImages[name].src; img.alt=name; tile.appendChild(img); parent.appendChild(tile); }
 
-/* ---------- Rounds ---------- */
-function startFindRound(){
-  const choices = shuffle(imageList).slice(0,4);
-  const target = choices[Math.floor(Math.random()*choices.length)];
-  qEl.textContent = `Find the ${target}`;
-  speak(`Can you find the ${target}?`);
-  const ansContainer = document.createElement('div');
-  ansContainer.className = 'answer-container';
-  shuffle(choices).forEach(name => {
-    const tile = document.createElement('div');
-    tile.className = 'option';
-    const img = document.createElement('img');
-    img.src = loadedImages[name].src;
-    img.alt = name;
-    tile.appendChild(img);
-    tile.onclick = () => {
-      if(name===target){
-        correctSound.play(); score++; updateScore();
-        speak('Well done!', ()=> setTimeout(nextRound, 800));
-      } else { wrongSound.play(); speak('Try again'); }
-    };
-    ansContainer.appendChild(tile);
-  });
-  optionsEl.appendChild(ansContainer);
-}
+function createAnswerTile(name,isCorrect,parent,blankDiv=null,missing=null){ const tile=document.createElement('div'); tile.className='option'; tile.dataset.correct=isCorrect?'1':'0'; const img=document.createElement('img'); img.src=loadedImages[name].src; img.alt=name; tile.appendChild(img); 
+tile.addEventListener('click',()=>{ if(roundAnswered) return; const correct=tile.dataset.correct==='1'; 
+if(correct){ roundAnswered=true; try{correctSound.currentTime=0; correctSound.play();}catch(e){} score++; updateScore();
+if(blankDiv && missing){ blankDiv.innerHTML=''; const im=document.createElement('img'); im.src=loadedImages[missing].src; im.alt=missing; blankDiv.appendChild(im); }
+speak('Well done!',()=>setTimeout(()=>nextRound(),500)); } else { try{wrongSound.currentTime=0; wrongSound.play();}catch(e){} speak('Try again'); } }); 
+parent.appendChild(tile); }
 
-function startDifferentRound(){
-  const base = imageList[Math.floor(Math.random()*imageList.length)];
-  let odd;
-  do{ odd = imageList[Math.floor(Math.random()*imageList.length)]; } while(odd === base);
-  qEl.textContent = 'Find the different one!';
-  speak('Which one is different?');
-  const arr = shuffle([base, base, base, odd]);
-  const ansContainer = document.createElement('div');
-  ansContainer.className = 'answer-container';
-  arr.forEach(name => {
-    const tile = document.createElement('div');
-    tile.className = 'option';
-    const img = document.createElement('img');
-    img.src = loadedImages[name].src;
-    img.alt = name;
-    tile.appendChild(img);
-    tile.onclick = () => {
-      if(name===odd){ correctSound.play(); score++; updateScore(); speak('Well done!', ()=> setTimeout(nextRound, 800)); }
-      else { wrongSound.play(); speak('Try again'); }
-    };
-    ansContainer.appendChild(tile);
-  });
-  optionsEl.appendChild(ansContainer);
-}
+function startFindRound(){ const choices=shuffle(imageList).slice(0,4); const target=choices[Math.floor(Math.random()*choices.length)]; qEl.textContent=`Find the ${target}`; speak(`Can you find the ${target}?`);
+const ansContainer=document.createElement('div'); ansContainer.className='answer-container'; shuffle(choices).forEach(name=>createAnswerTile(name,name===target,ansContainer)); optionsEl.appendChild(ansContainer); }
 
-function startMissingRound() {
-  // pick 6 distinct items and choose one to be missing
-  const selected = shuffle([...imageList]).slice(0, 6);
-  const missingIndex = Math.floor(Math.random() * selected.length);
-  const missing = selected[missingIndex];
+function startDifferentRound(){ const base=imageList[Math.floor(Math.random()*imageList.length)]; let odd; do{ odd=imageList[Math.floor(Math.random()*imageList.length)]; }while(odd===base); qEl.textContent='Find the different one!'; speak('Which one is different?');
+const arr=shuffle([base,base,base,odd]); const ansContainer=document.createElement('div'); ansContainer.className='answer-container'; arr.forEach(name=>createAnswerTile(name,name===odd,ansContainer)); optionsEl.appendChild(ansContainer); }
 
-  qEl.textContent = 'Which picture is missing?';
-  speak('Which picture is missing?');
+function startMissingRound(){ const selected=shuffle(imageList).slice(0,6); const missingIndex=Math.floor(Math.random()*selected.length); const missing=selected[missingIndex]; const itemsInGrid=selected.filter((_,idx)=>idx!==missingIndex); qEl.textContent='Which picture is missing?'; speak('Which picture is missing?');
+const questionContainer=document.createElement('div'); questionContainer.className='option-container'; let blankDiv=null;
+selected.forEach((name,idx)=>{ if(idx===missingIndex){ blankDiv=document.createElement('div'); blankDiv.className='option blank'; questionContainer.appendChild(blankDiv); } else { createQuestionTile(name,questionContainer); } });
+optionsEl.appendChild(questionContainer);
 
-  // Label for question set
-  const qLabel = document.createElement('div');
-  qLabel.className = 'set-label';
-  qLabel.textContent = 'Question';
-  optionsEl.appendChild(qLabel);
+const wrongOptions=shuffle(itemsInGrid).slice(0,2); 
+const answerChoices=shuffle([missing,...wrongOptions]);
+const answerContainer=document.createElement('div'); answerContainer.className='answer-container';
+answerChoices.forEach(name=>createAnswerTile(name,name===missing,answerContainer,blankDiv,missing));
+optionsEl.appendChild(answerContainer); }
 
-  // QUESTION GRID (2 rows x 3 columns)
-  const questionContainer = document.createElement('div');
-  questionContainer.className = 'option-container';
+function startMemoryRound(){ qEl.textContent='Match the pair!'; speak('Can you match the pair?'); const pairImages=shuffle(imageList).slice(0,2); const cards=shuffle([...pairImages,...pairImages]);
+const container=document.createElement('div'); container.className='option-container';
+let first=null, second=null;
+cards.forEach(name=>{ const tile=document.createElement('div'); tile.className='option'; const img=document.createElement('img'); img.src=loadedImages[name].src; img.alt=name; img.style.visibility='hidden'; tile.appendChild(img); tile.dataset.name=name;
+tile.addEventListener('click',()=>{ if(img.style.visibility==='visible') return; img.style.visibility='visible';
+if(!first){ first={tile,img,name}; } else { second={tile,img,name}; 
+if(first.name===second.name){ first=null; second=null; score++; updateScore(); } else { setTimeout(()=>{ first.img.style.visibility='hidden'; second.img.style.visibility='hidden'; first=null; second=null; },700); } } });
+container.appendChild(tile); });
+optionsEl.appendChild(container); }
 
-  let blankDiv = null;
-  selected.forEach((name, idx) => {
-    if (idx === missingIndex) {
-      blankDiv = document.createElement('div');
-      blankDiv.className = 'option blank';
-      questionContainer.appendChild(blankDiv);
-    } else {
-      createQuestionTile(name, questionContainer);
-    }
-  });
-  optionsEl.appendChild(questionContainer);
-
-  // Label for answer set
-  const aLabel = document.createElement('div');
-  aLabel.className = 'set-label';
-  aLabel.textContent = 'Choose the missing picture';
-  optionsEl.appendChild(aLabel);
-
-  // ANSWER CHOICES
-  const itemsInGrid = selected.filter((_, idx) => idx !== missingIndex);
-  const wrongOptions = shuffle(itemsInGrid).slice(0, 2);
-  const answerChoices = shuffle([missing, ...wrongOptions]);
-
-  const answerContainer = document.createElement('div');
-  answerContainer.className = 'answer-container';
-  answerChoices.forEach(name => {
-    const aTile = document.createElement('div');
-    aTile.className = 'option';
-    const aImg = document.createElement('img');
-    aImg.src = loadedImages[name].src;
-    aImg.alt = name;
-    aTile.appendChild(aImg);
-
-    aTile.onclick = () => {
-      if (name === missing) {
-        correctSound.play(); score++; updateScore();
-        if (blankDiv) {
-          blankDiv.innerHTML = '';
-          const im = document.createElement('img');
-          im.src = loadedImages[missing].src;
-          im.alt = missing;
-          blankDiv.appendChild(im);
-        }
-        speak('Well done!', () => setTimeout(nextRound, 1200));
-      } else {
-        wrongSound.play(); speak('Try again');
-      }
-    };
-
-    answerContainer.appendChild(aTile);
-  });
-  optionsEl.appendChild(answerContainer);
-}
+function startShadowRound(){ qEl.textContent='Find the shadow!'; speak('Can you find the shadow?'); const target=imageList[Math.floor(Math.random()*imageList.length)];
+const shadowContainer=document.createElement('div'); shadowContainer.className='option-container';
+const options=[target,...shuffle(imageList.filter(x=>x!==target)).slice(0,2)]; shuffle(options).forEach(name=>{
+const tile=document.createElement('div'); tile.className='option'; tile.dataset.correct=name===target?'1':'0'; const img=document.createElement('img'); img.src=loadedImages[name].src; img.alt=name; tile.appendChild(img);
+tile.addEventListener('click',()=>{ if(roundAnswered) return; const correct=tile.dataset.correct==='1'; if(correct){ roundAnswered=true; score++; updateScore(); try{correctSound.currentTime=0; correctSound.play();}catch(e){} speak('Well done!',()=>setTimeout(()=>nextRound(),500)); } else { try{wrongSound.currentTime=0; wrongSound.play();}catch(e){} speak('Try again'); } });
+shadowContainer.appendChild(tile); });
+optionsEl.appendChild(shadowContainer); }
 </script>
+
 </body>
 </html>
