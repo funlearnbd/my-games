@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Kids Learning Game</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  body {
+    margin: 0;
+    font-family: "Comic Sans MS", Arial, sans-serif;
+    background: linear-gradient(135deg, #a8c0ff, #3f2b96);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #fff;
+  }
+
+  #startScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  #startScreen h1 {
+    font-size: 3.8rem;
+    color: #ffeb3b;
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5);
+    margin-bottom: 40px;
+  }
+  .start-button {
+    font-size: 3rem;
+    padding: 28px 70px;
+    border-radius: 60px;
+    border: none;
+    background: linear-gradient(45deg, #ff4081, #ff9800, #ffeb3b);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 12px 35px rgba(255, 140, 0, 0.6);
+    animation: pulse 2s infinite ease-in-out;
+    transition: transform 0.25s;
+  }
+  .start-button:hover { transform: scale(1.1) rotate(-1deg); }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 20px #ff4081; }
+    50% { box-shadow: 0 0 40px #ffeb3b; }
+    100% { box-shadow: 0 0 20px #ff9800; }
+  }
+
+  .game-container {
+    display: none;
+    width: 100%;
+    max-width: 850px;
+    padding: 24px;
+    box-sizing: border-box;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.35);
+  }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    font-size: 1.8rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  #question {
+    font-size: 2rem;
+    color: #fff;
+    margin: 12px auto;
+  }
+  .score {
+    font-size: 1.6rem;
+    color: #ffeb3b;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .option-container {
+    border: 4px dashed #ffeb3b;
+    border-radius: 22px;
+    padding: 20px;
+    margin: 25px 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    justify-items: center;
+    align-items: center;
+  }
+  .answer-container {
+    border: 4px dashed #4caf50;
+    border-radius: 22px;
+    padding: 20px;
+    margin-top: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .option {
+    width: 140px;
+    height: 140px;
+    border-radius: 25px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .option img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+  }
+  .option:hover { transform: scale(1.08); }
+  .question-tile { cursor: default; pointer-events: none; }
+
+  .blank {
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #666;
+    border: 3px dashed #9e9e9e;
+  }
+
+  #exitBtn {
+    margin-top: 30px;
+    padding: 16px 40px;
+    border-radius: 40px;
+    border: none;
+    background: linear-gradient(45deg, #ff1744, #e53935);
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(229, 57, 53, 0.6);
+    transition: transform 0.25s, background 0.25s;
+  }
+  #exitBtn:hover { background: linear-gradient(45deg, #e53935, #c62828); transform: scale(1.05); }
+
+  #fireworksCanvas {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 999;
+    pointer-events: none;
+  }
+  #congratsText {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ffeb3b;
+    text-shadow: 0 0 20px #ff4081, 0 0 40px #ff9800;
+    display: none;
+    z-index: 1000;
+    animation: popScale 1.2s infinite alternate;
+  }
+  @keyframes popScale {
+    from { transform: translate(-50%, -50%) scale(1); }
+    to { transform: translate(-50%, -50%) scale(1.2); }
+  }
+
+  @media (max-width: 600px) {
+    .option-container { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .option { width: 110px; height: 110px; }
+    .start-button { font-size: 2.2rem; padding: 20px 40px; }
+  }
+</style>
+</head>
+<body>
+  <div id="startScreen">
+    <h1>🌟 Fun Learning Game 🌟</h1>
+    <button id="startBtn" class="start-button">▶ Start Game</button>
+  </div>
+
+  <div id="game" class="game-container" aria-live="polite">
+    <div class="top-bar">
+      <div id="question"></div>
+      <div id="score" class="score">Score: 0</div>
+    </div>
+    <div id="options"></div>
+    <button id="exitBtn">⏹ Exit Game</button>
+  </div>
+
+  <canvas id="fireworksCanvas"></canvas>
+  <div id="congratsText">🎉 Congratulations 🎉</div>
+
+  <audio id="bgMusic" src="https://actions.google.com/sounds/v1/musical/melodious_tunes.ogg" loop></audio>
+  <audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="congratsMusic" src="https://actions.google.com/sounds/v1/cartoon/party_horn.ogg"></audio>
+
+<script>
+const imageList = ["apple","ball","banana","car","cat","cherry","dog","fish","flower","orange"];
+
+let currentMode = "find";
+let voicesReady = false;
+let score = 0;
+let waitingNextRound = false;
+let roundAnswered = false;
+
+const loadedImages = {};
+const bgMusic = document.getElementById('bgMusic');
+const correctSound = document.getElementById('correctSound');
+const wrongSound = document.getElementById('wrongSound');
+const congratsMusic = document.getElementById('congratsMusic');
+const scoreEl = document.getElementById('score');
+const startBtn = document.getElementById('startBtn');
+const startScreen = document.getElementById('startScreen');
+const game = document.getElementById('game');
+const qEl = document.getElementById('question');
+const optionsEl = document.getElementById('options');
+const exitBtn = document.getElementById('exitBtn');
+const fireworksCanvas = document.getElementById('fireworksCanvas');
+const congratsText = document.getElementById('congratsText');
+
+imageList.forEach(name => { const img = new Image(); img.src = `image/${name}.png`; loadedImages[name] = img; });
+
+startBtn.addEventListener('click', () => {
+  voicesReady = true;
+  try { bgMusic.play(); } catch(e) {}
+  startScreen.style.display = 'none';
+  game.style.display = 'block';
+  score = 0;
+  updateScore();
+  nextRound();
+});
+exitBtn.addEventListener('click', () => {
+  try { bgMusic.pause(); bgMusic.currentTime = 0; } catch(e) {}
+  window.location.href = 'index.html';
+});
+
+function speak(text, cb=null){
+  if(!voicesReady){ if(cb) setTimeout(cb, 400); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.8; u.pitch = 1.15;
+  if(cb) u.onend = cb;
+  speechSynthesis.speak(u);
+}
+function updateScore(){ scoreEl.textContent = `Score: ${score}`; }
+function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+
+function nextRound(){
+  if(waitingNextRound) return;
+  roundAnswered = false;
+  optionsEl.innerHTML = '';
+  const modes = ['find','different','missing','memory','shadow'];
+  currentMode = modes[Math.floor(Math.random()*modes.length)];
+  if(currentMode==='find') startFindRound();
+  else if(currentMode==='different') startDifferentRound();
+  else if(currentMode==='missing') startMissingRound();
+  else if(currentMode==='memory') startMemoryRound();
+  else startShadowRound();
+}
+
+function createQuestionTile(name, parent){
+  const tile = document.createElement('div');
+  tile.className = 'option question-tile';
+  const img = document.createElement('img');
+  img.src = loadedImages[name].src; img.alt = name;
+  tile.appendChild(img);
+  parent.appendChild(tile);
+}
+
+function createAnswerTile(name, isCorrect, parent, blankDiv=null, missing=null){
+  const tile = document.createElement('div');
+  tile.className = 'option';
+  tile.dataset.correct = isCorrect ? '1' : '0';
+  const img = document.createElement('img');
+  img.src = loadedImages[name].src; img.alt = name;
+  tile.appendChild(img);
+  tile.addEventListener('click', ()=>{
+    if(roundAnswered) return;
+    const correct = tile.dataset.correct === '1';
+    if(correct){
+      roundAnswered = true;
+      try{ correctSound.currentTime = 0; correctSound.play(); }catch(e){}
+      score++; updateScore();
+      if(blankDiv && missing){
+        blankDiv.innerHTML = '';
+        const im = document.createElement('img');
+        im.src = loadedImages[missing].src; im.alt = missing;
+        blankDiv.appendChild(im);
+      }
+      speak('Well done!', ()=> {
+        if(score>0 && score%10===0){ showCongrats(()=> nextRound()); }
+        else setTimeout(()=> nextRound(), 500);
+      });
+    } else {
+      try{ wrongSound.currentTime = 0; wrongSound.play(); }catch(e){}
+      speak('Try again');
+    }
+  });
+  parent.appendChild(tile);
+}
+
+function startFindRound(){
+  const choices = shuffle(imageList).slice(0,4);
+  const target = choices[Math.floor(Math.random()*choices.length)];
+  qEl.textContent = `Find the ${target}`;
+  speak(`Can you find the ${target}?`);
+  const ansContainer = document.createElement('div');
+  ansContainer.className = 'answer-container';
+  shuffle(choices).forEach(name => createAnswerTile(name, name===target, ansContainer));
+  optionsEl.appendChild(ansContainer);
+}
+
+function startDifferentRound(){
+  const base = imageList[Math.floor(Math.random()*imageList.length)];
+  let odd; do{ odd = imageList[Math.floor(Math.random()*imageList.length)]; } while(odd===base);
+  qEl.textContent = 'Find the different one!';
+  speak('Which one is different?');
+  const arr = shuffle([base, base, base, odd]);
+  const ansContainer = document.createElement('div');
+  ansContainer.className = 'answer-container';
+  arr.forEach(name => createAnswerTile(name, name===odd, ansContainer));
+  optionsEl.appendChild(ansContainer);
+}
+
+function startMissingRound(){
+  const selected = shuffle(imageList).slice(0, 6);
+  const missingIndex = Math.floor(Math.random()*selected.length);
+  const missing = selected[missingIndex];
+  const itemsInGrid = selected.filter((_, idx) => idx !== missingIndex);
+  qEl.textContent = 'Which picture is missing?';
+  speak('Which picture is missing?');
+  const questionContainer = document.createElement('div');
+  questionContainer.className = 'option-container';
+  let blankDiv = null;
+  selected.forEach((name, idx) => {
+    if(idx===missingIndex){
+      blankDiv = document.createElement('div');
+      blankDiv.className = 'option blank';
+      questionContainer.appendChild(blankDiv);
+    } else createQuestionTile(name, questionContainer);
+  });
+  optionsEl.appendChild(questionContainer);
+  const wrongOptions = shuffle(itemsInGrid).slice(0,2);
+  const answerChoices = shuffle([missing, ...wrongOptions]);
+  const answerContainer = document.createElement('div');
+  answerContainer.className = 'answer-container';
+  answerChoices.forEach(name => createAnswerTile(name, name===missing, answerContainer, blankDiv, missing));
+  optionsEl.appendChild(answerContainer);
+}
+
+/* -------- Memory Game -------- */
+function startMemoryRound(){
+  qEl.textContent = 'Match all the pairs!';
+  speak('Can you match all the pairs?');
+  const selected = shuffle(imageList).slice(0,3);
+  const pairList = shuffle([...selected, ...selected]);
+  const grid = document.createElement('div');
+  grid.className = 'option-container';
+  optionsEl.appendChild(grid);
+  let first=null, second=null, lock=false, matched=0;
+  pairList.forEach(name=>{
+    const tile=document.createElement('div');
+    tile.className='option';
+    tile.textContent='❓';
+    tile.dataset.name=name;
+    tile.addEventListener('click',()=>{
+      if(lock || tile.classList.contains('matched') || tile===first) return;
+      tile.innerHTML=`<img src="${loadedImages[name].src}" alt="${name}">`;
+      if(!first){ first=tile; }
+      else { second=tile; lock=true;
+        if(first.dataset.name===second.dataset.name){
+          first.classList.add('matched'); second.classList.add('matched');
+          first=null; second=null; lock=false; matched++;
+          if(matched===selected.length){
+            roundAnswered=true; score++; updateScore();
+            speak('Well done!', ()=> {
+              if(score>0 && score%10===0){ showCongrats(()=> nextRound()); }
+              else setTimeout(()=> nextRound(),500);
+            });
+          }
+        } else {
+          setTimeout(()=>{
+            first.textContent='❓'; second.textContent='❓';
+            first=null; second=null; lock=false;
+          },1000);
+        }
+      }
+    });
+    grid.appendChild(tile);
+  });
+}
+
+/* -------- Shadow Game -------- */
+function startShadowRound(){
+  const target=imageList[Math.floor(Math.random()*imageList.length)];
+  let distractors=shuffle(imageList.filter(n=>n!==target)).slice(0,2);
+  let answerChoices=shuffle([target,...distractors]);
+  qEl.textContent=`Find the shadow of ${target}`;
+  speak(`Find the shadow of the ${target}`);
+  const qContainer=document.createElement('div');
+  qContainer.className='option-container';
+  createQuestionTile(target,qContainer);
+  optionsEl.appendChild(qContainer);
+  const aContainer=document.createElement('div');
+  aContainer.className='answer-container';
+  answerChoices.forEach(name=>{
+    const tile=document.createElement('div');
+    tile.className='option';
+    const img=document.createElement('img');
+    img.src=loadedImages[name].src; img.alt=name;
+    img.style.filter='brightness(0) saturate(100%)';
+    tile.appendChild(img);
+    tile.addEventListener('click',()=>{
+      if(roundAnswered) return;
+      if(name===target){
+        roundAnswered=true;
+        try{ correctSound.currentTime=0; correctSound.play(); }catch(e){}
+        score++; updateScore();
+        speak('Well done!',()=> {
+          if(score>0 && score%10===0){ showCongrats(()=> nextRound()); }
+          else setTimeout(()=> nextRound(),500);
+        });
+      } else {
+        try{ wrongSound.currentTime=0; wrongSound.play(); }catch(e){}
+        speak('Try again');
+      }
+    });
+    aContainer.appendChild(tile);
+  });
+  optionsEl.appendChild(aContainer);
+}
+
+/* -------- Celebration -------- */
+function showCongrats(cb){
+  fireworksCanvas.style.display='block';
+  congratsText.style.display='block';
+  congratsMusic.currentTime=0; congratsMusic.play();
+  speak('Congratulations!');
+  const ctx=fireworksCanvas.getContext('2d');
+  fireworksCanvas.width=window.innerWidth;
+  fireworksCanvas.height=window.innerHeight;
+  let particles=[];
+  function spawn(x,y){
+    for(let i=0;i<80;i++){
+      const angle=Math.random()*2*Math.PI;
+      const speed=Math.random()*5+2;
+      particles.push({
+        x,y,
+        vx:Math.cos(angle)*speed,
+        vy:Math.sin(angle)*speed,
+        life:100,
+        color:`hsl(${Math.random()*360},100%,50%)`
+      });
+    }
+  }
+  spawn(fireworksCanvas.width/2, fireworksCanvas.height/2);
+  function animate(){
+    ctx.clearRect(0,0,fireworksCanvas.width,fireworksCanvas.height);
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,2,0,2*Math.PI);
+      ctx.fillStyle=p.color; ctx.fill();
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.05;
+      p.life--;
+    });
+    particles=particles.filter(p=>p.life>0);
+    if(particles.length>0){ requestAnimationFrame(animate); }
+  }
+  animate();
+  setTimeout(()=>{
+    fireworksCanvas.style.display='none';
+    congratsText.style.display='none';
+    if(cb) cb();
+  },5000);
+}
+</script>
+</body>
+</html>
