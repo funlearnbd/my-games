@@ -333,9 +333,11 @@ function startDifferentRound(){
 function startMissingRound(){
   // 1) pick 6 unique items
   const selected = shuffle(imageList).slice(0,6);
+
   // 2) pick exactly 1 missing from selected
   const missingIndex = Math.floor(Math.random() * selected.length);
   const missing = selected[missingIndex];
+  // Get the items that are in the grid, excluding the missing one.
   const itemsInGrid = selected.filter((_, idx) => idx !== missingIndex);
 
   qEl.textContent = 'Which picture is missing?';
