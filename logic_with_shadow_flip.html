@@ -1,1 +1,390 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Memory & Shadow Games</title> <style> body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f4f9; } .game-container { display: flex; flex-direction: column; align-items: center; gap: 20px; } .game-container h1 { margin: 0; font-size: 2rem; color: #333; } .game-container .options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; justify-items: center; } .game-container .option { width: 100px; height: 100px; position: relative; overflow: hidden; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.3s; } .game-container .option img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; } .game-container .option.flipped img { opacity: 0; } .game-container .option.matched { transform: scale(1.1); box-shadow: 0 6px 8px rgba(0, 255, 0, 0.3); } .game-container .option-back { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #333; color: white; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; opacity: 0; transition: opacity 0.3s; } .game-container .option.flipped .option-back { opacity: 1; } .game-container .option.matched .option-back { background-color: green; } </style> </head> <body> <div class="game-container"> <h1>Memory & Shadow Games</h1> <div class="options" id="memory-game"> <!-- Memory game options will be injected here --> </div> <div class="options" id="shadow-game"> <!-- Shadow game options will be injected here --> </div> </div> <script> const memoryImages = [ 'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg', 'image6.jpg' ]; const shadowImages = [ 'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg', 'image6.jpg' ]; const memoryGame = document.getElementById('memory-game'); const shadowGame = document.getElementById('shadow-game'); function createMemoryGame() { const shuffledImages = [...memoryImages, ...memoryImages] .sort(() => Math.random() - 0.5); shuffledImages.forEach(src => { const option = document.createElement('div'); option.classList.add('option'); option.dataset.name = src; const img = document.createElement('img'); img.src = src; img.alt = src; const optionBack = document.createElement('div'); optionBack.classList.add('option-back'); optionBack.textContent = '?'; option.appendChild(img); option.appendChild(optionBack); memoryGame.appendChild(option); }); } function createShadowGame() { shadowImages.forEach(src => { const option = document.createElement('div'); option.classList.add('option'); option.dataset.name = src; const img = document.createElement('img'); img.src = src; img.alt = src; const optionBack = document.createElement('div'); optionBack.classList.add('option-back'); optionBack.textContent = '?'; option.appendChild(img); option.appendChild(optionBack); shadowGame.appendChild(option); }); } function convertToSilhouette(img) { const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); canvas.width = img.width; canvas.height = img.height; ctx.drawImage(img, 0, 0); const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height); const data = imageData.data; for (let i = 0; i < data.length; i += 4) { const avg = (data[i] + data[i + 1] + data[i + 2]) / 3; const threshold = 128; const color = avg < threshold ? 0 : 255; data[i] = data[i + 1] = data[i + 2] = color; } ctx.putImageData(imageData, 0, 0); return canvas.toDataURL(); } function handleMemoryClick(event) { const option = event.currentTarget; if (option.classList.contains('flipped') || option.classList.contains('matched')) { return; } option.classList.add('flipped'); const flippedOptions = document.querySelectorAll('.option.flipped'); if (flippedOptions.length === 2) { const [first, second] = flippedOptions; if (first.dataset.name === second.dataset.name) { first.classList.add('matched'); second.classList.add('matched'); } setTimeout(() => { flippedOptions.forEach(opt => opt.classList.remove('flipped')); }, 1000); } } function handleShadowClick(event) { const option = event.currentTarget; if (option.classList.contains('flipped')) { return; } option.classList.add('flipped'); const img = option.querySelector('img'); const silhouette = convertToSilhouette(img); img.src = silhouette; } memoryGame.addEventListener('click', event => { if (event.target.closest('.option')) { handleMemoryClick(event); } }); shadowGame.addEventListener('click', event => { if (event.target.closest('.option')) { handleShadowClick(event); } }); createMemoryGame(); createShadowGame(); </script> </body> </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Kids Learning Game</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  body{
+    margin:0;
+    font-family: "Comic Sans MS", Arial, sans-serif;
+    background: linear-gradient(135deg,#ffecd2,#fcb69f);
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  /* Start screen */
+  #startScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  #startScreen h1{font-size:3rem;color:#ff4081;text-shadow:2px 2px 5px rgba(0,0,0,.3);margin-bottom:28px;}
+  .start-button{font-size:2.5rem;padding:18px 40px;border-radius:48px;border:none;background:linear-gradient(45deg,gold,orange);color:#fff;cursor:pointer;box-shadow:0 0 28px gold;animation:glow 1.5s infinite alternate}
+  @keyframes glow{from{box-shadow:0 0 20px gold}to{box-shadow:0 0 48px orange}}
+
+  /* Game */
+  .game-container{display:none; width:100%; max-width:760px; padding:16px; box-sizing:border-box; text-align:center}
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  #question{font-size:1.6rem; color:#333; margin:6px auto}
+  .score{font-size:1.3rem;color:#2e7d32;font-weight:700}
+
+  /* containers */
+  .option-container{
+    border:4px dashed #ff9800;
+    border-radius:16px;
+    padding:14px;
+    margin:22px 0;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:180px;
+    gap:14px;
+    background: rgba(255,255,255,0.12);
+    justify-items:center;
+    align-items:center;
+  }
+
+  /* answers container: smaller rows if fewer items */
+  .answer-container{
+    border:4px dashed #42a5f5;
+    border-radius:16px;
+    padding:14px;
+    margin-top:28px;
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .option{
+    width:100%;
+    height:100%;
+    max-width:180px;
+    max-height:180px;
+    border-radius:20px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 14px rgba(0,0,0,0.18);
+    transition: transform .18s, box-shadow .18s;
+    cursor:pointer;
+    user-select:none;
+    position:relative;
+    overflow:hidden;
+  }
+  .option img{max-width:95%; max-height:95%}
+  .option:hover{transform:scale(1.06)}
+  .question-tile{cursor:default; pointer-events:none} /* question tiles not clickable */
+
+  .blank{background:#f0f0f0; display:flex; align-items:center; justify-content:center; font-size:2.4rem; color:#666}
+  .blank:empty{font-size:2.6rem; color:#888; opacity:0.9}
+  .shine{animation:shineAnim .9s ease-out forwards}
+  @keyframes shineAnim{
+    0%{transform:scale(.6); opacity:0}
+    60%{transform:scale(1.12); opacity:1}
+    100%{transform:scale(1); box-shadow:0 0 20px gold}
+  }
+
+  .star-effect{ position:absolute; pointer-events:none; font-size:1.6rem; animation:starFloat 1s ease-out forwards }
+  @keyframes starFloat{from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0; transform:translateY(-60px) scale(1.8)}}
+
+  /* congrats */
+  .congrats{ position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); background:linear-gradient(135deg,#ffeb3b,#ff9800); padding:36px 48px; border-radius:20px; font-size:2rem; color:#fff; text-align:center; box-shadow:0 0 50px rgba(255,140,0,.8); z-index:2000; display:none; overflow:visible}
+  .congrats-star{ position:absolute; font-size:1.6rem; color:gold; animation:starFly 2s forwards }
+  @keyframes starFly{0%{transform:translateY(120px) scale(.5); opacity:0}50%{opacity:1; transform:translateY(-20px) scale(1.2)}100%{transform:translateY(-160px) scale(1); opacity:0}}
+
+  /* exit */
+  #exitBtn{ margin-top:12px; padding:8px 20px; border-radius:14px; border:none; background:#e53935; color:#fff; font-size:1rem; cursor:pointer }
+  /* responsive */
+  @media(max-width:480px){
+    .option-container{ grid-auto-rows:140px; gap:10px; padding:10px }
+    .option{max-width:140px; max-height:140px}
+    .answer-container{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+
+  <div id="startScreen">
+    <h1>🌟 Fun Learning Game 🌟</h1>
+    <button id="startBtn" class="start-button">▶ Start Game</button>
+  </div>
+
+  <div id="game" class="game-container" aria-live="polite">
+    <div class="top-bar">
+      <div id="question"></div>
+      <div id="score" class="score">Score: 0</div>
+    </div>
+
+        <div id="options"></div>
+
+    <button id="exitBtn">Exit Game</button>
+  </div>
+
+  <div id="congrats" class="congrats"></div>
+
+    <audio id="correctSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="wrongSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="congratsMusic" src="https://actions.google.com/sounds/v1/cartoon/party_horn.ogg"></audio>
+
+<script>
+/* ---------- DATA ---------- */
+const imageList = ["apple","ball","banana","car","cat","cherry","dog","fish","flower","orange"];
+
+/* ---------- STATE + DOM ---------- */
+let currentMode = "find";
+let voicesReady = false;
+let score = 0;
+let waitingNextRound = false; // when congrats playing
+let roundAnswered = false;    // prevents multiple fills in same round
+
+const loadedImages = {};
+const correctSound = document.getElementById('correctSound');
+const wrongSound = document.getElementById('wrongSound');
+const congratsMusic = document.getElementById('congratsMusic');
+const scoreEl = document.getElementById('score');
+const congratsEl = document.getElementById('congrats');
+const startBtn = document.getElementById('startBtn');
+const startScreen = document.getElementById('startScreen');
+const game = document.getElementById('game');
+const qEl = document.getElementById('question');
+const optionsEl = document.getElementById('options');
+const exitBtn = document.getElementById('exitBtn');
+
+/* preload images (so images show quickly) */
+imageList.forEach(name => { const img = new Image(); img.src = `image/${name}.png`; loadedImages[name] = img; });
+
+/* ---------- START / EXIT ---------- */
+startBtn.addEventListener('click', () => {
+  // allow speech after user gesture
+  voicesReady = true;
+  startScreen.style.display = 'none';
+  game.style.display = 'block';
+  score = 0;
+  updateScore();
+  nextRound();
+});
+
+exitBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+/* ---------- SPEECH HELPERS ---------- */
+function speak(text, cb=null){
+  if(!voicesReady){ if(cb) setTimeout(cb, 400); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.8; u.pitch = 1.15;
+  if(cb) u.onend = cb;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- SCORE / CONGRATS ---------- */
+function updateScore(){
+  scoreEl.textContent = `Score: ${score}`;
+  if(score>0 && score % 10 === 0 && !waitingNextRound){
+    showCongratsPopup(score);
+  }
+}
+
+function showCongratsPopup(scoreVal){
+  waitingNextRound = true;
+  congratsEl.innerHTML = `🎉 Congratulations! 🎉<br>You got ${scoreVal} points!`;
+  congratsEl.style.display = 'block';
+  // play music if allowed
+  try{ congratsMusic.currentTime = 0; congratsMusic.play(); }catch(e){}
+  // create stars
+  for(let i=0;i<18;i++){
+    const s = document.createElement('div');
+    s.className = 'congrats-star';
+    s.style.left = (20 + Math.random()*(window.innerWidth-40)) + 'px';
+    s.style.top = (window.innerHeight + 20) + 'px';
+    congratsEl.appendChild(s);
+    setTimeout(()=>s.remove(),2200);
+  }
+  // wait for speech to end before continuing
+  speak(`Congratulations, you have got ${scoreVal} points!`, ()=>{
+    congratsEl.style.display = 'none';
+    waitingNextRound = false;
+    // stop music
+    try{ congratsMusic.pause(); congratsMusic.currentTime = 0; }catch(e){}
+    nextRound();
+  });
+}
+
+/* ---------- UTIL ---------- */
+function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
+
+/* ---------- CORE FLOW ---------- */
+function nextRound(){
+  if(waitingNextRound) return;
+  roundAnswered = false;
+  optionsEl.innerHTML = '';
+  const modes = ['find','different','missing'];
+  currentMode = modes[Math.floor(Math.random()*modes.length)];
+  if(currentMode==='find') startFindRound();
+  else if(currentMode==='different') startDifferentRound();
+  else startMissingRound();
+}
+
+/* ---------- Create visual tiles ---------- */
+/* Create a non-clickable question tile (used inside question container) */
+function createQuestionTile(name, parent){
+  const tile = document.createElement('div');
+  tile.className = 'option question-tile';
+  const img = document.createElement('img');
+  img.src = loadedImages[name].src;
+  img.alt = name;
+  tile.appendChild(img);
+  parent.appendChild(tile);
+}
+
+/* Create a clickable answer tile (used inside answer container) */
+function createAnswerTile(name, isCorrect, parent, blankDiv=null, missing=null){
+  const tile = document.createElement('div');
+  tile.className = 'option';
+  tile.dataset.name = name;
+  tile.dataset.correct = isCorrect ? '1' : '0';
+  const img = document.createElement('img');
+  img.src = loadedImages[name].src;
+  img.alt = name;
+  tile.appendChild(img);
+
+  tile.addEventListener('click', ()=>{
+    if(roundAnswered) return; // already answered this round
+    const correct = tile.dataset.correct === '1';
+    if(correct){
+      roundAnswered = true;
+      try{ correctSound.currentTime = 0; correctSound.play(); }catch(e){}
+      score++;
+      updateScore();
+      // fill blank only when we have a reference
+      if(blankDiv && missing){
+        blankDiv.innerHTML = '';
+        const im = document.createElement('img');
+        im.src = loadedImages[missing].src;
+        im.alt = missing;
+        im.className = 'shine';
+        blankDiv.appendChild(im);
+        // sparkle stars on the filled blank
+        addStars(blankDiv);
+      } else {
+        // temporary stars on the tile
+        addStars(tile);
+      }
+
+      // speak then continue; if congrats triggered, showCongratsPopup will handle waitingNextRound
+      speak('Well done!', ()=>{
+        // small delay to let shine finish
+        setTimeout(()=>{ if(!waitingNextRound) nextRound(); }, 450);
+      });
+
+    } else {
+      // wrong: give feedback, but DO NOT reveal blank
+      try{ wrongSound.currentTime = 0; wrongSound.play(); }catch(e){}
+      tile.animate([{transform:'translateX(0)'},{transform:'translateX(6px)'},{transform:'translateX(-6px)'},{transform:'translateX(0)'}], {duration:250});
+      speak('Try again');
+    }
+  });
+
+  parent.appendChild(tile);
+}
+
+/* add small star effects centered on a target element */
+function addStars(target){
+  const rect = target.getBoundingClientRect();
+  for(let i=0;i<6;i++){
+    const s = document.createElement('div');
+    s.className = 'star-effect';
+    s.textContent = '⭐';
+    // random offset around center
+    const x = rect.left + rect.width/2 + (Math.random()*60-30);
+    const y = rect.top + rect.height/2 + (Math.random()*20-10);
+    s.style.left = x + 'px';
+    s.style.top = y + 'px';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1100);
+  }
+}
+
+/* ---------- Rounds ---------- */
+function startFindRound(){
+  const choices = shuffle(imageList).slice(0,4);
+  const target = choices[Math.floor(Math.random()*choices.length)];
+  qEl.textContent = `Find the ${target}`;
+  speak(`Can you find the ${target}?`);
+  // answer tiles (clickable)
+  const ansContainer = document.createElement('div');
+  ansContainer.className = 'answer-container';
+  shuffle(choices).forEach(name => createAnswerTile(name, name===target, ansContainer));
+  optionsEl.appendChild(ansContainer);
+}
+
+function startDifferentRound(){
+  const base = imageList[Math.floor(Math.random()*imageList.length)];
+  let odd;
+  do{ odd = imageList[Math.floor(Math.random()*imageList.length)]; } while(odd === base);
+  qEl.textContent = 'Find the different one!';
+  speak('Which one is different?');
+  const arr = shuffle([base, base, base, odd]);
+  const ansContainer = document.createElement('div');
+  ansContainer.className = 'answer-container';
+  arr.forEach(name => createAnswerTile(name, name===odd, ansContainer));
+  optionsEl.appendChild(ansContainer);
+}
+
+function startMissingRound(){
+  // 1) pick 6 unique items
+  const selected = shuffle(imageList).slice(0,6);
+  // 2) pick exactly 1 missing from selected
+  const missingIndex = Math.floor(Math.random() * selected.length);
+  const missing = selected[missingIndex];
+  const itemsInGrid = selected.filter((_, idx) => idx !== missingIndex);
+
+  qEl.textContent = 'Which picture is missing?';
+  speak('Which picture is missing?');
+
+  // QUESTION container (6 slots: 5 filled + 1 blank)
+  const questionContainer = document.createElement('div');
+  questionContainer.className = 'option-container';
+
+  let blankDiv = null;
+  selected.forEach((name, idx) => {
+    if(idx === missingIndex){
+      blankDiv = document.createElement('div');
+      blankDiv.className = 'option blank';
+      questionContainer.appendChild(blankDiv);
+    } else {
+      createQuestionTile(name, questionContainer);
+    }
+  });
+  optionsEl.appendChild(questionContainer);
+
+  // ANSWER container → 1 correct + 2 wrong
+  // The wrong options must NOT be in the question grid.
+  const allImagesExceptGrid = imageList.filter(name => !itemsInGrid.includes(name) && name !== missing);
+  const wrongOptions = shuffle(allImagesExceptGrid).slice(0, 2);
+  const answerChoices = shuffle([missing, ...wrongOptions]);
+
+  const answerContainer = document.createElement('div');
+  answerContainer.className = 'answer-container';
+  answerChoices.forEach(name =>
+    createAnswerTile(name, name === missing, answerContainer, blankDiv, missing)
+  );
+  optionsEl.appendChild(answerContainer);
+}
+
+
+/* create question tile helper (non-clickable) */
+function createQuestionTile(name, parent){
+  const t = document.createElement('div');
+  t.className = 'option question-tile';
+  const img = document.createElement('img');
+  img.src = loadedImages[name].src;
+  img.alt = name;
+  t.appendChild(img);
+  parent.appendChild(t);
+}
+
+/* ---------- start initial UI ---------- */
+// nothing else — user clicks start to begin
+</script>
+</body>
+</html>
