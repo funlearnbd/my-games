@@ -1,54 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Colors Game</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .bouncy-tap { transition: transform 0.1s ease-in-out; }
-    .bouncy-tap:active { transform: scale(0.95); }
-    .incorrect-animation { animation: incorrect-shake 0.3s ease-in-out; }
-    .correct-pop-out {
-      position: relative;
-      z-index: 50;
-      animation: popOut 0.8s ease-in-out forwards;
-      animation-iteration-count: 2;
-    }
-    .correct-pop-out::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 150%; height: 150%;
-      border-radius: 50%;
-      background-image: radial-gradient(circle, white 10%, transparent 10%),
-                        radial-gradient(circle, white 10%, transparent 10%);
-      background-position: 0% 0%, 100% 100%;
-      background-size: 50% 50%, 50% 50%;
-      background-repeat: no-repeat;
-      transform: translate(-50%, -50%) scale(0);
-      opacity: 0;
-      animation: diamond-shine 0.8s ease-out forwards;
-      animation-delay: 0.8s;
-      pointer-events: none;
-    }
-    @keyframes incorrect-shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);} }
-    @keyframes popOut { 0%{transform:scale(1);}50%{transform:scale(1.5);}100%{transform:scale(1.5);} }
-    @keyframes diamond-shine { 0%{transform:translate(-50%,-50%) scale(0);opacity:0;}50%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(-50%,-50%) scale(1.5);opacity:0;} }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colors Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .bouncy-tap { transition: transform 0.1s ease-in-out; }
+        .bouncy-tap:active { transform: scale(0.95); }
+        .incorrect-animation { animation: incorrect-shake 0.3s ease-in-out; }
+        .correct-pop-out {
+            position: relative;
+            z-index: 50;
+            animation: popOut 0.8s ease-in-out forwards;
+        }
+        .correct-pop-out::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%;
+            height: 150%;
+            border-radius: 50%;
+            background-image: radial-gradient(circle, white 10%, transparent 10%), radial-gradient(circle, white 10%, transparent 10%);
+            background-position: 0% 0%, 100% 100%;
+            background-size: 50% 50%, 50% 50%;
+            background-repeat: no-repeat;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            animation: diamond-shine 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes incorrect-shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);} }
+        @keyframes popOut { 0% {transform:scale(1);} 100% {transform:scale(1.5);} }
+        @keyframes diamond-shine { 0% {transform:translate(-50%,-50%) scale(0);opacity:0;} 50% {transform:translate(-50%,-50%) scale(1);opacity:1;} 100% {transform:translate(-50%,-50%) scale(1.5);opacity:0;} }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 overflow-hidden">
   <div id="game-container" class="w-full max-w-lg p-6 bg-white rounded-3xl shadow-xl flex flex-col items-center space-y-8">
-    <h1 class="text-4xl sm:text-5xl font-bold text-center text-gray-800">
+    <h1 id="game-title" class="text-4xl sm:text-5xl font-bold text-center text-gray-800">
       Find the <span id="color-name" class="text-blue-500">...</span>
     </h1>
-    <div class="w-full text-center text-2xl font-bold text-gray-600">
+    <div id="score-board" class="w-full text-center text-2xl font-bold text-gray-600">
       Score: <span id="score-count">0</span>
     </div>
     <div id="colors-grid" class="flex flex-wrap justify-center items-center gap-6 w-full"></div>
-    <div class="min-h-16 w-full text-center">
+    <div id="message-box" class="min-h-16 w-full text-center">
       <p id="message-text" class="text-xl font-semibold hidden"></p>
     </div>
   </div>
@@ -56,11 +55,11 @@
     <h2 id="win-message" class="text-6xl font-extrabold text-white text-center">You Did It!</h2>
     <p id="win-subtext" class="text-2xl text-white text-center font-semibold">You completed a level!</p>
     <button id="back-to-menu-btn" class="bg-white text-blue-600 px-8 py-4 rounded-full shadow-lg font-bold text-lg transform active:scale-95 transition-transform">
-      Back to Menu
+        Back to Menu
     </button>
   </div>
-
 <script>
+  // 🎨 Colors
   const allColors = [
     { name: 'Red', hex: '#ef4444' }, { name: 'Blue', hex: '#3b82f6' },
     { name: 'Green', hex: '#22c55e' }, { name: 'Yellow', hex: '#facc15' },
@@ -71,117 +70,196 @@
   ];
   const positiveFeedback = ['Excellent!', 'Great Job!', 'You are doing great!', 'Fantastic!', 'Super!'];
   const negativeFeedback = ['Oops, try again!', 'Not quite, give it another go!', 'You can do it!'];
-
-  // Short, safe audio files
-  const successSounds = [
-    new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_3d1424a7ce.mp3"),
-    new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_951f33f662.mp3"),
-    new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_9520b22606.mp3")
-  ];
-  const failSounds = [
-    new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_ed64741496.mp3")
-  ];
-  successSounds.forEach(s => s.preload="auto");
-  failSounds.forEach(s => s.preload="auto");
-
-  function playRandomSound(list) {
-    const sound = list[Math.floor(Math.random() * list.length)];
-    try { sound.currentTime = 0; sound.play(); } catch(e) {}
-  }
-
+  
   // Game state
-  let correctColor=null, previousColor=null, score=0, totalCorrectAnswers=0;
-  const COLORS_PER_LEVEL=[4,6,8,10,12];
-  const CORRECT_ANSWERS_TO_LEVEL_UP=6;
+  let correctColor = null, previousColor = null, score = 0, totalCorrectAnswers = 0;
+  let isProcessing = false; // Flag to prevent multiple simultaneous actions
+  const COLORS_PER_LEVEL = [4, 6, 8, 10, 12];
+  const CORRECT_ANSWERS_TO_LEVEL_UP = 6;
 
-  const speak = (text, rate=0.9, onend=null) => {
-    if (!('speechSynthesis' in window)) { if(onend) onend(); return; }
-    window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text);
-    u.rate=rate;
-    if(onend) u.onend=onend;
-    window.speechSynthesis.speak(u);
-  };
+  // Speech synthesis management
+  let speechQueue = [];
+  let isSpeaking = false;
 
-  const createColorButton = (color) => {
-    const b=document.createElement('div');
-    b.className="w-20 h-20 md:w-24 md:h-24 rounded-3xl shadow-md cursor-pointer transition-all bouncy-tap";
-    b.style.backgroundColor=color.hex;
-    b.dataset.colorName=color.name;
-    return b;
-  };
-
-  const updateScoreDisplay=()=>{document.getElementById('score-count').textContent=totalCorrectAnswers;};
-
-  const showCelebrationScreen=(msg,sub)=>{
-    const game=document.getElementById('game-container');
-    const win=document.getElementById('win-screen');
-    game.classList.add('hidden');
-    win.classList.remove('hidden');
-    document.getElementById('win-message').textContent=msg;
-    document.getElementById('win-subtext').textContent=sub;
-    speak(msg,0.8,()=>{
-      setTimeout(()=>{
-        win.classList.add('hidden');
-        game.classList.remove('hidden');
-        setupNewRound();
-      },2000);
-    });
-  };
-
-  const handleTap=(e)=>{
-    const tapped=e.target.dataset.colorName;
-    const msg=document.getElementById('message-text');
-    const btn=e.target;
-    if(tapped===correctColor.name){
-      totalCorrectAnswers++; score++;
-      playRandomSound(successSounds);
-      btn.classList.add('correct-pop-out');
-      const fb=positiveFeedback[Math.floor(Math.random()*positiveFeedback.length)];
-      speak(correctColor.name,0.7,()=>{
-        speak(fb,0.9,()=>{
-          msg.textContent=fb;
-          msg.classList.remove('hidden');
-          msg.style.color=correctColor.hex;
-          setTimeout(()=>{
-            btn.classList.remove('correct-pop-out');
-            msg.classList.add('hidden');
-            if(score>=CORRECT_ANSWERS_TO_LEVEL_UP){
-              score=0;
-              showCelebrationScreen('Great Job!','You unlocked the next level!');
-            }else{ setupNewRound(); }
-            updateScoreDisplay();
-          },1200);
-        });
-      });
+  const processSpeechQueue = () => {
+    if (speechQueue.length === 0 || isSpeaking) return;
+    
+    isSpeaking = true;
+    const { text, rate, resolve } = speechQueue.shift();
+    
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = rate;
+      utterance.onend = () => {
+        utterance.onend = null;
+        isSpeaking = false;
+        resolve();
+        processSpeechQueue();
+      };
+      utterance.onerror = () => {
+        utterance.onerror = null;
+        isSpeaking = false;
+        resolve();
+        processSpeechQueue();
+      };
+      window.speechSynthesis.speak(utterance);
     } else {
-      score=0; playRandomSound(failSounds);
-      const fb=negativeFeedback[Math.floor(Math.random()*negativeFeedback.length)];
-      msg.textContent=fb; msg.classList.remove('hidden');
-      msg.style.color=correctColor.hex;
-      speak(fb);
+      isSpeaking = false;
+      resolve();
+      processSpeechQueue();
     }
   };
 
-  const resetGame=()=>{document.getElementById('colors-grid').innerHTML='';correctColor=null;};
-  const setupNewRound=()=>{
-    resetGame();
-    const display=document.getElementById('color-name');
-    const levelIndex=Math.min(Math.floor(totalCorrectAnswers/CORRECT_ANSWERS_TO_LEVEL_UP),COLORS_PER_LEVEL.length-1);
-    const num=COLORS_PER_LEVEL[levelIndex];
-    const shuffled=[...allColors].sort(()=>Math.random()-0.5);
-    let newColor; do{newColor=shuffled[0];}while(newColor.name===previousColor?.name);
-    correctColor=newColor; previousColor=correctColor;
-    const round=shuffled.slice(0,num);
-    if(!round.some(c=>c.name===correctColor.name)) round[0]=correctColor;
-    round.sort(()=>Math.random()-0.5);
-    display.textContent=correctColor.name;
-    display.style.color=correctColor.hex;
-    speak(`Find the color ${correctColor.name}`);
-    const grid=document.getElementById('colors-grid');
-    round.forEach(c=>{const b=createColorButton(c);b.addEventListener('click',handleTap);grid.appendChild(b);});
+  const speak = (text, rate = 0.9) => {
+    return new Promise(resolve => {
+      speechQueue.push({ text, rate, resolve });
+      processSpeechQueue();
+    });
   };
-  window.onload=()=>{setupNewRound();updateScoreDisplay();};
+
+  const cancelAllSpeech = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    speechQueue = [];
+    isSpeaking = false;
+  };
+
+  const createColorButton = (color) => {
+    const button = document.createElement('div');
+    button.className = "w-20 h-20 md:w-24 md:h-24 rounded-3xl shadow-md cursor-pointer transition-all bouncy-tap";
+    button.style.backgroundColor = color.hex;
+    button.dataset.colorName = color.name;
+    return button;
+  };
+
+  const updateScoreDisplay = () => { document.getElementById('score-count').textContent = totalCorrectAnswers; };
+
+  const showCelebrationScreen = async (message, subtext) => {
+      const gameContainer = document.getElementById('game-container');
+      const winScreen = document.getElementById('win-screen');
+      gameContainer.classList.add('hidden');
+      winScreen.classList.remove('hidden');
+      document.getElementById('win-message').textContent = message;
+      document.getElementById('win-subtext').textContent = subtext;
+
+      // Speak the message and wait for it to finish
+      await speak(message, 0.8);
+
+      setTimeout(() => {
+          winScreen.classList.add('hidden');
+          gameContainer.classList.remove('hidden');
+          setupNewRound();
+      }, 500);
+  };
+
+  const handleTap = async (e) => {
+      if (isProcessing) return; // Prevent multiple taps during processing
+      isProcessing = true;
+      
+      const tapped = e.target.dataset.colorName;
+      const msg = document.getElementById('message-text');
+      const btn = e.target;
+      
+      if (tapped === correctColor.name) {
+          totalCorrectAnswers++;
+          score++;
+          btn.classList.add('correct-pop-out');
+          
+          // Remove any existing event listeners to prevent duplicates
+          const newHandler = async function handler() {
+              btn.removeEventListener('animationend', handler);
+              const fb = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+              
+              msg.textContent = fb;
+              msg.classList.remove('hidden');
+              msg.style.color = correctColor.hex;
+
+              await speak(correctColor.name, 0.7);
+              await speak(fb, 0.9);
+
+              btn.classList.remove('correct-pop-out');
+              msg.classList.add('hidden');
+              
+              if (score >= CORRECT_ANSWERS_TO_LEVEL_UP) {
+                  score = 0;
+                  showCelebrationScreen('Great Job!', 'You unlocked the next level!');
+              } else {
+                  setupNewRound();
+              }
+              updateScoreDisplay();
+              isProcessing = false;
+          };
+          
+          btn.addEventListener('animationend', newHandler, { once: true });
+          
+      } else {
+          score = 0;
+          const fb = negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)];
+          msg.textContent = fb;
+          msg.classList.remove('hidden');
+          msg.style.color = correctColor.hex;
+          
+          // Cancel any ongoing speech and speak the feedback
+          cancelAllSpeech();
+          speak(fb).then(() => {
+            isProcessing = false;
+          });
+      }
+  };
+
+  const resetGame = () => {
+      // Remove all event listeners from color buttons
+      const grid = document.getElementById('colors-grid');
+      while (grid.firstChild) {
+          grid.removeChild(grid.firstChild);
+      }
+      correctColor = null;
+      cancelAllSpeech(); // Clear any queued speech
+  };
+
+  const setupNewRound = () => {
+      resetGame();
+      isProcessing = false; // Reset processing flag
+      
+      const display = document.getElementById('color-name');
+      const levelIndex = Math.min(Math.floor(totalCorrectAnswers / CORRECT_ANSWERS_TO_LEVEL_UP), COLORS_PER_LEVEL.length - 1);
+      const num = COLORS_PER_LEVEL[levelIndex];
+      const shuffled = [...allColors].sort(() => Math.random() - 0.5);
+      let newColor;
+      do { newColor = shuffled[0]; } while (newColor.name === previousColor?.name);
+      correctColor = newColor;
+      previousColor = correctColor;
+      const round = shuffled.slice(0, num);
+      if (!round.some(c => c.name === correctColor.name)) round[0] = correctColor;
+      round.sort(() => Math.random() - 0.5);
+      display.textContent = correctColor.name;
+      display.style.color = correctColor.hex;
+      
+      // Cancel any ongoing speech and speak the new instruction
+      cancelAllSpeech();
+      speak(`Find the color ${correctColor.name}`);
+      
+      const grid = document.getElementById('colors-grid');
+      round.forEach(c => { 
+          const b = createColorButton(c); 
+          b.addEventListener('click', handleTap); 
+          grid.appendChild(b); 
+      });
+  };
+
+  // Initialize the game
+  window.onload = () => { 
+      setupNewRound(); 
+      updateScoreDisplay(); 
+  };
+
+  // Clean up when the page is hidden to prevent speech issues
+  document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+          cancelAllSpeech();
+      }
+  });
 </script>
 </body>
 </html>
