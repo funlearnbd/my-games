@@ -34,7 +34,7 @@
             pointer-events: none;
         }
         @keyframes incorrect-shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);} }
-        @keyframes popOut { 0% {transform:scale(1);} 100% {transform:scale(1.5);} }
+        @keyframes popOut { 0% {transform:scale(1);} 50% {transform:scale(1.5);} 100% {transform:scale(1);} }
         @keyframes diamond-shine { 0% {transform:translate(-50%,-50%) scale(0);opacity:0;} 50% {transform:translate(-50%,-50%) scale(1);opacity:1;} 100% {transform:translate(-50%,-50%) scale(1.5);opacity:0;} }
     </style>
 </head>
@@ -47,17 +47,21 @@
       Score: <span id="score-count">0</span>
     </div>
     <div id="colors-grid" class="flex flex-wrap justify-center items-center gap-6 w-full"></div>
-    <div id="message-box" class="min-h-16 w-full text-center">
-      <p id="message-text" class="text-xl font-semibold hidden"></p>
-    </div>
+    <button id="leave-game-btn" class="mt-4 px-6 py-3 rounded-full shadow-lg font-bold text-lg transform active:scale-95 transition-transform">
+        Leave Game
+    </button>
   </div>
   <div id="win-screen" class="absolute inset-0 bg-blue-500 bg-opacity-90 flex flex-col items-center justify-center p-4 space-y-8 z-20 hidden">
     <h2 id="win-message" class="text-6xl font-extrabold text-white text-center">You Did It!</h2>
     <p id="win-subtext" class="text-2xl text-white text-center font-semibold">You completed a level!</p>
-    <button id="back-to-menu-btn" class="bg-white text-blue-600 px-8 py-4 rounded-full shadow-lg font-bold text-lg transform active:scale-95 transition-transform">
+    <button id="back-to-menu-btn" class="px-8 py-4 rounded-full shadow-lg font-bold text-lg transform active:scale-95 transition-transform">
         Back to Menu
     </button>
   </div>
+  
+  <!-- Audio element for the bell sound -->
+  <audio id="bell-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+  
 <script>
   // 🎨 Colors
   const allColors = [
@@ -68,8 +72,6 @@
     { name: 'Gray', hex: '#9ca3af' }, { name: 'Black', hex: '#111827' },
     { name: 'White', hex: '#f9fafb' }, { name: 'Teal', hex: '#14b8a6' },
   ];
-  const positiveFeedback = ['Excellent!', 'Great Job!', 'You are doing great!', 'Fantastic!', 'Super!'];
-  const negativeFeedback = ['Oops, try again!', 'Not quite, give it another go!', 'You can do it!'];
   
   // Game state
   let correctColor = null, previousColor = null, score = 0, totalCorrectAnswers = 0;
@@ -143,6 +145,10 @@
       document.getElementById('win-message').textContent = message;
       document.getElementById('win-subtext').textContent = subtext;
 
+      // Update button colors to match the correct color
+      document.getElementById('back-to-menu-btn').style.backgroundColor = correctColor.hex;
+      document.getElementById('back-to-menu-btn').style.color = correctColor.name === 'Black' || correctColor.name === 'Brown' ? 'white' : 'black';
+
       // Speak the message and wait for it to finish
       await speak(message, 0.8);
 
@@ -158,28 +164,28 @@
       isProcessing = true;
       
       const tapped = e.target.dataset.colorName;
-      const msg = document.getElementById('message-text');
       const btn = e.target;
       
       if (tapped === correctColor.name) {
           totalCorrectAnswers++;
           score++;
+          
+          // Play bell sound for correct answer
+          const bellSound = document.getElementById('bell-sound');
+          if (bellSound) {
+            bellSound.currentTime = 0;
+            bellSound.play().catch(e => console.log("Audio play failed:", e));
+          }
+          
           btn.classList.add('correct-pop-out');
           
           // Remove any existing event listeners to prevent duplicates
           const newHandler = async function handler() {
               btn.removeEventListener('animationend', handler);
-              const fb = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
               
-              msg.textContent = fb;
-              msg.classList.remove('hidden');
-              msg.style.color = correctColor.hex;
-
               await speak(correctColor.name, 0.7);
-              await speak(fb, 0.9);
 
               btn.classList.remove('correct-pop-out');
-              msg.classList.add('hidden');
               
               if (score >= CORRECT_ANSWERS_TO_LEVEL_UP) {
                   score = 0;
@@ -195,16 +201,10 @@
           
       } else {
           score = 0;
-          const fb = negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)];
-          msg.textContent = fb;
-          msg.classList.remove('hidden');
-          msg.style.color = correctColor.hex;
           
-          // Cancel any ongoing speech and speak the feedback
+          // Cancel any ongoing speech
           cancelAllSpeech();
-          speak(fb).then(() => {
-            isProcessing = false;
-          });
+          isProcessing = false;
       }
   };
 
@@ -236,6 +236,10 @@
       display.textContent = correctColor.name;
       display.style.color = correctColor.hex;
       
+      // Update leave game button color
+      document.getElementById('leave-game-btn').style.backgroundColor = correctColor.hex;
+      document.getElementById('leave-game-btn').style.color = correctColor.name === 'Black' || correctColor.name === 'Brown' ? 'white' : 'black';
+      
       // Cancel any ongoing speech and speak the new instruction
       cancelAllSpeech();
       speak(`Find the color ${correctColor.name}`);
@@ -252,6 +256,16 @@
   window.onload = () => { 
       setupNewRound(); 
       updateScoreDisplay(); 
+      
+      // Add event listener for leave game button
+      document.getElementById('leave-game-btn').addEventListener('click', () => {
+          window.location.href = 'index.html';
+      });
+      
+      // Add event listener for back to menu button
+      document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+          window.location.href = 'index.html';
+      });
   };
 
   // Clean up when the page is hidden to prevent speech issues
