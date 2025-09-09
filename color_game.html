@@ -25,11 +25,6 @@
     @keyframes incorrect-shake { 0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);} }
     @keyframes popOut {0%{transform:scale(1);}50%{transform:scale(1.5);}100%{transform:scale(1.5);} }
     @keyframes diamond-shine {0%{transform:translate(-50%,-50%) scale(0);opacity:0;}50%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(-50%,-50%) scale(1.5);opacity:0;}}
-    .fireworks-container { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:10; }
-    .firework { position:absolute; width:5px; height:5px; background-color:#fff; border-radius:50%; animation:explode 1s ease-out forwards; }
-    @keyframes explode {0%{transform:scale(1);opacity:1;}100%{transform:scale(100);opacity:0;}}
-    .star { position:absolute; width:8px; height:8px; background-color:#facc15; border-radius:50%; transform:scale(0); opacity:0; animation:sparkle 0.8s ease-out forwards;}
-    @keyframes sparkle {0%{transform:scale(0);opacity:0;}30%{transform:scale(1);opacity:1;}100%{transform:scale(0);opacity:0;transform:translateY(-50px);} }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 overflow-hidden">
@@ -46,18 +41,8 @@
     </div>
   </div>
 
-  <!-- Celebration Screen -->
-  <div id="win-screen" class="absolute inset-0 bg-blue-500 bg-opacity-90 flex flex-col items-center justify-center p-4 space-y-8 z-20 hidden">
-    <div class="fireworks-container" id="fireworks"></div>
-    <h2 id="win-message" class="text-6xl font-extrabold text-white text-center">You Did It!</h2>
-    <p id="win-subtext" class="text-2xl text-white text-center font-semibold">You found all the colors!</p>
-    <button id="back-to-menu-btn" class="bg-white text-blue-600 px-8 py-4 rounded-full shadow-lg font-bold text-lg transform active:scale-95 transition-transform">
-      Back to Menu
-    </button>
-  </div>
-
 <script>
-  // Colors
+  // 🎨 Colors
   const allColors = [
     { name: 'Red', hex: '#ef4444' }, { name: 'Blue', hex: '#3b82f6' },
     { name: 'Green', hex: '#22c55e' }, { name: 'Yellow', hex: '#facc15' },
@@ -69,42 +54,37 @@
   const positiveFeedback = ['Excellent!', 'Great Job!', 'You are doing great!', 'Fantastic!', 'Super!'];
   const negativeFeedback = ['Oops, try again!', 'Not quite, give it another go!', 'You can do it!'];
 
-  // 🎵 Sounds
+  // 🔊 Short sounds (only correct/wrong, no background music)
   const successSounds = [
-    new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"),
-    new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"),
-    new Audio("https://actions.google.com/sounds/v1/cartoon/concussive_drum_hit.ogg"),
-    new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg"),
-    new Audio("https://actions.google.com/sounds/v1/cartoon/clang.ogg")
+    new Audio("https://assets.mixkit.co/active_storage/sfx/2851/2851-preview.mp3"), // ding
+    new Audio("https://assets.mixkit.co/active_storage/sfx/3520/3520-preview.mp3"), // tada
+    new Audio("https://assets.mixkit.co/active_storage/sfx/3521/3521-preview.mp3")  // bell
   ];
   const failSounds = [
-    new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"),
-    new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg"),
-    new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"),
-    new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg")
+    new Audio("https://assets.mixkit.co/active_storage/sfx/2566/2566-preview.mp3"), // buzz
+    new Audio("https://assets.mixkit.co/active_storage/sfx/2745/2745-preview.mp3"), // error
+    new Audio("https://assets.mixkit.co/active_storage/sfx/2746/2746-preview.mp3")  // fail beep
   ];
+
   successSounds.forEach(s => s.preload="auto");
   failSounds.forEach(s => s.preload="auto");
 
   function playRandomSound(list) {
     const sound = list[Math.floor(Math.random() * list.length)];
-    try { sound.currentTime = 0; sound.play(); } catch(e) { console.error(e); }
+    try { sound.currentTime = 0; sound.play(); } catch(e) {}
   }
 
   // Game state
-  let correctColor=null, previousColor=null, score=0, currentLevel=1, fireworkIntervalId=null;
-  const CORRECT_ANSWERS_TO_LEVEL_UP = 5;
-  const CELEBRATION_LEVEL_INTERVAL = 2;
-  const COLORS_PER_LEVEL = [4,6,8,8,10,10,12,12,12,12];
+  let correctColor=null, previousColor=null, score=0;
+  const COLORS_PER_LEVEL = [4,6,8,10,12];
 
-  const speak = (text, callback, rate=0.9) => {
+  const speak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = rate;
-      utterance.onend = () => { if (callback) callback(); };
+      utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-    } else if (callback) callback();
+    }
   };
 
   const createColorButton = (color) => {
@@ -115,81 +95,43 @@
     return button;
   };
   const updateScoreDisplay = () => { document.getElementById('score-count').textContent=score; };
-  const generateFirework = () => {
-    const f=document.createElement('div');
-    f.className='firework';
-    f.style.width=f.style.height=`${Math.random()*20+5}px`;
-    f.style.backgroundColor=`hsl(${Math.random()*360},100%,80%)`;
-    f.style.left=`${Math.random()*100}vw`;
-    f.style.top=`${Math.random()*100}vh`;
-    document.getElementById('fireworks').appendChild(f);
-    f.addEventListener('animationend',()=>f.remove());
-  };
-  const generateStars=(button)=>{
-    const rect=button.getBoundingClientRect(); const c=10;
-    for(let i=0;i<c;i++){const s=document.createElement('div');s.className='star';
-      s.style.left=`${rect.left+rect.width/2+(Math.random()-0.5)*50}px`;
-      s.style.top=`${rect.top+rect.height/2+(Math.random()-0.5)*50}px`;
-      document.body.appendChild(s);
-      s.addEventListener('animationend',()=>s.remove());
-    }
-  };
-
-  const showCelebrationScreen=(msg,sub,isFinal=false)=>{
-    const gc=document.getElementById('game-container');const ws=document.getElementById('win-screen');
-    gc.classList.add('hidden'); ws.classList.remove('hidden');
-    document.getElementById('win-message').textContent=msg;
-    document.getElementById('win-subtext').textContent=sub;
-    const back=document.getElementById('back-to-menu-btn');
-    if(isFinal){back.classList.remove('hidden');back.onclick=()=>{clearInterval(fireworkIntervalId);window.location.href='main_page.html';};}
-    else{back.classList.add('hidden');}
-    if(fireworkIntervalId)clearInterval(fireworkIntervalId);
-    fireworkIntervalId=setInterval(generateFirework,300);
-    speak(msg,()=>{if(!isFinal){setTimeout(()=>{ws.classList.add('hidden');gc.classList.remove('hidden');clearInterval(fireworkIntervalId);setupNewRound();},2500);}});
-  };
 
   const handleTap=(e)=>{
     const tapped=e.target.dataset.colorName;
     const msg=document.getElementById('message-text');
     const btn=e.target;
     if(tapped===correctColor.name){
-      score++; btn.classList.add('correct-pop-out'); generateStars(btn);
-      playRandomSound(successSounds); // ✅ Correct sound
+      score++; playRandomSound(successSounds);
       const fb=positiveFeedback[Math.floor(Math.random()*positiveFeedback.length)];
-      speak(correctColor.name,()=>{speak(fb,()=>{
-        msg.textContent=fb; msg.classList.remove('hidden'); msg.style.color=correctColor.hex;
-        setTimeout(()=>{btn.classList.remove('correct-pop-out');msg.classList.add('hidden');updateScoreDisplay();
-          if(score>=CORRECT_ANSWERS_TO_LEVEL_UP){currentLevel++;score=0;updateScoreDisplay();
-            if(currentLevel%CELEBRATION_LEVEL_INTERVAL===0){showCelebrationScreen('Great Job!',`You completed Level ${currentLevel-1}!`,false);}
-            else setupNewRound();
-          }else setupNewRound();
-        },800);
-      });});
-    }else{
-      score=0; updateScoreDisplay(); btn.classList.add('incorrect-animation');
+      msg.textContent=fb; msg.classList.remove('hidden'); msg.style.color=correctColor.hex;
+      speak(correctColor.name);
+      setTimeout(()=>{ msg.classList.add('hidden'); setupNewRound(); updateScoreDisplay(); },1000);
+    } else {
+      score=0; playRandomSound(failSounds);
       const fb=negativeFeedback[Math.floor(Math.random()*negativeFeedback.length)];
       msg.textContent=fb; msg.classList.remove('hidden'); msg.style.color=correctColor.hex;
-      playRandomSound(failSounds); // ❌ Wrong sound
       speak(fb);
-      btn.addEventListener('animationend',()=>btn.classList.remove('incorrect-animation'),{once:true});
+      setTimeout(()=>{ msg.classList.add('hidden'); updateScoreDisplay(); },800);
     }
   };
 
   const resetGame=()=>{document.getElementById('colors-grid').innerHTML='';correctColor=null;};
   const setupNewRound=()=>{
-    resetGame(); const display=document.getElementById('color-name');
-    const num=COLORS_PER_LEVEL[currentLevel-1]||allColors.length;
+    resetGame();
+    const display=document.getElementById('color-name');
+    const num=COLORS_PER_LEVEL[Math.min(score, COLORS_PER_LEVEL.length-1)];
     const shuffled=[...allColors].sort(()=>Math.random()-0.5);
     let newColor; do{newColor=shuffled[0];}while(newColor.name===previousColor?.name);
     correctColor=newColor; previousColor=correctColor;
-    const round=shuffled.slice(0,num); if(!round.includes(correctColor))round[0]=correctColor;
+    const round=shuffled.slice(0,num);
+    if(!round.includes(correctColor)) round[0]=correctColor;
     round.sort(()=>Math.random()-0.5);
     display.textContent=correctColor.name; display.style.color=correctColor.hex;
-    speak(`Find the color ${correctColor.name}.`);
+    speak(`Find the color ${correctColor.name}`);
     const grid=document.getElementById('colors-grid');
     round.forEach(c=>{const b=createColorButton(c);b.addEventListener('click',handleTap);grid.appendChild(b);});
   };
-  window.onload=()=>{setTimeout(()=>{setupNewRound();updateScoreDisplay();},500);};
+  window.onload=()=>{setupNewRound();updateScoreDisplay();};
 </script>
 </body>
 </html>
