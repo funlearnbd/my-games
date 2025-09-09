@@ -3,316 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Matching Game</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Colors Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary-color: #00b894;
-            --secondary-color: #0984e3;
-            --accent-color: #ff7675;
-            --background-color: #dfe6e9;
-            --text-color-dark: #2d3436;
-            --box-shadow-light: rgba(0, 0, 0, 0.1);
-            --box-shadow-medium: rgba(0, 0, 0, 0.2);
-            --success-color: #27ae60;
-            --error-color: #e74c3c;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
-            background-color: var(--background-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bouncy-tap {
+            transition: transform 0.1s ease-in-out;
+        }
+        .bouncy-tap:active {
+            transform: scale(0.95);
+        }
+        .incorrect-animation {
+            animation: incorrect-shake 0.3s ease-in-out;
+        }
+        .correct-pop-out {
+            position: relative;
+            z-index: 50; /* Bring to front */
+            animation: popOut 0.8s ease-in-out forwards;
+        }
+        .correct-pop-out::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%;
+            height: 150%;
+            border-radius: 50%;
+            background-image: radial-gradient(circle, white 10%, transparent 10%),
+                              radial-gradient(circle, white 10%, transparent 10%);
+            background-position: 0% 0%, 100% 100%;
+            background-size: 50% 50%, 50% 50%;
+            background-repeat: no-repeat;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            animation: diamond-shine 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes incorrect-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes popOut {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+            50% { transform: scale(1.5); box-shadow: 0 0 25px 10px rgba(255, 255, 255, 0.8), 0 0 50px 20px rgba(255, 255, 255, 0.6); }
+            100% {
+                transform: scale(1.5);
+                box-shadow:
+                    0 0 10px rgba(0,0,0,0.2),
+                    0 0 50px 20px rgba(255, 255, 255, 0.8),
+                    0 0 100px 30px rgba(255, 255, 255, 0.6),
+                    0 0 150px 40px rgba(255, 255, 255, 0.4),
+                    0 0 200px 50px rgba(255, 255, 255, 0.2);
+            }
+        }
+        @keyframes diamond-shine {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+        .fireworks-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
             overflow: hidden;
+            z-index: 10;
         }
-
-        .splash-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px var(--box-shadow-medium);
-            max-width: 500px;
-            width: 90%;
-            animation: fadeIn 1s ease-in-out;
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
         }
-
-        .splash-screen h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            color: var(--secondary-color);
-            margin-bottom: 1.5rem;
-        }
-
-        .splash-screen p {
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-            color: var(--text-color-dark);
-            margin-bottom: 2rem;
-        }
-
-        .start-btn {
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-            padding: 15px 30px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
-        }
-
-        .start-btn:hover {
-            background-color: #00a884;
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
-        }
-
-        .game-container {
-            display: none; /* Hidden by default */
-            background-color: white;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px var(--box-shadow-medium);
-            max-width: 600px;
-            width: 90%;
-            transition: transform 0.3s ease;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            color: var(--secondary-color);
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        #word-display {
-            font-size: clamp(2.5rem, 6vw, 4rem);
-            margin: 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-color-dark);
-            text-shadow: 1px 1px 2px var(--box-shadow-light);
-        }
-
-        #color-boxes {
-            display: flex;
-            justify-content: center;
-            gap: clamp(10px, 2vw, 20px);
-            flex-wrap: wrap;
-        }
-
-        .color-box {
-            width: clamp(80px, 15vw, 120px);
-            height: clamp(80px, 15vw, 120px);
-            border: 4px solid #fff;
-            cursor: pointer;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px var(--box-shadow-light);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-
-        .color-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px var(--box-shadow-medium);
-        }
-
-        #message {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
-            margin: 20px 0;
-            font-weight: 600;
-        }
-
-        #score {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            margin: 10px 0;
-            color: var(--text-color-dark);
-        }
-
-        .button-group {
-            margin-top: 1.5rem;
-        }
-
-        button {
-            font-size: clamp(1rem, 2vw, 1.1rem);
-            padding: 12px 24px;
-            margin: 0 8px;
-            cursor: pointer;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        #restart {
-            background-color: var(--primary-color);
-            box-shadow: 0 4px 10px rgba(0, 184, 148, 0.4);
-        }
-
-        #restart:hover {
-            background-color: #00a884;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.6);
-        }
-
-        #exit {
-            background-color: var(--error-color);
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
-        }
-
-        #exit:hover {
-            background-color: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
+        @keyframes explode {
+            0% {
                 transform: scale(1);
+                opacity: 1;
             }
+            100% {
+                transform: scale(100);
+                opacity: 0;
+            }
+        }
+        .star {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #facc15; /* Yellow star color */
+            border-radius: 50%;
+            transform: scale(0);
+            opacity: 0;
+            animation: sparkle 0.8s ease-out forwards;
+        }
+        @keyframes sparkle {
+            0% { transform: scale(0); opacity: 0; }
+            30% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; transform: translateY(-50px); }
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div id="game-container" class="w-full max-w-lg p-6 bg-white rounded-3xl shadow-xl flex flex-col items-center space-y-8">
+        <!-- Title and Prompt -->
+        <h1 id="game-title" class="text-4xl sm:text-5xl font-bold text-center text-gray-800">
+            Find the <span id="color-name" class="text-blue-500">...</span>
+        </h1>
+        
+        <!-- Scoreboard -->
+        <div id="score-board" class="w-full text-center text-2xl font-bold text-gray-600">
+            Score: <span id="score-count">0</span>
+        </div>
 
-    <div id="splash-screen" class="splash-screen">
-        <h1>Are you ready to play?</h1>
-        <p>Listen for the color name, then tap the right box!</p>
-        <button id="start-btn" class="start-btn">Start</button>
-    </div>
+        <!-- The game area for colors -->
+        <div id="colors-grid" class="flex flex-wrap justify-center items-center gap-6 w-full">
+            <!-- Color buttons will be dynamically generated here by JavaScript -->
+        </div>
 
-    <div id="game-container" class="game-container">
-        <h1>Color Match Mania! ✨</h1>
-        <div id="word-display"></div>
-        <div id="color-boxes"></div>
-        <div id="message"></div>
-        <div id="score">Score: 0</div>
-
-        <div class="button-group">
-            <button id="restart">New Game</button>
-            <button id="exit">Exit Game</button>
+        <!-- Correct/Incorrect message box -->
+        <div id="message-box" class="min-h-16 w-full text-center">
+            <p id="message-text" class="text-xl font-semibold hidden"></p>
         </div>
     </div>
 
-    <audio id="buzz-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
+    <!-- Celebration Screen -->
+    <div id="win-screen" class="absolute inset-0 bg-blue-500 bg-opacity-90 flex flex-col items-center justify-center p-4 space-y-8 z-20 hidden">
+        <div class="fireworks-container" id="fireworks"></div>
+        <h2 id="win-message" class="text-6xl font-extrabold text-white text-center">You Did It!</h2>
+        <p id="win-subtext" class="text-2xl text-white text-center font-semibold">You found all the colors!</p>
+        <button id="back-to-menu-btn" class="bg-white text-blue-600 px-8 py-4 rounded-full shadow-lg font-bold text-lg transform active:scale-95 transition-transform">
+            Back to Menu
+        </button>
+    </div>
 
     <script>
-        const colors = [
-            { name: 'Red', value: '#eb4d4b' },
-            { name: 'Blue', value: '#2e86de' },
-            { name: 'Green', value: '#6ab04c' },
-            { name: 'Yellow', value: '#f9ca24' },
-            { name: 'Purple', value: '#8e44ad' },
-            { name: 'Orange', value: '#e67e22' },
-            { name: 'Pink', value: '#fd79a8' },
-            { name: 'Teal', value: '#1abc9c' }
+        // Data for the colors. This is the core of our "database".
+        const allColors = [
+            { name: 'Red', hex: '#ef4444' },
+            { name: 'Blue', hex: '#3b82f6' },
+            { name: 'Green', hex: '#22c55e' },
+            { name: 'Yellow', hex: '#facc15' },
+            { name: 'Purple', hex: '#a855f7' },
+            { name: 'Orange', hex: '#f97316' },
+            { name: 'Pink', hex: '#ec4899' },
+            { name: 'Brown', hex: '#8a4b08' },
+            { name: 'Gray', hex: '#9ca3af' },
+            { name: 'Black', hex: '#111827' },
+            { name: 'White', hex: '#f9fafb' },
+            { name: 'Teal', hex: '#14b8a6' },
         ];
 
+        const positiveFeedback = ['Excellent!', 'Great Job!', 'You are doing great!', 'Fantastic!', 'Super!'];
+        const negativeFeedback = ['Oops, try again!', 'Not quite, give it another go!', 'You can do it!'];
+        
+        // Game state variables
+        let correctColor = null;
+        let previousColor = null;
         let score = 0;
-        let currentColor;
-        const synth = window.speechSynthesis;
-        let voiceSupported = true;
+        let currentLevel = 1;
+        let fireworkIntervalId = null;
+        
+        // Game progression settings
+        const CORRECT_ANSWERS_TO_LEVEL_UP = 5;
+        const CELEBRATION_LEVEL_INTERVAL = 2; // For testing, a smaller interval works well
+        const COLORS_PER_LEVEL = [4, 6, 8, 8, 10, 10, 12, 12, 12, 12]; // Colors for levels 1-10
 
-        const splashScreen = document.getElementById('splash-screen');
-        const startButton = document.getElementById('start-btn');
-        const gameContainer = document.getElementById('game-container');
-        const wordDisplay = document.getElementById('word-display');
-        const colorBoxes = document.getElementById('color-boxes');
-        const message = document.getElementById('message');
-        const scoreDisplay = document.getElementById('score');
-        const restartButton = document.getElementById('restart');
-        const exitButton = document.getElementById('exit');
-        const buzzSound = document.getElementById('buzz-sound');
-
-        if (!synth) {
-            voiceSupported = false;
-            document.querySelector('.splash-screen p').textContent = 'Voice not supported. Tap start to begin.';
-        }
-
-        function speak(text) {
-            if (voiceSupported) {
-                synth.cancel();
+        const speak = (text, callback, rate = 0.9) => {
+            if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                utterance.volume = 1;
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                synth.speak(utterance);
+                utterance.voice = speechSynthesis.getVoices().find(voice => voice.name === 'Google UK English Female') || speechSynthesis.getVoices()[0];
+                utterance.rate = rate;
+                utterance.onend = () => {
+                    if (callback) callback();
+                };
+                window.speechSynthesis.speak(utterance);
+            } else if (callback) {
+                callback();
             }
-        }
+        };
 
-        function startGame() {
-            splashScreen.style.display = 'none';
-            gameContainer.style.display = 'block';
-            score = 0;
-            scoreDisplay.textContent = `Score: ${score}`;
-            setupRound();
-        }
+        const createColorButton = (color) => {
+            const button = document.createElement('div');
+            const baseClasses = `w-20 h-20 md:w-24 md:h-24 rounded-3xl shadow-md cursor-pointer transition-all bouncy-tap`;
+            button.className = baseClasses;
+            button.style.backgroundColor = color.hex;
+            button.dataset.colorName = color.name;
+            button.dataset.colorHex = color.hex;
+            return button;
+        };
 
-        function setupRound() {
-            colorBoxes.innerHTML = '';
-            currentColor = colors[Math.floor(Math.random() * colors.length)];
-            wordDisplay.textContent = currentColor.name;
-            speak(`Find the color ${currentColor.name}`);
+        const updateScoreDisplay = () => {
+            document.getElementById('score-count').textContent = score;
+        };
+        
+        const generateFirework = () => {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            const size = Math.random() * 20 + 5;
+            firework.style.width = `${size}px`;
+            firework.style.height = `${size}px`;
+            firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 80%)`;
+            firework.style.left = `${Math.random() * 100}vw`;
+            firework.style.top = `${Math.random() * 100}vh`;
+            document.getElementById('fireworks').appendChild(firework);
+            firework.addEventListener('animationend', () => firework.remove());
+        };
 
-            const shuffledColors = [...colors].sort(() => Math.random() - 0.5);
-            shuffledColors.forEach(color => {
-                const box = document.createElement('div');
-                box.className = 'color-box';
-                box.style.backgroundColor = color.value;
-                box.addEventListener('click', () => checkAnswer(color));
-                colorBoxes.appendChild(box);
-            });
-        }
+        const generateStars = (button) => {
+            const buttonRect = button.getBoundingClientRect();
+            const starCount = 10;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${buttonRect.left + buttonRect.width / 2 + (Math.random() - 0.5) * 50}px`;
+                star.style.top = `${buttonRect.top + buttonRect.height / 2 + (Math.random() - 0.5) * 50}px`;
+                document.body.appendChild(star);
+                star.addEventListener('animationend', () => star.remove());
+            }
+        };
 
-        function checkAnswer(selectedColor) {
-            if (selectedColor.name === currentColor.name) {
-                score++;
-                message.textContent = 'Yay! Great job!';
-                message.style.color = 'var(--success-color)';
-                scoreDisplay.textContent = `Score: ${score}`;
-                setTimeout(() => {
-                    message.textContent = '';
-                    setupRound();
-                }, 1500);
+        const showCelebrationScreen = (message, subtext, isFinalWin = false) => {
+            const gameContainer = document.getElementById('game-container');
+            const winScreen = document.getElementById('win-screen');
+            gameContainer.classList.add('hidden');
+            winScreen.classList.remove('hidden');
+
+            document.getElementById('win-message').textContent = message;
+            document.getElementById('win-subtext').textContent = subtext;
+
+            const backButton = document.getElementById('back-to-menu-btn');
+            if (isFinalWin) {
+                backButton.classList.remove('hidden');
+                backButton.onclick = () => {
+                    window.location.href = 'main_page.html';
+                };
             } else {
-                buzzSound.play();
-                message.textContent = 'Try again!';
-                message.style.color = 'var(--error-color)';
-                speak('Try again!');
+                backButton.classList.add('hidden');
             }
+
+            // Start fireworks and store the ID to clear it later
+            fireworkIntervalId = setInterval(generateFirework, 200);
+            
+            speak(message, () => {
+                if (!isFinalWin) {
+                    setTimeout(() => {
+                        winScreen.classList.add('hidden');
+                        gameContainer.classList.remove('hidden');
+                        clearInterval(fireworkIntervalId); // Stop fireworks
+                        setupNewRound();
+                    }, 3000); // 3-second delay before next round
+                }
+            });
+        };
+
+        const handleTap = (event) => {
+            const tappedColorName = event.target.dataset.colorName;
+            const messageText = document.getElementById('message-text');
+            const tappedButton = event.target;
+
+            if (tappedColorName === correctColor.name) {
+                score++;
+                
+                tappedButton.classList.add('correct-pop-out');
+                generateStars(tappedButton);
+                
+                const chime = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+                try {
+                    chime.play().catch(e => console.error("Audio playback interrupted:", e));
+                } catch (e) {
+                    console.error("Audio playback error:", e);
+                }
+
+                const randomFeedback = positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)];
+
+                // Chained speech to ensure smooth playback and prevent hangs
+                speak(correctColor.name, () => {
+                    speak(randomFeedback, () => {
+                        messageText.textContent = randomFeedback;
+                        messageText.classList.remove('hidden');
+                        messageText.style.color = correctColor.hex;
+                        
+                        setTimeout(() => {
+                            tappedButton.classList.remove('correct-pop-out');
+                            messageText.classList.add('hidden');
+                            updateScoreDisplay();
+
+                            if (score >= CORRECT_ANSWERS_TO_LEVEL_UP) {
+                                currentLevel++;
+                                score = 0;
+                                updateScoreDisplay();
+
+                                if (currentLevel % CELEBRATION_LEVEL_INTERVAL === 0) {
+                                    showCelebrationScreen('Great Job!', `You completed Level ${currentLevel - 1}!`, false);
+                                } else {
+                                    setupNewRound();
+                                }
+                            } else {
+                                setupNewRound();
+                            }
+                        }, 800); // Matches the popOut animation duration
+                    }, 0.9);
+                }, 0.7);
+            } else {
+                score = 0;
+                updateScoreDisplay();
+                tappedButton.classList.add('incorrect-animation');
+                const randomFeedback = negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)];
+                messageText.textContent = randomFeedback;
+                messageText.classList.remove('hidden');
+                messageText.style.color = correctColor.hex; 
+                speak(randomFeedback);
+
+                tappedButton.addEventListener('animationend', () => {
+                    tappedButton.classList.remove('incorrect-animation');
+                }, { once: true });
+            }
+        };
+
+        const resetGame = () => {
+             const colorsGrid = document.getElementById('colors-grid');
+             colorsGrid.innerHTML = '';
+             correctColor = null;
         }
 
-        function exitGame() {
-            synth.cancel();
-            window.location.href = 'index.html';
-        }
+        const setupNewRound = () => {
+            resetGame();
 
-        startButton.addEventListener('click', startGame);
-        restartButton.addEventListener('click', () => {
-            score = 0;
-            scoreDisplay.textContent = `Score: ${score}`;
-            setupRound();
-        });
-        exitButton.addEventListener('click', exitGame);
+            const colorNameDisplay = document.getElementById('color-name');
+            const numColorsToShow = COLORS_PER_LEVEL[currentLevel - 1] || allColors.length;
+            
+            const shuffledColors = allColors.sort(() => Math.random() - 0.5);
+            
+            let newCorrectColor;
+            do {
+                newCorrectColor = shuffledColors[0];
+            } while (newCorrectColor.name === previousColor?.name);
+
+            correctColor = newCorrectColor;
+            previousColor = correctColor;
+            
+            const roundColors = shuffledColors.slice(0, numColorsToShow);
+            if (!roundColors.includes(correctColor)) {
+                roundColors[0] = correctColor; // Ensure the correct color is always in the list
+            }
+            roundColors.sort(() => Math.random() - 0.5);
+
+            colorNameDisplay.textContent = correctColor.name;
+            colorNameDisplay.style.color = correctColor.hex;
+
+            speak(`Find the color ${correctColor.name}.`);
+
+            const colorsGrid = document.getElementById('colors-grid');
+            
+            roundColors.forEach(color => {
+                const button = createColorButton(color);
+                button.addEventListener('click', handleTap);
+                colorsGrid.appendChild(button);
+            });
+        };
+
+        window.onload = () => {
+            setTimeout(() => {
+                setupNewRound();
+                updateScoreDisplay();
+            }, 500); 
+        };
     </script>
 </body>
 </html>
